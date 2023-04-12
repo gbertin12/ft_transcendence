@@ -1,0 +1,16 @@
+services:
+    app:
+        build: ./app
+        volumes:
+            - ./app/src:/app
+        ports:
+            - 3000:3000
+
+    db:
+        image: postgres:15
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=asdf
+            - POSTGRES_DB=test
