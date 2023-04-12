@@ -10,6 +10,8 @@ npm install prisma --save-dev
 
 ### Define Schema
 
+put this in `./prisma/schema.prisma`:
+
 ```
 generator client {
   provider = "prisma-client-js"
