@@ -1,5 +1,7 @@
 FROM node:lts
 
+COPY --chmod=0755 entrypoint.sh /entrypoint.sh
+
 WORKDIR /app
 
-ENTRYPOINT ["npm", "run", "start:dev"]
+ENTRYPOINT ["/entrypoint.sh"]
