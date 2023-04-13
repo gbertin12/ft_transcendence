@@ -1,28 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
+import { ConfigService } from '@nestjs/config';
+
+function buildBody(params: any): FormData {
+    const data = new FormData();
+    for (const name in params) { data.append(name, params[name]); }
+    return data;
+}
 
 @Injectable()
 export class AuthService {
-    constructor(private db: DbService) { }
+    constructor(
+        private db: DbService,
+        private config: ConfigService
+    ) { }
 
-    async login(password: string) {
-        // SELECT * FROM user WHERE password = password
-        const result = await this.db.user.findFirst({
-            where: { password: password }
-        });
+    async callback(code: string) {
+        const token_url = 'https://api.intra.42.fr/oauth/token';
+        const params = {
+            grant_type: 'authorization_code',
+            client_id: this.config.get('CLIENT_ID'),
+            client_secret: this.config.get('CLIENT_SECRET'),
+            code,
+            redirect_uri: 'http://localhost:3000/auth/callback',
+        };
+        const options = {
+            method: 'POST',
+            body: buildBody(params),
+        };
 
-        return result;
-    }
-
-    async signup(username: string, password: string) {
-        // must specify ALL fields in the table to insert
-        await this.db.user.create({
-            data: { username, password, role: 'player' }
-        });
-    }
-
-    async allUsers() {
-        // returns all items in the table
-        return await this.db.user.findMany();
+        // send a POST request to the authorization server
+        // to exchange the authorization code for an access token
+        // that can be used to query the API
+        await fetch(token_url, options)
+            .then(response => response.json()
+            .then(response => {
+                console.log(response);
+            }));
     }
 }

@@ -20,10 +20,8 @@ services:
 
     db:
         image: postgres:15
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=asdf
-            - POSTGRES_DB=test
+        env_file:
+            - ./app/src/.env
         networks:
             - back
         healthcheck:
