@@ -2,9 +2,10 @@ import React, { useState } from "react";
 
 interface MessageInputProps {
 	onSend: (message: string) => void;
+	muted?: boolean | undefined;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ onSend, muted }) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +22,8 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
 		<form onSubmit={handleSubmit}>
 			<input
 				type="text"
-				placeholder="Type your message..."
+				disabled={muted}
+				placeholder={muted ? "You cannot send messages" : "Type your message"}
 				value={inputValue}
 				onChange={handleInputChange}
 				className="border-gray-300 border-solid border p-2 rounded-md w-full"
