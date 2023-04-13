@@ -14,6 +14,8 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, muted }) => {
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault(); // Prevent page reload
+		if (inputValue === "") return;	// Don't send empty messages
+		if (muted) return;				// Don't send messages if muted (shouldn't happen)
 		onSend(inputValue);		// Call the callback
 		setInputValue("");		// Clear the input
 	};
