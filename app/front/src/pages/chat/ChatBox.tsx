@@ -9,7 +9,7 @@ const ChatBox: React.FC = () => {
 	return (
 		<div>
 			<MessageInput
-				onNewMessage={handleNewMessage}
+				onSend={handleNewMessage}
 			/>
 		</div>
 	);

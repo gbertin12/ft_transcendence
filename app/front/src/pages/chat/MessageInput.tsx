@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
 interface MessageInputProps {
-	onNewMessage: (message: string) => void;
+	onSend: (message: string) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onNewMessage }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -12,9 +12,9 @@ const MessageInput: React.FC<MessageInputProps> = ({ onNewMessage }) => {
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault(); 	// Prevent page reload
-		onNewMessage(inputValue);	// Call the callback
-		setInputValue("");			// Clear the input
+		event.preventDefault(); // Prevent page reload
+		onSend(inputValue);		// Call the callback
+		setInputValue("");		// Clear the input
 	};
 
 	return (
