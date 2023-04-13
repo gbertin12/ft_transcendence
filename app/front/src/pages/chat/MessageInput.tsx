@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-const MessageInput: React.FC = () => {
+interface MessageInputProps {
+	onNewMessage: (message: string) => void;
+}
+
+const MessageInput: React.FC<MessageInputProps> = ({ onNewMessage }) => {
 	const [inputValue, setInputValue] = useState("");
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -8,11 +12,11 @@ const MessageInput: React.FC = () => {
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		// TODO: Implement onSubmit
-		console.log("Submitted message:", inputValue);
-		setInputValue("");
+		event.preventDefault(); 	// Prevent page reload
+		onNewMessage(inputValue);	// Call the callback
+		setInputValue("");			// Clear the input
 	};
+
 	return (
 		<form onSubmit={handleSubmit}>
 			<input
@@ -26,7 +30,7 @@ const MessageInput: React.FC = () => {
 				type="submit"
 				className="bg-blue-500 text-white font-semibold py-2 px-4 mt-2 rounded-md hover:bg-blue-600"
 			>
-			Send
+				Send
 			</button>
 		</form>
 	);
