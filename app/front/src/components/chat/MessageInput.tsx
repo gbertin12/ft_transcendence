@@ -21,26 +21,28 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, muted }) => {
 	};
 
 	return (
-		<form onSubmit={handleSubmit}>
-			<input
-				type="text"
-				disabled={muted}
-				placeholder={muted ? "You cannot send messages" : "Type your message"}
-				value={inputValue}
-				onChange={handleInputChange}
-				className="border-gray-300 border-solid border p-2 rounded-md w-full"
-			/>
-			<button
-				type="submit"
-				className={`${
-					muted
-						? "bg-red-500 text-white cursor-not-allowed saturate-[80%]"
-						: "bg-blue-500 text-white hover:bg-blue-600"
-				} font-semibold py-2 px-4 mt-2 rounded-md`}
-				disabled={muted}
-			>
-				{muted ? "Muted" : "Send"}
-			</button>
+		<form onSubmit={handleSubmit} className="absolute bottom-0 w-full bg-white p-2 gap-x-2">
+			<div className="flex gap-x-2">
+				<input
+					type="text"
+					disabled={muted}
+					placeholder={muted ? "You cannot send messages" : "Type your message"}
+					value={inputValue}
+					onChange={handleInputChange}
+					className="border-gray-300 border-solid border p-2 rounded-md w-full"
+				/>
+				<button
+					type="submit"
+					className={`${
+						muted
+							? "bg-red-500 text-white cursor-not-allowed saturate-[80%]"
+							: "bg-blue-500 text-white hover:bg-blue-600"
+					} font-semibold py-2 px-4 mt-2 rounded-md`}
+					disabled={muted}
+				>
+					{muted ? "Muted" : "Send"}
+				</button>
+			</div>
 		</form>
 	);
 };
