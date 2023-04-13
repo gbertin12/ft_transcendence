@@ -8,8 +8,9 @@ const ChatBox: React.FC = () => {
 
 	return (
 		<div>
-		<h1>Chat Box</h1>
-		<MessageInput onSubmit={handleNewMessage} />
+			<MessageInput
+				onNewMessage={handleNewMessage}
+			/>
 		</div>
 	);
 };
