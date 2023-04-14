@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import MessageInput from "../../components/chat/MessageInput";
 import ChannelsBrowser from "../../components/chat/ChannelsBrowser";
 import ChannelBar from "../../components/chat/ChannelBar";
+import Message from "@/components/chat/Message";
 
 interface Message {
 	timestamp: number;
@@ -65,9 +66,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 						isPrivateMessage={isPrivateMessage}
 						topic={selectedChannel?.topic}
 					/>
-					<ul className="h-full overflow-y-auto	">
+					<ul className="h-full overflow-y-auto">
 						{messages.map((message) => (
-							<li key={message.timestamp}>{message.timestamp} {message.content}</li>
+							<Message
+								key={message.timestamp}
+								timestamp={message.timestamp}
+								content={message.content}
+							/>
 						))}
 					</ul>
 					<MessageInput
