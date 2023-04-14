@@ -80,16 +80,16 @@ Retourne une liste d’objets JSON représentant des salons
 		"id": 0,
 		"name": "#test",
 		"topic": "test topic",
-		"private": 0, // always 0 or 2, hidden channels aren't listed
+		"private": 0,
 		"creation_date": 1681504983654,
 		"owner_id": 1,
-		"password": "" // empty because the channel is public
+		"password": ""
 	},
 	{
 		"id": 1,
 		"name": "#test-mdp",
 		"topic": "salon avec mot de passe",
-		"private": 2, // password protected
+		"private": 2,
 		"creation_date": 1681504973654,
 		"owner_id": 92,
 		"password": "efd2fa9cd038d6c96e4e7b2472f3d06d432f46711c38e5c8e546afb96f2ead5420338da45ee4b0ace8bccb02dbeb6b4ca243b2f5ce0c490bc8bd3445519eac54",
@@ -137,9 +137,9 @@ Exemple de body :
 
 ```json
 {
-	"name": "nom", // les # sont ignorés
+	"name": "nom",
 	"topic": "topic",
-	"private": 0, // publique
+	"private": 0,
 }
 ```
 
@@ -155,8 +155,8 @@ Exemple de body :
 ```json
 {
 	"target_id": 0,
-	"time": 600, // 10 minutes
-	"type": 0 // 0 = mute, 1 kick (time ignoré), 2 ban
+	"time": 600,
+	"type": 0
 }
 ```
 
