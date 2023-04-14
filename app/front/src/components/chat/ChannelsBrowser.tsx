@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 
 interface ChannelsBrowserProps {
+	onChange: (index: number) => void;
 	privateMessages: string[];
 	channels: any[];
 	defaultSelectedIndex?: number | undefined;
 }
 
-
-const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ privateMessages, channels, defaultSelectedIndex }) => {
+const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ onChange, privateMessages, channels, defaultSelectedIndex }) => {
 	const [selectedIndex, setSelectedIndex] = useState<number | undefined>(defaultSelectedIndex);
 
 	const changeFocus = (index: number) => {
 		setSelectedIndex(index);
+		onChange(index);
 	};
 
 	return (
@@ -24,7 +25,7 @@ const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ privateMessages, chan
 							className={`text-gray-200 flex gap-x-3 rounded-lg px-2 py-1 my-1 mr-2 cursor-pointer ${
 								selectedIndex === index ? "bg-blue-800" : "hover:bg-blue-500"
 							}`}
-							key={channel}
+							key={channel.title}
 							onClick={() => changeFocus(index)}
 						>
 							<h3 className="text-lg">#</h3>

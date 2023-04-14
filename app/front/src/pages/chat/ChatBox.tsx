@@ -17,6 +17,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setLoading] = useState(false);
 	const [channels, setChannels] = useState<any>(null);
+	const [selectedChannel, setSelectedChannel] = useState<any>(null);
+	const [isPrivateMessage, setIsPrivateMessage] = useState(false);
 
 	useEffect(() => {
 		setLoading(true);
@@ -24,10 +26,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		.then((res) => res.json())
 		.then((data) => {
 			setChannels(data);
+			setSelectedChannel(data[0]);
 			setLoading(false);
 		}
 		);
-		setLoading(false);
 	}, []);
 
 	const handleNewMessage = (message: string) => {
@@ -39,15 +41,30 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		setMessages([...messages, newMessage]);
 	};
 
+	const handleChannelChange = (index: number) => {
+		const newChannel = channels[index];
+		setSelectedChannel(newChannel);
+		setIsPrivateMessage(index >= channels.length);
+	};
+
 	// TODO: Prettify this
 	if (isLoading) { return <div>Loading...</div>; }
 
 	return (
 		<div className="h-full">
 			<div className="grid grid-cols-6 h-full">
-				<ChannelsBrowser channels={channels || []} privateMessages={privateMessages} defaultSelectedIndex={0} />
+				<ChannelsBrowser
+					onChange={handleChannelChange}
+					channels={channels || []}
+					privateMessages={privateMessages}
+					defaultSelectedIndex={0}
+				/>
 				<div className="relative col-span-5 h-full overflow-hidden">
-					<ChannelBar title="test" isPrivateMessage={false} topic="Test Topic" />
+					<ChannelBar	
+						title={(isPrivateMessage ? "dm-default-placeholder" : selectedChannel?.title)}
+						isPrivateMessage={isPrivateMessage}
+						topic={selectedChannel?.topic}
+					/>
 					<ul className="h-full overflow-y-auto	">
 						{messages.map((message) => (
 							<li key={message.timestamp}>{message.timestamp} {message.content}</li>
