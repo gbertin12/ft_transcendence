@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = [ "native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x" ]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,14 +9,50 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   username String
   password String
-  role String
+  role     String
+  Channel  Channel[]
 }
 
 model Channel {
-  id Int @id @default(autoincrement())
-  title String
-  topic String
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(64)
+  topic         String   @db.VarChar(128)
+  private       Boolean  @default(false) @db.Boolean
+  creation_date DateTime @default(now()) @db.Timestamp(6)
+  owner_id      Int
+  password      String?  @default("") @db.VarChar(128)
+  owner         User     @relation(fields: [owner_id], references: [id])
+}
+
+model ChannelAdmin {
+  channel_id Int
+  user_id    Int
+
+  @@id([channel_id, user_id])
+}
+
+model Message {
+  channel_id Int
+  sender_id  Int
+  message_id Int      @id @default(autoincrement())
+  timestamp  DateTime @default(now()) @db.Timestamp(6)
+  content    String   @db.VarChar(2000)
+
+  @@index([channel_id, timestamp], name: "channel_id_timestamp")
+}
+
+model Punishment {
+  issuer_id   Int
+  punished_id Int
+  channel_id  Int
+  type        Int      @db.SmallInt
+  punished_at DateTime @default(now()) @db.Timestamp(6)
+  expires_at  DateTime @default(dbgenerated("CURRENT_TIMESTAMP + INTERVAL '1 HOUR'")) @db.Timestamp(6) // default
+
+  @@id([issuer_id, punished_id, channel_id])
+  @@index([punished_id, issuer_id, type], name: "punished_id_issuer_id_type")
+  @@index([punished_id, channel_id, type], name: "punished_id_channel_id_type")
 }
