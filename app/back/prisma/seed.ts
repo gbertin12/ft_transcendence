@@ -24,14 +24,14 @@ function createFakeChannel(size: number) {
 }
 
 async function main() {
-    console.log("Creating fake channels with short names (15)");
-    for (let i = 0; i < 15; i++) {
+    console.log("Creating fake channels with short names (30)");
+    for (let i = 0; i < 30; i++) {
         await prisma.channel.create({
             data: createFakeChannel(0),
         })
     }
-    console.log("Creating fake channels with long names (15)");
-    for (let i = 0; i < 15; i++) {
+    console.log("Creating fake channels with long names (30)");
+    for (let i = 0; i < 30; i++) {
         await prisma.channel.create({
             data: createFakeChannel(1),
         })
