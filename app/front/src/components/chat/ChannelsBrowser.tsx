@@ -2,34 +2,17 @@ import React, { useEffect, useState } from "react";
 
 interface ChannelsBrowserProps {
 	privateMessages: string[];
+	channels: any[];
 	defaultSelectedIndex?: number | undefined;
 }
 
-const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ privateMessages, defaultSelectedIndex }) => {
-	const [selectedIndex, setSelectedIndex] = useState<number | undefined>(defaultSelectedIndex);
-	const [isLoading, setLoading] = useState(false);
-	const [channels, setChannels] = useState<any>(null);
 
-	useEffect(() => {
-		setLoading(true);
-		fetch("http://localhost:3001/channel/all")
-		.then((res) => res.json())
-		.then((data) => {
-			setChannels(data);
-			setLoading(false);
-		}
-		);
-		setLoading(false);
-		// setChannels([{"id":1,"title":"test","topic":"topic de test"},{"id":2,"title":"test2","topic":"un autre topic de test"}]);
-	}, []);
+const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ privateMessages, channels, defaultSelectedIndex }) => {
+	const [selectedIndex, setSelectedIndex] = useState<number | undefined>(defaultSelectedIndex);
 
 	const changeFocus = (index: number) => {
 		setSelectedIndex(index);
 	};
-
-	// TODO: Prettify this
-	if (isLoading) return <li>Loading...</li>;
-	if (!channels) return <li>Failed to fetch data</li>;
 
 	return (
 		<div className="pl-5 pt-2 py-1 bg-blue-950 overflow-hidden">
