@@ -8,12 +8,11 @@ interface Message {
 }
 
 interface ChatBoxProps {
-	channels: string[];
 	privateMessages: string[];
 	muted?: boolean | undefined;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ muted, channels, privateMessages }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 
 	const handleNewMessage = (message: string) => {
@@ -28,7 +27,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, channels, privateMessages }) =
 	return (
 		<div className="h-full">
 			<div className="grid grid-cols-6 h-full">
-				<ChannelsBrowser channels={channels} privateMessages={privateMessages} defaultSelectedIndex={0} />
+				<ChannelsBrowser privateMessages={privateMessages} defaultSelectedIndex={0} />
 				<div className="relative col-span-5 h-full overflow-hidden">
 					<ul className="h-full overflow-y-auto">
 						{messages.map((message) => (
