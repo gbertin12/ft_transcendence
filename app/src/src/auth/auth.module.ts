@@ -4,11 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { OAuthStrategy } from './oauth.strategy';
-import { Buffer } from 'buffer';
-import { getRandomValues } from 'crypto';
-
-const secret = Buffer.alloc(42);
-getRandomValues(secret);
+import { authConstants } from './constants';
 
 @Module({
     controllers: [AuthController],
@@ -17,7 +13,7 @@ getRandomValues(secret);
         ConfigModule,
         JwtModule.register({
             global: true,
-            secret,
+            secret: authConstants.secret,
         }),
     ]
 })

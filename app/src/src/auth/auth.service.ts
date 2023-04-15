@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 
 // the authorization server wants the POST data
 // in the multipart/form-data Content-Type
@@ -74,7 +75,6 @@ export class AuthService {
             }
             return 'login failed';
         } catch (error) {
-            console.log(error);
             // TODO: better error handling
             if (error instanceof SyntaxError) {
                 console.log('got malformed json');
@@ -83,5 +83,11 @@ export class AuthService {
             }
             return 'error';
         }
+    }
+
+    async generateState() {
+        const state = randomUUID();
+        const payload = { state };
+        return { state: await this.jwtService.signAsync(payload) };
     }
 }
