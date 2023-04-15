@@ -83,7 +83,7 @@ Retourne une liste d’objets JSON représentant des salons
 		"private": 0,
 		"creation_date": 1681504983654,
 		"owner_id": 1,
-		"password": ""
+		"password": false
 	},
 	{
 		"id": 1,
@@ -92,7 +92,7 @@ Retourne une liste d’objets JSON représentant des salons
 		"private": 2,
 		"creation_date": 1681504973654,
 		"owner_id": 92,
-		"password": "efd2fa9cd038d6c96e4e7b2472f3d06d432f46711c38e5c8e546afb96f2ead5420338da45ee4b0ace8bccb02dbeb6b4ca243b2f5ce0c490bc8bd3445519eac54",
+		"password": true
 	}
 ]
 ```
