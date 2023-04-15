@@ -70,7 +70,7 @@ Légende :
 
 # 1. Groupe `/channels`
 
-## 1.1 👤GET `/all`
+## 1.1 👤 GET `/all`
 
 Retourne une liste d’objets JSON représentant des salons
 
@@ -97,7 +97,7 @@ Retourne une liste d’objets JSON représentant des salons
 ]
 ```
 
-## 1.2 👤GET `/history/:id/:min/:max/:timestamp`
+## 1.2 👤 GET `/history/:id/:min/:max/:timestamp`
 
 - min ≥ 1
 - max ≤ 50
@@ -121,7 +121,7 @@ Retourne une liste d’objets JSON représentant des messages
 - `403` Utilisateur banni
 - `404` Plus d’anciens messages
 
-## 1.3 🔰DELETE `/:id`
+## 1.3 🔰 DELETE `/:id`
 
 - L’utilisateur qui envoie la requête doit être “owner”
 
@@ -131,7 +131,7 @@ Retourne :
 - `403` si l’utilisateur n’est pas “owner”
 - `404` si le salon n’existe pas
 
-## 1.4 👤POST `/new`
+## 1.4 👤 POST `/new`
 
 Exemple de body :
 
@@ -148,7 +148,7 @@ Retourne :
 - `201` si le salon à été créé
 - `400` si le nom du salon / le topic du salon est trop long / trop court
 
-## 1.5 🛡️PATCH `/:id/punish`
+## 1.5 🛡️ PATCH `/:id/punish`
 
 Exemple de body :
 
@@ -166,3 +166,52 @@ Retourne :
 - `403` pas de permission “admin” / “owner”
 - `404` cible introuvable / salon introuvable
 - `200` sanction appliquée
+
+## 1.6 👤 PUT `/:id/typing`
+
+Retourne :
+
+- `200` le status a été mis à jour
+- `403` l’utilisateur n’a pas les droits d'écrire dans le salon (banni / mute)
+- `404` le salon n’existe pas
+
+## 1.7 👤 POST `/:id/message`
+
+Exemple de body :
+
+```json
+{
+	"content": "Hello World!"
+}
+```
+
+Retourne :
+
+- `200` le message a été envoyé
+- `403` l’utilisateur n’a pas les droits d'écrire dans le salon (banni / mute)
+- `404` le salon n’existe pas
+
+## 1.8 👤 GET `/:id/listen`
+
+Endpoint de WebSocket
+
+Permet de recevoir les informations suivantes :
+
+* Nouveaux messages
+* Un utilisateur est en train d’écrire
+* Un utilisateur a arrêté d’écrire
+* Un utilisateur a été sanctionné
+* Un utilisateur a été dé-sanctionné
+
+Retourne :
+
+* (`101`) `200` si la connexion a réussi
+	* Le client doit envoyer un message JSON contenant l’id du salon (`channel_id`)
+	```json
+	{
+		"channel_id": 0
+	}
+	```
+
+* `403` si l’utilisateur n’a pas les droits d’accès au salon (ou est banni)
+* `404` si le salon n’existe pas
