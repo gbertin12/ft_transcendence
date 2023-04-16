@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import { faker } from '@faker-js/faker';
 import { sha512 } from 'js-sha512';
@@ -27,6 +28,18 @@ async function createFakeChannel(size: number, isPrivate: boolean = false, isPas
         default:
             throw new Error("Invalid size");
     }
+}
+
+let messageId = 0;
+
+async function createFakeMessage(size: number, author_id: number, channel_id: number) {
+    return {
+        channel_id: channel_id,
+        sender_id: author_id === 2 ? 1 : 2,
+        message_id: messageId++,
+        content: faker.lorem.words(size),
+        timestamp: faker.date.past().toISOString()
+    };
 }
 
 async function seedUsers() {
@@ -59,12 +72,31 @@ async function seedChannels() {
     });
 }
 
+async function seedMessages() {
+    // create 100 messages (max 2000 length) for each channel
+    for (let i = 1; i <= 6; i++) {
+        let messages: Prisma.MessageCreateManyInput[] = [];
+        for (let j = 0; j < 100; j++) {
+            messages.push(
+                await createFakeMessage(
+                    Math.floor(Math.random() * 20),
+                    Math.floor(Math.random() * 2) + 1, i
+                )
+            );
+        }
+        await prisma.message.createMany({
+            data: messages
+        });
+    }
+}
+
 async function main() {
     // reset all tables
     await prisma.$executeRaw`TRUNCATE TABLE "User", "Channel", "Message" RESTART IDENTITY CASCADE`;
 
     await seedUsers();
     await seedChannels();
+    await seedMessages();
 }
 
 main()
