@@ -21,6 +21,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 	const [selectedChannel, setSelectedChannel] = useState<any>(null);
 	const [isPrivateMessage, setIsPrivateMessage] = useState(false);
 
+	const fetchMessages = (channelId: number) => {
+		fetch(`http://localhost:3001/channel/${channelId}/messages`)
+		.then((res) => res.json())
+		.then((data) => {
+			setMessages(data);
+		});
+	};
+
 	useEffect(() => {
 		setLoading(true);
 		fetch("http://localhost:3001/channel/all")
@@ -28,6 +36,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		.then((data) => {
 			setChannels(data);
 			setSelectedChannel(data[0]);
+			fetchMessages(data[0].id);
 			setLoading(false);
 		}
 		);
@@ -46,6 +55,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		const newChannel = channels[index];
 		setSelectedChannel(newChannel);
 		setIsPrivateMessage(index >= channels.length);
+		fetchMessages(newChannel.id);
 	};
 
 	// TODO: Prettify this
@@ -62,7 +72,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 				/>
 				<div className="relative col-span-5 h-full overflow-hidden">
 					<ChannelBar	
-						title={(isPrivateMessage ? "dm-default-placeholder" : selectedChannel?.title)}
+						title={(isPrivateMessage ? "dm-default-placeholder" : selectedChannel?.name)}
 						isPrivateMessage={isPrivateMessage}
 						topic={selectedChannel?.topic}
 					/>

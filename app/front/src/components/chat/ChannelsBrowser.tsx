@@ -25,11 +25,11 @@ const ChannelsBrowser: React.FC<ChannelsBrowserProps> = ({ onChange, privateMess
 							className={`text-gray-200 flex gap-x-3 rounded-lg px-2 py-1 my-1 mr-2 cursor-pointer ${
 								selectedIndex === index ? "bg-blue-800" : "hover:bg-blue-500"
 							}`}
-							key={channel.title}
+							key={channel.name}
 							onClick={() => changeFocus(index)}
 						>
 							<h3 className="text-lg">#</h3>
-							<h3 className="text-lg">{channel.title}</h3>
+							<h3 className="text-lg">{channel.name}</h3>
 						</li>
 					))}
 				</ul>
