@@ -187,7 +187,8 @@ Exemple de body :
 
 Retourne :
 
-- `200` le message a été envoyé
+- `201` le message a été envoyé
+- `400` le message est trop long
 - `403` l’utilisateur n’a pas les droits d'écrire dans le salon (banni / mute)
 - `404` le salon n’existe pas
 
