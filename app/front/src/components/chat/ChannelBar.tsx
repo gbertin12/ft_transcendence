@@ -1,8 +1,8 @@
 import React from "react";
 
 interface ChannelBarProps {
-    title: string;
-    topic: string;
+    title?: string;
+    topic?: string;
     isPrivateMessage?: boolean;
     // messages: any[]; // -- TODO
 }
