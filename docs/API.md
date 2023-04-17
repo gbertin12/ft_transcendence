@@ -162,7 +162,7 @@ Status HTTP :
 
 | État | Description |
 | :---: | :---: |
-| ❌ | Envoie un message dans le salon |
+| ✅ | Envoie un message dans le salon |
 
 
 Exemple de body :
