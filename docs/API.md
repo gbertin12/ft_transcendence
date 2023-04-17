@@ -12,7 +12,11 @@ Légende :
 
 ## 1.1 👤 GET `/all`
 
-Retourne une liste d’objets JSON représentant des salons
+| État | Description |
+| :---: | :---: |
+| ✅ | Retourne une liste d’objets JSON représentant des salons |
+
+Exemple :
 
 ```json
 [
@@ -37,13 +41,26 @@ Retourne une liste d’objets JSON représentant des salons
 ]
 ```
 
+Status HTTP : 
+
+| Code | Description |
+| :---: | :---: |
+| `200` | OK |
+
 ## 1.2 👤 GET `/history/:id/:min/:max/:timestamp`
 
-- min ≥ 1
-- max ≤ 50
-- timestamp = message le plus vieux (0 pour récupérer les plus récents)
+| État | Description |
+| :---: | :---: |
+| ❌ | Retourne une liste d’objets JSON représentant des messages |
 
-Retourne une liste d’objets JSON représentant des messages 
+Paramètres :
+
+| Nom | Type | Notes |
+| :---: | :---: | :---: |
+| `id` | `number` | Id du salon |
+| `min` | `number` | Nombre minimum de messages à récupérer (≥1) |
+| `max` | `number` | Nombre maximum de messages à récupérer (≤50) |
+| `timestamp` | `number` | Timestamp du message le plus vieux (0 pour récupérer les plus récents) |
 
 ```json
 [
@@ -57,23 +74,35 @@ Retourne une liste d’objets JSON représentant des messages
 ]
 ```
 
-- `200`
-- `403` Utilisateur banni
-- `404` Plus d’anciens messages
+Status HTTP :
+
+| Code | Description |
+| :---: | :---: |
+| `200` | OK |
+| `403` | Utilisateur banni |
+| `404` | Plus d’anciens messages |
 
 ## 1.3 🔰 DELETE `/:id`
 
-- L’utilisateur qui envoie la requête doit être “owner”
+| État | Description |
+| :---: | :---: |
+| ❌ | Supprime le salon |
 
-Retourne :
+Status HTTP :
 
-- `200` si la suppression à réussi
-- `403` si l’utilisateur n’est pas “owner”
-- `404` si le salon n’existe pas
+| Code | Description |
+| :---: | :---: |
+| `200` | OK |
+| `403` | Utilisateur n’est pas “owner” |
+| `404` | Salon n’existe pas |
 
 ## 1.4 👤 POST `/new`
 
-Exemple de body :
+| État | Description |
+| :---: | :---: |
+| ❌ | Crée un nouveau salon |
+
+Exemple :
 
 ```json
 {
@@ -83,14 +112,20 @@ Exemple de body :
 }
 ```
 
-Retourne :
+Status HTTP :
 
-- `201` si le salon à été créé
-- `400` si le nom du salon / le topic du salon est trop long / trop court
+| Code | Description |
+| :---: | :---: |
+| `201` | Salon créé |
+| `400` | Nom / topic trop long / trop court |
 
 ## 1.5 🛡️ PATCH `/:id/punish`
 
-Exemple de body :
+| État | Description |
+| :---: | :---: |
+| ❌ | Applique une sanction à un utilisateur |
+
+Exemple :
 
 ```json
 {
@@ -100,22 +135,35 @@ Exemple de body :
 }
 ```
 
-Retourne :
+Status HTTP :
 
-- `400` champ invalide
-- `403` pas de permission “admin” / “owner”
-- `404` cible introuvable / salon introuvable
-- `200` sanction appliquée
+| Code | Description |
+| :---: | :---: |
+| `200` | Sanction appliquée |
+| `400` | Champ invalide |
+| `403` | Pas de permission “admin” / “owner” |
+| `404` | Cible introuvable / salon introuvable |
 
 ## 1.6 👤 PUT `/:id/typing`
 
-Retourne :
+| État | Description |
+| :---: | :---: |
+| ❌ | Indique à l’API que l’utilisateur est en train d’écrire |
 
-- `200` le status a été mis à jour
-- `403` l’utilisateur n’a pas les droits d'écrire dans le salon (banni / mute)
-- `404` le salon n’existe pas
+Status HTTP :
+
+| Code | Description |
+| :---: | :---: |
+| `200` | OK |
+| `403` | Utilisateur banni / mute |
+| `404` | Salon introuvable |
 
 ## 1.7 👤 POST `/:id/message`
+
+| État | Description |
+| :---: | :---: |
+| ❌ | Envoie un message dans le salon |
+
 
 Exemple de body :
 
@@ -125,16 +173,20 @@ Exemple de body :
 }
 ```
 
-Retourne :
+Status HTTP :
 
-- `201` le message a été envoyé
-- `400` le message est trop long
-- `403` l’utilisateur n’a pas les droits d'écrire dans le salon (banni / mute)
-- `404` le salon n’existe pas
+| Code | Description |
+| :---: | :---: |
+| `201` | Message envoyé |
+| `400` | Message trop long |
+| `403` | Utilisateur banni / mute |
+| `404` | Salon introuvable |
 
 ## 1.8 👤 GET `/:id/listen`
 
-Endpoint de WebSocket
+| État | Description |
+| :---: | :---: |
+| ❌ | WebSocket |
 
 Permet de recevoir les informations suivantes :
 
