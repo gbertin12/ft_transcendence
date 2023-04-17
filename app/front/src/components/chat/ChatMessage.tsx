@@ -1,12 +1,12 @@
 import React from "react";
 
 interface MessageProps {
-    timestamp: number;
+    timestamp: Date;
     userId?: number;
     content: string;
 }
 
-const Message: React.FC<MessageProps> = ({ timestamp, userId, content }) => {
+const ChatMessage: React.FC<MessageProps> = ({ timestamp, userId, content }) => {
     return (
         <li className="grid my-3">
             {/* <img
@@ -25,4 +25,4 @@ const Message: React.FC<MessageProps> = ({ timestamp, userId, content }) => {
     )
 };
 
-export default Message;
+export default ChatMessage;
