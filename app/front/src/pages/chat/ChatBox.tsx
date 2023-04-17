@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import MessageInput from "../../components/chat/MessageInput";
 import ChannelsBrowser from "../../components/chat/ChannelsBrowser";
 import ChannelBar from "../../components/chat/ChannelBar";
-import Message from "@/components/chat/Message";
+import { Channel, Message } from "@/interfaces/chat.interfaces";
+import ChatMessage from "@/components/chat/ChatMessage";
 
-interface Message {
-	timestamp: number;
-	content: string;
-}
 
 interface ChatBoxProps {
 	privateMessages: string[];
@@ -17,9 +14,12 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setLoading] = useState(false);
-	const [channels, setChannels] = useState<any>(null);
-	const [selectedChannel, setSelectedChannel] = useState<any>(null);
+	const [channels, setChannels] = useState<Channel[]>([]);
+	const [selectedChannel, setSelectedChannel] = useState<Channel>();
 	const [isPrivateMessage, setIsPrivateMessage] = useState(false);
+
+	// ghostMessages is used to display the message before it is sent to the server
+	const [ghostMessages, setGhostMessage] = useState<string[]>([]);
 
 	const fetchMessages = (channelId: number) => {
 		fetch(`http://localhost:3001/channel/${channelId}/messages`)
@@ -43,12 +43,24 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 	}, []);
 
 	const handleNewMessage = (message: string) => {
-		const newMessage: Message = {
-			timestamp: Date.now(),
-			content: message,
-		};
-		// we cannot use push() because it mutates the array and React won't detect the change
-		setMessages([...messages, newMessage]);
+		// Add ghost message
+		setGhostMessage([...ghostMessages, message]);
+
+		// POST request to send the message to the server
+		fetch(`http://localhost:3001/channel/${selectedChannel?.id}/message`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ content: message }),
+		})
+		.then((res) => res.json())
+		.then((data) => {
+			// Remove ghost message
+			setGhostMessage(ghostMessages.filter((msg) => msg !== message));
+			// Prepend the message to the list
+			setMessages([data, ...messages]);
+		});
 	};
 
 	const handleChannelChange = (index: number) => {
@@ -76,10 +88,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 						isPrivateMessage={isPrivateMessage}
 						topic={selectedChannel?.topic}
 					/>
-					<ul className="h-full overflow-y-auto">
+					<ul className="h-full overflow-y-auto pb-28 flex flex-col-reverse">
+						{ghostMessages.map((message, index) => (
+							<ChatMessage
+								key={-index}
+								timestamp={new Date()}
+								content={message}
+								isGhost={true}
+							/>
+						))}
 						{messages.map((message) => (
-							<Message
-								key={message.timestamp}
+							<ChatMessage
+								key={message.message_id}
 								timestamp={message.timestamp}
 								content={message.content}
 							/>
