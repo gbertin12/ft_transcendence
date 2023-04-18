@@ -1,10 +1,12 @@
 services:
     front:
         build: ./app/front
+        env_file:
+          - ./env/front.env
         volumes:
             - front:/app
         ports:
-            - 5000:3000
+            - 8000:3000
         networks:
             - front
         healthcheck:
@@ -19,6 +21,8 @@ services:
 
     back:
         build: ./app/back
+        env_file:
+          - ./env/back.env
         volumes:
             - back:/app
         ports:
@@ -39,7 +43,7 @@ services:
     db:
         image: postgres:15
         env_file:
-            - ./app/back/src/.env
+            - ./env/db.env
         networks:
             - back
         healthcheck:

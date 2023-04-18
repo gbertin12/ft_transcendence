@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { DbModule } from 'src/db/db.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { OAuthStrategy } from './oauth.strategy';
-import { authConstants } from './constants';
+import { OAuth2Strategy } from './oauth2.strategy';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
     controllers: [AuthController],
-    providers: [AuthService, OAuthStrategy],
+    providers: [AuthService, OAuth2Strategy, JwtStrategy],
     imports: [
-        ConfigModule,
+        DbModule,
         JwtModule.register({
             global: true,
-            secret: authConstants.secret,
+            secret: process.env.JWT_SIGN_KEY,
+            signOptions: { expiresIn: '7d' },
         }),
     ]
 })

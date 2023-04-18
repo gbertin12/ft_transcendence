@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from 'src/db/db.service';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/db/user.service';
 import { randomUUID } from 'crypto';
 
 // the authorization server wants the POST data
@@ -15,7 +14,7 @@ function buildBody(params: any): FormData {
 }
 
 // fetch the 42 login using the access token
-async function getLogin(access_token: string): Promise<string> {
+async function getProfile(access_token: string): Promise<any> {
     const options = {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${access_token}` },
@@ -24,9 +23,9 @@ async function getLogin(access_token: string): Promise<string> {
         const response = await fetch('https://api.intra.42.fr/v2/me', options);
         if (response?.ok) {
             const data = await response.json();
-            return data.login;
+            return { id: data.id, login: data.login };
         }
-        console.log('42 INTRA DEAD (AGAIN)');
+        console.log('42 INTRA DEAD (AGAIN)??');
         return 'error';
     } catch (error) {
         // TODO: better error handling
@@ -41,24 +40,25 @@ async function getLogin(access_token: string): Promise<string> {
 @Injectable()
 export class AuthService {
     constructor(
-        private dbService: DbService,
-        private config: ConfigService,
+        private userService: UserService,
         private jwtService: JwtService,
     ) { }
 
-    async callback(auth_code: string, state: string) {
+    async callback(auth_code: string, state_param: string, state_cookie: string) {
+        if (await this.verifyState(state_param, state_cookie) === false) {
+            return 'throw exception maybe?';
+        }
         const token_url = 'https://api.intra.42.fr/oauth/token';
         const params = {
-            grant_type: 'authorization_code',
-            client_id: this.config.get('CLIENT_ID'),
-            client_secret: this.config.get('CLIENT_SECRET'),
-            code: auth_code,
             redirect_uri: 'http://localhost:3000/auth/callback',
-            state: state,
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            code: auth_code,
         };
         const options = {
             method: 'POST',
-            body: buildBody(params),  // turns `params` object into a multipart/form-data body
+            body: buildBody(params),  // turns 'params' object into a multipart/form-data body
         };
 
         // send a POST request to the authorization server
@@ -68,12 +68,9 @@ export class AuthService {
             const response = await fetch(token_url, options);
             if (response?.ok) {
                 const data = await response.json();
-                // TODO: check state from response
-                // get login from 42 API
-                const login = await getLogin(data.access_token);
-                console.log(`${login} just logged in`);
-                const payload = { login };
-                return { jwt: await this.jwtService.signAsync(payload) };
+                // get data from 42 API
+                const user = await getProfile(data.access_token);
+                return this.generateJWT(user);
             }
             return 'login failed';
         } catch (error) {
@@ -87,9 +84,21 @@ export class AuthService {
         }
     }
 
-    async generateState() {
+    async generateJWT(data) {
+        // select or insert user
+        const user = await this.userService.findOrCreate(data);
+        const token = await this.jwtService.signAsync(user);
+        return token;
+    }
+
+    async generateStateToken() {
         const state = randomUUID();
         const payload = { state };
         return { state: await this.jwtService.signAsync(payload) };
+    }
+
+    async verifyState(state_param: string, state_cookie: string): Promise<Boolean> {
+        const payload = await this.jwtService.verifyAsync(state_cookie);
+        return state_param === payload.state;
     }
 }

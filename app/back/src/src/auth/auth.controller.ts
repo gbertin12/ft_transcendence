@@ -1,38 +1,37 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-//import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
 
-    // OAuth callback
-    // should contain a `code` query parameter
-    //@UseGuards(AuthGuard('oauth2'))  // passport OAuth strategy
     @Get('callback')
     async callback(
         @Query('code') auth_code: string,
-        @Query('state') state: string,
-        @Req() req: Request
+        @Query('state') state_param: string,
+        @Req() req: Request,
+        @Res() res: Response,
     ) {
-        // TODO: use `state` parameter as CSRF token
-        console.log(`authorization code: '${auth_code}'`);
-        console.log(`state: '${state}'`);
-        console.log(`state cookie: '${req.signedCookies['state']}'`);
-        // returns object containing JWT
-        return await this.authService.callback(auth_code, state);
+        const state_cookie = req.cookies['state'];
+        const token = await this.authService.callback(auth_code, state_param, state_cookie);
+        res.redirect(302, `http://localhost:8000/login?token=${token}`);
     }
 
     // before starting the OAuth flow, we hit this endpoint
     // to generate a random value to act as a CSRF token (state parameter)
     @Get('state')
     async generateState(@Req() req: Request) {
-        // TODO: ignore requests that already have a `state` cookie
-        if (req.signedCookies['state']) {
+        if (req.cookies['state']) {
             return 'abort';
         }
-        // returns JWT containing the generated state
-        return await this.authService.generateState();
+        return await this.authService.generateStateToken();
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/profile')
+    async profile(@Req() req: Request) {
+        return req.user;
     }
 }
