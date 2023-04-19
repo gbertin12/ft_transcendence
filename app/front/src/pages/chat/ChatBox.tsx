@@ -4,11 +4,25 @@ import ChannelsBrowser from "../../components/chat/ChannelsBrowser";
 import ChannelBar from "../../components/chat/ChannelBar";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
 import ChatMessage from "@/components/chat/ChatMessage";
+import io from 'socket.io-client';
 
 
 interface ChatBoxProps {
 	privateMessages: string[];
 	muted?: boolean | undefined;
+}
+
+function useSocket(url: string) {
+	const [socket, setSocket] = useState<any>();
+	useEffect(() => {
+		const socketIo = io(url);
+		setSocket(socketIo);
+		function cleanup() {
+			socketIo.disconnect()
+		}
+		return cleanup
+	}, [])
+	return socket
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
@@ -20,6 +34,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 
 	// ghostMessages is used to display the message before it is sent to the server
 	const [ghostMessages, setGhostMessage] = useState<string[]>([]);
+
+	// Workaround to not re-create the socket on every render
+	const socket = useSocket('http://localhost:8001');
 
 	const fetchMessages = (channelId: number) => {
 		fetch(`http://localhost:3001/channel/${channelId}/messages`)
@@ -38,9 +55,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 			setSelectedChannel(data[0]);
 			fetchMessages(data[0].id);
 			setLoading(false);
+		});
+
+		// Listen for new messages
+		if (socket) {
+			socket.on('message', (payload: any) => {
+				// setMessages([payload.message, ...messages]);
+				setMessages((messages) => [payload.message, ...messages]);
+			});
 		}
-		);
-	}, []);
+	}, [socket]);
 
 	const handleNewMessage = (message: string) => {
 		// Add ghost message
@@ -58,8 +82,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		.then((data) => {
 			// Remove ghost message
 			setGhostMessage(ghostMessages.filter((msg) => msg !== message));
-			// Prepend the message to the list
-			setMessages([data, ...messages]);
+			// Emit message to the server using socket.io
+			socket.emit('message', {
+				message: data,
+			});
 		});
 	};
 
@@ -67,7 +93,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		const newChannel = channels[index];
 		setSelectedChannel(newChannel);
 		setIsPrivateMessage(index >= channels.length);
-		fetchMessages(newChannel.id);
+		fetchMessages(newChannel.id); // TODO: Replace with socket.io
 	};
 
 	// TODO: Prettify this
