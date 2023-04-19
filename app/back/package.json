@@ -24,6 +24,8 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^9.4.0",
+    "@nestjs/websockets": "^9.4.0",
     "@prisma/client": "^4.12.0",
     "js-sha512": "^0.8.0",
     "prisma": "^4.12.0",
