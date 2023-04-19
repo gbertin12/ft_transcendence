@@ -1,13 +1,19 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model User {
-  id Int        @unique
-  login String
+    // 42 id from the API
+    id        Int       @unique
+    name      String    @unique
+    avatar    String    @default("default.jpg")
+    otp       Boolean   @default(false)
+    wins      Int       @default(0)
+    losses    Int       @default(0)
+    elo       Int       @default(1000)
 }

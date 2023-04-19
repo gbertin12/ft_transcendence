@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/db/user.service';
+import { UserService } from 'src/user/user.service';
 import { randomUUID } from 'crypto';
 
 // the authorization server wants the POST data
@@ -15,15 +15,13 @@ function buildBody(params: any): FormData {
 
 // fetch the 42 login using the access token
 async function getProfile(access_token: string): Promise<any> {
-    const options = {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${access_token}` },
-    };
     try {
-        const response = await fetch('https://api.intra.42.fr/v2/me', options);
+        const response = await fetch('https://api.intra.42.fr/v2/me', {
+            headers: { 'Authorization': `Bearer ${access_token}` },
+        });
         if (response?.ok) {
-            const data = await response.json();
-            return { id: data.id, login: data.login };
+            const user = await response.json();
+            return { id: user.id, name: user.login };
         }
         console.log('42 INTRA DEAD (AGAIN)??');
         return 'error';
@@ -43,6 +41,18 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService,
     ) { }
+
+    async verifyState(state_param: string, state_cookie: string): Promise<Boolean> {
+        const payload = await this.jwtService.verifyAsync(state_cookie);
+        return state_param === payload.state;
+    }
+
+    async generateJWT(data) {
+        // select or insert user
+        const user_id = await this.userService.findOrCreate(data);
+        const token = await this.jwtService.signAsync(user_id);
+        return token;
+    }
 
     async callback(auth_code: string, state_param: string, state_cookie: string) {
         if (await this.verifyState(state_param, state_cookie) === false) {
@@ -68,7 +78,7 @@ export class AuthService {
             const response = await fetch(token_url, options);
             if (response?.ok) {
                 const data = await response.json();
-                // get data from 42 API
+                // get user data from 42 API
                 const user = await getProfile(data.access_token);
                 return this.generateJWT(user);
             }
@@ -84,21 +94,9 @@ export class AuthService {
         }
     }
 
-    async generateJWT(data) {
-        // select or insert user
-        const user = await this.userService.findOrCreate(data);
-        const token = await this.jwtService.signAsync(user);
-        return token;
-    }
-
     async generateStateToken() {
         const state = randomUUID();
         const payload = { state };
         return { state: await this.jwtService.signAsync(payload) };
-    }
-
-    async verifyState(state_param: string, state_cookie: string): Promise<Boolean> {
-        const payload = await this.jwtService.verifyAsync(state_cookie);
-        return state_param === payload.state;
     }
 }

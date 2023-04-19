@@ -1,12 +1,12 @@
-import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
 
+    // OAuth callback
     @Get('callback')
     async callback(
         @Query('code') auth_code: string,
@@ -22,16 +22,7 @@ export class AuthController {
     // before starting the OAuth flow, we hit this endpoint
     // to generate a random value to act as a CSRF token (state parameter)
     @Get('state')
-    async generateState(@Req() req: Request) {
-        if (req.cookies['state']) {
-            return 'abort';
-        }
+    async generateState() {
         return await this.authService.generateStateToken();
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Get('/profile')
-    async profile(@Req() req: Request) {
-        return req.user;
     }
 }

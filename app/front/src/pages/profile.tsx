@@ -8,12 +8,12 @@ async function fetcher(url: string) {
     if (!res?.ok) {
         throw 'big problem';
     }
-    return await res.text();
+    const json = await res.json();
+    return JSON.stringify(json, null, 2);
 }
 
-
-export default function Profile({ profile }) {
-    const { data, error } = useSWR('http://localhost:3000/auth/profile', fetcher);
+export default function Profile() {
+    const { data, error } = useSWR('http://localhost:3000/user/me', fetcher);
 
     if (error) window.location = '/login';
     if (!data) return <div>loading...</div>
