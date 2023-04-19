@@ -53,18 +53,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 		.then((data) => {
 			setChannels(data);
 			setSelectedChannel(data[0]);
-			fetchMessages(data[0].id);
 			setLoading(false);
 		});
 
 		// Listen for new messages
 		if (socket) {
 			socket.on('message', (payload: any) => {
-				// setMessages([payload.message, ...messages]);
 				setMessages((messages) => [payload.message, ...messages]);
 			});
 		}
 	}, [socket]);
+
+	useEffect(() => {
+		if (selectedChannel) {
+			fetchMessages(selectedChannel.id);
+			socket.emit('join', {
+				channel: selectedChannel.id,
+			});
+		}
+	}, [selectedChannel]);
+
 
 	const handleNewMessage = (message: string) => {
 		// Add ghost message
@@ -77,7 +85,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({ content: message }),
-		})
+		}) // TODO: check that API sent a 200
 		.then((res) => res.json())
 		.then((data) => {
 			// Remove ghost message
