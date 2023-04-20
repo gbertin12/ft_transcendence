@@ -8,8 +8,7 @@ async function fetcher(url: string) {
     if (!res?.ok) {
         throw 'big problem';
     }
-    const json = await res.json();
-    return JSON.stringify(json, null, 2);
+    return await res.json();
 }
 
 export default function Profile() {
@@ -21,7 +20,8 @@ export default function Profile() {
     return (
         <LayoutAuth>
             <h2>User Profile</h2>
-            <pre>{data.toString()}</pre>
+            <img src={`http://localhost:3000/static/avatars/${data.avatar}`}/>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
         </LayoutAuth>
     )
 }

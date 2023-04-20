@@ -26,22 +26,18 @@ export class UserService {
         }
     }
 
-    async updateUser(id: number, data: User) {
-        delete data.id;
-        delete data.wins;
-        delete data.losses;
-        delete data.elo;
-        // better: extract allowed fields from 'data'
+    async updateName(id: number, name: string) {
         await this.db.user.update({
-            data,
+            data: { name },
             where: { id },
         });
     }
 
-    async updateAvatar(id: number, path: string) {
+    async updateAvatar(id: number, filename: string) {
+        // TODO: delete previous avatar (except if default)
         try {
             await this.db.user.update({
-                data: { avatar: path },
+                data: { avatar: filename },
                 where: { id },
             });
         } catch (_) {
