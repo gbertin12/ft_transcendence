@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { DbService } from 'src/db/db.service';
 
@@ -7,23 +7,17 @@ export class UserService {
     constructor(private db: DbService) {}
 
     async getUserById(id: number): Promise<User> {
-        try {
-            return await this.db.user.findUniqueOrThrow({
-                where: { id },
-            });
-        } catch (_) {
-            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
-        }
+        const user = await this.db.user.findUnique({
+            where: { id },
+        });
+        return user;
     }
 
     async getUserByName(name: string): Promise<User> {
-        try {
-            return await this.db.user.findUniqueOrThrow({
-                where: { name },
-            });
-        } catch (_) {
-            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
-        }
+        const user = await this.db.user.findUniqueOrThrow({
+            where: { name },
+        });
+        return user;
     }
 
     async updateName(id: number, name: string) {
@@ -35,31 +29,33 @@ export class UserService {
 
     async updateAvatar(id: number, filename: string) {
         // TODO: delete previous avatar (except if default)
-        try {
-            await this.db.user.update({
-                data: { avatar: filename },
-                where: { id },
-            });
-        } catch (_) {
-            throw new HttpException('NOT ACCEPTABLE', HttpStatus.NOT_ACCEPTABLE)
-        }
+        await this.db.user.update({
+            data: { avatar: filename },
+            where: { id },
+        });
     }
 
-    async findOrCreate(data: User) {
-        // find user by id
-        let user_id = await this.db.user.findUnique({
-            where: { id: data.id },
-            select: { id: true },
+    async getOTPSecretById(id: number): Promise<string> {
+        const user = await this.db.user.findUnique({
+            where: { id },
+            select: { otpSecret: true },
         });
+        return user.otpSecret;
+    }
 
-        // user not found: create it
-        if (user_id === null) {
-            user_id = await this.db.user.create({
-                data,
-                select: { id: true },
-            });
-        }
+    async updateOTPSecret(id: number, otpSecret: string) {
+        await this.db.user.update({
+            data: { otp: true, otpSecret },
+            where: { id },
+        });
+    }
 
-        return user_id;
+    async createUser(user: User) {
+        // creates a new user if it doesn't already exist (by id)
+        await this.db.user.upsert({
+            where: { id: user.id },
+            update: {},
+            create: user,
+        });
     }
 }

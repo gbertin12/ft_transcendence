@@ -1,8 +1,9 @@
 import {
     Body,
     Controller,
-    FileTypeValidator,
     Get,
+    HttpException,
+    HttpStatus,
     MaxFileSizeValidator,
     Param,
     ParseFilePipe,
@@ -24,7 +25,8 @@ export class UserController {
     @UseGuards(AuthGuard('jwt'))
     @Get('me')
     async me(@Req() req: Request) {
-        return await this.userService.getUserById(req.user['id']);
+        const user = await this.userService.getUserById(req.user['id']);
+        return user;
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -33,12 +35,17 @@ export class UserController {
         @Req() req: Request,
         @Body('name') new_name: string
     ) {
-        return await this.userService.updateName(req.user['id'], new_name);
+        await this.userService.updateName(req.user['id'], new_name);
     }
 
     @Get('profile/:username')
     async getProfile(@Param('username') username: string) {
-        return await this.userService.getUserByName(username);
+        try {
+            const user = await this.userService.getUserByName(username);
+            return user;
+        } catch (_) {
+            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
+        }
     }
 
     @UseGuards(AuthGuard('jwt'))

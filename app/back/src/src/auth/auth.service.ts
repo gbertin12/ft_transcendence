@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { randomUUID } from 'crypto';
+import * as OTPAuth from 'otpauth';
+import { User } from '@prisma/client';
 
 // the authorization server wants the POST data
 // in the multipart/form-data Content-Type
@@ -47,20 +49,23 @@ export class AuthService {
         return state_param === payload.state;
     }
 
-    async generateJWT(data) {
-        // select or insert user
-        const user_id = await this.userService.findOrCreate(data);
-        const token = await this.jwtService.signAsync(user_id);
+    async generateJWT(id: number, otpAuth = false): Promise<string> {
+        const token = await this.jwtService.signAsync({ id, otpAuth });
         return token;
     }
 
-    async callback(auth_code: string, state_param: string, state_cookie: string) {
-        if (await this.verifyState(state_param, state_cookie) === false) {
-            return 'throw exception maybe?';
+    async callback(
+        auth_code: string,
+        state_param: string,
+        state_cookie: string
+    ): Promise<User> {
+
+        if (!await this.verifyState(state_param, state_cookie)) {
+            throw new HttpException('Invlalid state parameter', HttpStatus.UNAUTHORIZED);
         }
         const token_url = 'https://api.intra.42.fr/oauth/token';
         const params = {
-            redirect_uri: 'http://localhost:3000/auth/callback',
+            redirect_uri: 'http://localhost:3000/auth/oauth/callback',
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             grant_type: 'authorization_code',
@@ -80,9 +85,10 @@ export class AuthService {
                 const data = await response.json();
                 // get user data from 42 API
                 const user = await getProfile(data.access_token);
-                return this.generateJWT(user);
+                await this.userService.createUser(user);
+                return user;
             }
-            return 'login failed';
+            throw new HttpException('OAuth login failed', HttpStatus.UNAUTHORIZED);
         } catch (error) {
             // TODO: better error handling
             if (error instanceof SyntaxError) {
@@ -90,7 +96,7 @@ export class AuthService {
             } else {
                 console.log(error);
             }
-            return 'error';
+            throw new HttpException('unknown error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -98,5 +104,36 @@ export class AuthService {
         const state = randomUUID();
         const payload = { state };
         return { state: await this.jwtService.signAsync(payload) };
+    }
+
+    async setOTP(id: number) {
+        // TODO: check if 2fa is already enabled
+        const secret = new OTPAuth.Secret({ size: 42 });
+        const totp = new OTPAuth.TOTP({
+            issuer: 'ACME',
+            label: 'ft_transcendence',
+            algorithm: 'SHA512',
+            digits: 6,
+            period: 30,
+            secret,
+        });
+        await this.userService.updateOTPSecret(id, secret.base32);
+        const uri = totp.toString();
+        return { uri };
+    }
+
+    async verifyOTP(id: number, token: string): Promise<Boolean> {
+        const otpSecret = await this.userService.getOTPSecretById(id);
+        const secret = OTPAuth.Secret.fromBase32(otpSecret);
+        const totp = new OTPAuth.TOTP({
+            issuer: 'ACME',
+            label: 'ft_transcendence',
+            algorithm: 'SHA512',
+            digits: 6,
+            period: 30,
+            secret,
+        });
+        const result = totp.validate({ token, window: 1 });
+        return result !== null;
     }
 }

@@ -9,11 +9,12 @@ datasource db {
 
 model User {
     // 42 id from the API
-    id        Int       @unique
-    name      String    @unique
-    avatar    String    @default("default.jpg")
-    otp       Boolean   @default(false)
-    wins      Int       @default(0)
-    losses    Int       @default(0)
-    elo       Int       @default(1000)
+    id         Int       @unique
+    name       String    @unique
+    avatar     String    @default("default.jpg")
+    wins       Int       @default(0)
+    losses     Int       @default(0)
+    elo        Int       @default(1000)
+    otp        Boolean   @default(false)
+    otpSecret  String?
 }

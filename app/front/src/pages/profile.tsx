@@ -2,9 +2,8 @@ import LayoutAuth from "@/components/layout-authenticated";
 import useSWR from 'swr';
 
 async function fetcher(url: string) {
-    const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-    });
+    // credentials: 'include' <-- needed to send the cookie to the backend
+    const res = await fetch(url, { credentials: 'include' });
     if (!res?.ok) {
         throw 'big problem';
     }
