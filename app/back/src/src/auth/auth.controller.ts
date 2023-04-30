@@ -23,7 +23,6 @@ export class AuthController {
         private userService: UserService,
     ) { }
 
-    // OAuth callback
     @Get('42/callback')
     async ftCallback(
         @Query('code') auth_code: string,
@@ -38,15 +37,6 @@ export class AuthController {
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
-    // before starting the OAuth flow, we hit this endpoint
-    // to generate a random value (UUID) to act as a CSRF token (state parameter)
-    @Get('42/state')
-    async generateStateToken(@Res() res: Response) {
-        const { state, state_token } = await this.authService.generateStateToken();
-        res.cookie('state', state_token, { httpOnly: true, sameSite: 'lax' });
-        res.send(state);
-    }
-
     @Get('discord/callback')
     @UseGuards(AuthGuard('discord'))
     async discordCallback(
@@ -57,6 +47,27 @@ export class AuthController {
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
+    }
+
+    @Get('github/callback')
+    @UseGuards(AuthGuard('github'))
+    async githubCallback(
+        @Req() req: Request,
+        @Res() res: Response
+    ) {
+        const user = await this.userService.createUser(req.user.toString());
+        const token = await this.authService.generateJWT(user.id);
+        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+    }
+
+    // before starting the OAuth flow, we hit this endpoint
+    // to generate a random value (UUID) to act as a CSRF token (state parameter)
+    @Get('42/state')
+    async generateStateToken(@Res() res: Response) {
+        const { state, state_token } = await this.authService.generateStateToken();
+        res.cookie('state', state_token, { httpOnly: true, sameSite: 'lax' });
+        res.send(state);
     }
 
     @UseGuards(AuthGuard('jwt'))

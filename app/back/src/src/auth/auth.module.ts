@@ -6,10 +6,11 @@ import { JwtStrategy } from './jwt.strategy';
 import { Jwt2faStrategy } from './jwt-2fa.strategy';
 import { UserModule } from 'src/user/user.module';
 import { DiscordStrategy } from './discord.strategy'
+import { GithubStrategy } from './github.strategy'
 
 @Module({
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy, Jwt2faStrategy, DiscordStrategy],
+    providers: [AuthService, JwtStrategy, Jwt2faStrategy, DiscordStrategy, GithubStrategy],
     imports: [
         UserModule,
         JwtModule.register({
