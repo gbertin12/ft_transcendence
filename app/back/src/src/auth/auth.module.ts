@@ -5,10 +5,11 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { Jwt2faStrategy } from './jwt-2fa.strategy';
 import { UserModule } from 'src/user/user.module';
+import { DiscordStrategy } from './discord.strategy'
 
 @Module({
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy, Jwt2faStrategy],
+    providers: [AuthService, JwtStrategy, Jwt2faStrategy, DiscordStrategy],
     imports: [
         UserModule,
         JwtModule.register({

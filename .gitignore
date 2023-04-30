@@ -10,3 +10,4 @@
 **/*.pem
 **/.DS_Store
 **/.vscode
+**/migrations/

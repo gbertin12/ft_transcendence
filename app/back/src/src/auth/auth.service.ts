@@ -16,14 +16,14 @@ function buildBody(params: any): FormData {
 }
 
 // fetch the 42 login using the access token
-async function getProfile(access_token: string): Promise<any> {
+async function getProfile(access_token: string): Promise<string> {
     try {
         const response = await fetch('https://api.intra.42.fr/v2/me', {
             headers: { 'Authorization': `Bearer ${access_token}` },
         });
         if (response?.ok) {
             const user = await response.json();
-            return { id: user.id, name: user.login };
+            return user.login;
         }
         console.log('42 INTRA DEAD (AGAIN)??');
         return 'error';
@@ -54,7 +54,7 @@ export class AuthService {
         return token;
     }
 
-    async callback(
+    async ftCallback(
         auth_code: string,
         state_param: string,
         state_cookie: string
@@ -65,9 +65,9 @@ export class AuthService {
         }
         const token_url = 'https://api.intra.42.fr/oauth/token';
         const params = {
-            redirect_uri: 'http://localhost:3000/auth/oauth/callback',
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.CLIENT_SECRET,
+            redirect_uri: `${process.env.CALLBACK_URL}/42/callback`,
+            client_id: process.env.FT_CLIENT_ID,
+            client_secret: process.env.FT_CLIENT_SECRET,
             grant_type: 'authorization_code',
             code: auth_code,
         };
@@ -84,8 +84,8 @@ export class AuthService {
             if (response?.ok) {
                 const data = await response.json();
                 // get user data from 42 API
-                const user = await getProfile(data.access_token);
-                await this.userService.createUser(user);
+                const username = await getProfile(data.access_token);
+                const user = await this.userService.createUser(username);
                 return user;
             }
             throw new HttpException('OAuth login failed', HttpStatus.UNAUTHORIZED);

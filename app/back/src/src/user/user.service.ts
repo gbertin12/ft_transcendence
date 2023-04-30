@@ -55,13 +55,14 @@ export class UserService {
         });
     }
 
-    // creates a new user if it doesn't already exist (by id)
-    async createUser(user: User) {
-        await this.db.user.upsert({
-            where: { id: user.id },
+    // create a new user if it doesn't already exist (by id)
+    async createUser(name: string): Promise<User> {
+        const user = await this.db.user.upsert({
+            where: { name },
             update: {},
-            create: user,
+            create: { name },
         });
+        return user;
     }
 
     // DON'T PUT THIS IN PROD LMAO

@@ -8,8 +8,7 @@ datasource db {
 }
 
 model User {
-    // 42 id from the API
-    id         Int       @unique
+    id         Int       @id @default(autoincrement())
     name       String    @unique
     avatar     String    @default("default.jpg")
     wins       Int       @default(0)
