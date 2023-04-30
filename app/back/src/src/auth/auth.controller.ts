@@ -4,6 +4,7 @@ import {
     Get,
     HttpException,
     HttpStatus,
+    Param,
     Post,
     Query,
     Req,
@@ -29,27 +30,29 @@ export class AuthController {
         const state_cookie = req.cookies['state'];
         const user = await this.authService.callback(auth_code, state_param, state_cookie);
         const token = await this.authService.generateJWT(user.id);
-        res.cookie('token', token, { httpOnly: true, sameSite: 'none' });
+        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
         res.redirect(302, 'http://localhost:8000/profile');
     }
 
     // before starting the OAuth flow, we hit this endpoint
-    // to generate a random value to act as a CSRF token (state parameter)
+    // to generate a random value (UUID) to act as a CSRF token (state parameter)
     @Get('oauth/state')
-    async generateStateToken() {
-        const state_token = await this.authService.generateStateToken();
-        return state_token;
+    async generateStateToken(@Res() res: Response) {
+        const { state, state_token } = await this.authService.generateStateToken();
+        res.cookie('state', state_token, { httpOnly: true, sameSite: 'lax' });
+        res.send(state);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('2fa/activate')
     async setOTP(@Req() req: Request) {
-        return this.authService.setOTP(req.user['id']);
+        const uri = await this.authService.setOTP(req.user['id']);
+        return uri;
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post('2fa/verify')
-    async verifyTOTP(
+    async verifyOTP(
         @Req() req: Request,
         @Res() res: Response,
         @Body('otp') otp: string,
@@ -58,7 +61,13 @@ export class AuthController {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);
-        res.cookie('token', token, { httpOnly: true, sameSite: 'none' });
-        return 'OK';
+        res.cookie('session', token, { httpOnly: true, sameSite: 'none' });
+        res.end();
+    }
+
+    // DON'T PUT THIS IN PROD LMAO
+    @Get('2fa/reset/:username')
+    async resetOTP(@Param('username') username: string) {
+        await this.authService.resetOTP(username);
     }
 }

@@ -103,37 +103,46 @@ export class AuthService {
     async generateStateToken() {
         const state = randomUUID();
         const payload = { state };
-        return { state: await this.jwtService.signAsync(payload) };
+        const state_token = await this.jwtService.signAsync(payload);
+        return { state, state_token };
     }
 
-    async setOTP(id: number) {
-        // TODO: check if 2fa is already enabled
+    async setOTP(id: number): Promise<string> {
         const secret = new OTPAuth.Secret({ size: 42 });
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
             label: 'ft_transcendence',
-            algorithm: 'SHA512',
+            algorithm: 'SHA256',
             digits: 6,
             period: 30,
             secret,
         });
+        console.log(`set secret: ${secret.base32}`);
         await this.userService.updateOTPSecret(id, secret.base32);
         const uri = totp.toString();
-        return { uri };
+        return uri;
     }
 
     async verifyOTP(id: number, token: string): Promise<Boolean> {
         const otpSecret = await this.userService.getOTPSecretById(id);
         const secret = OTPAuth.Secret.fromBase32(otpSecret);
+        console.log(`get secret: ${secret}`);
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
             label: 'ft_transcendence',
-            algorithm: 'SHA512',
+            algorithm: 'SHA256',
             digits: 6,
             period: 30,
             secret,
         });
+        console.log(totp.generate());
         const result = totp.validate({ token, window: 1 });
+        console.log(result);
         return result !== null;
+    }
+
+    // DON'T PUT THIS IN PROD LMAO
+    async resetOTP(name: string) {
+        await this.userService.resetOTP(name);
     }
 }

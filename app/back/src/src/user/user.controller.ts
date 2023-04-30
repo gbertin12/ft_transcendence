@@ -22,14 +22,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UserController {
     constructor(private userService: UserService) {}
 
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Get('me')
     async me(@Req() req: Request) {
         const user = await this.userService.getUserById(req.user['id']);
         return user;
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
     async updateName(
         @Req() req: Request,
@@ -48,7 +48,7 @@ export class UserController {
         }
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post('avatar')
     @UseInterceptors(FileInterceptor('avatar'))
     async uploadAvatar(

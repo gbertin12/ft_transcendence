@@ -1,11 +1,11 @@
-import LayoutAuth from "@/components/layout-authenticated";
+import LayoutAuth from '@/components/layout-authenticated';
 import useSWR from 'swr';
 
 async function fetcher(url: string) {
     // credentials: 'include' <-- needed to send the cookie to the backend
     const res = await fetch(url, { credentials: 'include' });
     if (!res?.ok) {
-        throw 'big problem';
+        throw 'unauthenticated';
     }
     return await res.json();
 }

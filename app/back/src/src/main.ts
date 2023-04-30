@@ -6,6 +6,7 @@ import * as compression from 'compression';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    app.enableCors({ origin: 'http://localhost:8000', credentials: true });
     app.use(cookieParser());
     app.useStaticAssets('/app/files');
     app.use(compression());

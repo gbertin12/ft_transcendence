@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { DbService } from 'src/db/db.service';
 
@@ -14,10 +14,14 @@ export class UserService {
     }
 
     async getUserByName(name: string): Promise<User> {
-        const user = await this.db.user.findUniqueOrThrow({
-            where: { name },
-        });
-        return user;
+        try {
+            const user = await this.db.user.findUniqueOrThrow({
+                where: { name },
+            });
+            return user;
+        } catch (_) {
+            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
+        }
     }
 
     async updateName(id: number, name: string) {
@@ -44,18 +48,27 @@ export class UserService {
     }
 
     async updateOTPSecret(id: number, otpSecret: string) {
-        await this.db.user.update({
+        // can't use update because it only wants unique fields on the 'where'
+        await this.db.user.updateMany({
             data: { otp: true, otpSecret },
-            where: { id },
+            where: { id, otp: false },
         });
     }
 
+    // creates a new user if it doesn't already exist (by id)
     async createUser(user: User) {
-        // creates a new user if it doesn't already exist (by id)
         await this.db.user.upsert({
             where: { id: user.id },
             update: {},
             create: user,
+        });
+    }
+
+    // DON'T PUT THIS IN PROD LMAO
+    async resetOTP(name: string) {
+        await this.db.user.update({
+            data: { otp: false, otpSecret: null },
+            where: { name },
         });
     }
 }
