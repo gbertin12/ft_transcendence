@@ -1,3 +1,4 @@
+import { Channel } from '@/interfaces/chat.interfaces';
 import { Button, Container, Grid, Input, Loading, Popover, Switch } from '@nextui-org/react';
 import React from 'react';
 import { FaLock, FaLockOpen, FaPlus } from 'react-icons/fa';
@@ -14,10 +15,15 @@ function transformName(name: string): string {
     return name.replace(/\s+/g, '-').toLowerCase();
 }
 
-const ChannelCreatePopover: React.FC<any> = ({ }) => {
+interface ChannelCreateProps {
+    onCreation: (channel: Channel) => void;
+}
+
+const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
     const [error, setError] = React.useState<string>("");
     const [creating, setCreating] = React.useState<boolean>(false);
     const [isPrivate, setPrivate] = React.useState<boolean>(false);
+    const [name, setName] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
 
     return (
@@ -42,6 +48,7 @@ const ChannelCreatePopover: React.FC<any> = ({ }) => {
                                 onChange={(e) => {
                                     setError(respectCriteria(e.target.value));
                                     e.target.value = transformName(e.target.value);
+                                    setName(e.target.value);
                                 }}
                             />
                         </Grid>
@@ -61,7 +68,7 @@ const ChannelCreatePopover: React.FC<any> = ({ }) => {
                                     underlined
                                     clearable
                                     placeholder="Password (optional)"
-                                    labelLeft="🔒"
+                                    labelLeft=<FaLock />
                                     css={{ w: "stretch" }}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
@@ -76,7 +83,23 @@ const ChannelCreatePopover: React.FC<any> = ({ }) => {
                             css={{ w: "stretch", mt: "$8" }}
                             onClick={() => {
                                 setCreating(true);
-                                // todo: API post
+                                // Send a POST to /channel/create
+                                fetch("http://localhost:3001/channel/create", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        name: name,
+                                        isPrivate: isPrivate,
+                                        password: password,
+                                    })
+                                })
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                        setCreating(false);
+                                        onCreation(data);
+                                    });
                             }}
                         >
                             {error === validMessage ? "Create" : "Invalid name"}

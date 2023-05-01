@@ -36,4 +36,10 @@ export class ChannelController {
         let senderId = 1;
         return await this.channelService.createMessage(senderId, dto.channel_id, body.content);
     }
+
+    @Post('create')
+    async createChannel(@Body() body: any) {
+        let ownerId = 1;
+        return await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
+    }
 }

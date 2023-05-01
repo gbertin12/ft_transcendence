@@ -30,4 +30,16 @@ export class ChannelService {
             }
         });
     }
+
+    async createChannel(name: string, ownerId: number, isPrivate: boolean, password: string) {
+        return await this.db.channel.create({
+            data: {
+                name: name,
+                owner_id: ownerId,
+                private: isPrivate,
+                password: password, // TODO: Hash password (maybe in the front-end?)
+                topic: ''
+            }
+        });
+    }
 }
