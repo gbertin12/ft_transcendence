@@ -31,6 +31,7 @@ export class ChatGateway
     
     handleDisconnect(client: Socket) {
         console.log('Client disconnected');
+        delete usersChannels[client.id];
     }
     
     @SubscribeMessage('message') // Message received from client
