@@ -3,14 +3,7 @@ import ChatBox from "./chat/ChatBox";
 
 const Home: React.FC = () => {
 	return (
-		<div>
-			<ChatBox
-				privateMessages={[
-					"bob",
-					"alice",
-				]}
-			/>
-		</div>
-	);
+		<ChatBox />
+);
 };	
 export default Home;

@@ -22,11 +22,35 @@ function getStatusColor(isOnline: boolean, isPlaying: boolean) {
     return "success";
 }
 
+function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
+    if (isSelected) {
+        return "$accents1";
+    }
+    if (isHovered) {
+        return "$accents2";
+    }
+    return "transparent";
+}
+
 const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping, isPlaying, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
+
+    const [isHovered, setIsHovered] = React.useState(false);
+
     return (
-        <Grid.Container gap={1}>
-            <Grid css={{w: "stretch"}} xs={2}>
+        <Grid.Container
+            gap={0.5}
+            as="a"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            css={{
+                backgroundColor: getBackgroundColor(isHovered, false),
+                borderRadius: "5px",
+                padding: "5px",
+                transition: "background-color 0.05s ease-in-out",
+            }}
+        >
+            <Grid xs={2}>
                 <Badge
                     content=""
                     placement="bottom-right"

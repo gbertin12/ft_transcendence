@@ -9,8 +9,7 @@ import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 
 
 interface ChatBoxProps {
-    privateMessages: string[];
-    muted?: boolean | undefined;
+    
 }
 
 function useSocket(url: string) {
@@ -26,7 +25,7 @@ function useSocket(url: string) {
     return socket
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
