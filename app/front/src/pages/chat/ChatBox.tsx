@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
 import io from 'socket.io-client';
-import { Avatar, Container, Grid, Text } from "@nextui-org/react";
-import Chats from "@/components/chat/ChatBrowser";
-import ChatBrowser from "@/components/chat/ChatBrowser";
+import { Avatar, Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
+import Chats from "@/components/chat/ChatFriendBrowser";
+import ChatMessage from "@/components/chat/ChatMessage";
+import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 
 
 interface ChatBoxProps {
@@ -26,7 +27,7 @@ function useSocket(url: string) {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [isLoading, setLoading] = useState(false);
+    const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
     const [isPrivateMessage, setIsPrivateMessage] = useState(false);
@@ -46,7 +47,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
     };
 
     useEffect(() => {
-        setLoading(true);
         fetch("http://localhost:3001/channel/all")
             .then((res) => res.json())
             .then((data) => {
@@ -103,23 +103,91 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
         fetchMessages(newChannel.id); // TODO: Replace with socket.io
     };
 
+    if (isLoading) {
+        return (
+            <Container>
+                <Grid.Container gap={2} justify="center" css={{ height: "100vh" }}>
+                    <Grid xs={3} direction="column">
+                        <Text h3>Chats</Text>
+                        <hr />
+                        <Loading size="xl" css={{ mx: "auto" }} />
+                    </Grid>
+                    <Grid xs={6} direction="column">
+                        <Text h3>Current Chat</Text>
+                        <Loading size="xl" css={{ mx: "auto" }} />
+                    </Grid>
+                    <Grid xs={3} direction="column">
+                        <Grid>
+                            <Text h3 css={{ mx: "auto" }}>Friends</Text>
+                            <Loading size="xl" css={{ mx: "auto" }} />
+                        </Grid>
+                    </Grid>
+                </Grid.Container>
+            </Container>
+        );
+    }
     return (
         <Container>
-            <Grid.Container gap={2} justify="center" css={{height: "100vh"}}>
+            <Grid.Container gap={2} justify="center" css={{ height: "100vh" }}>
                 <Grid xs={3} direction="column">
                     <Text h3>Chats</Text>
                     <hr />
-                    <ChatBrowser />
                 </Grid>
                 <Grid xs={6}>
                     <Grid.Container>
-                        <Text h3 css={{ mx: "auto" }}>Current Chat</Text>
+                        <Grid>
+                            <Text h3 css={{ mx: "auto" }}>Current Chat</Text>
+                            <ul
+                                style={{
+                                    listStyle: "none",
+                                    padding: 0,
+                                    overflowY: "auto",
+                                    height: "80vh",
+                                    display: "flex",
+                                    flexDirection: "column-reverse",
+                                }}
+                            >
+                                {messages.map((message) => (
+                                    <li key={message.message_id}>
+                                        <ChatMessage
+                                            content={message.content}
+                                            senderId={message.sender_id}
+                                            userId={1}
+                                        />
+                                    </li>
+                                ))}
+                                {/* {ghostMessages.map((message) => (
+                                    <li key={message}>
+                                        <ChatMessage
+                                            content={message}
+                                            senderId={1}
+                                            userId={1}
+                                            ghost
+                                        />
+                                    </li>
+                                ))} */}
+                            </ul>
+                        </Grid>
+                        <Grid xs={12}>
+                            <Textarea
+                                placeholder="Entre ton message ici"
+                                fullWidth
+                                minLength={1}
+                                maxLength={2000}
+                                onKeyPress={(e: any) => {
+                                    if (e.key === "Enter") {
+                                        handleNewMessage(e.target.value);
+                                        e.target.value = "";
+                                    }
+                                }}
+                            />
+                        </Grid>
                     </Grid.Container>
                 </Grid>
-                <Grid xs={3}>
-                    <Grid.Container>
-                        <Text h3 css={{ mx: "auto" }}>Friends</Text>
-                    </Grid.Container>
+                <Grid xs={3} direction="column">
+                    <Text h3>Friends</Text>
+                    <hr />
+                    <ChatFriendBrowser />
                 </Grid>
             </Grid.Container>
         </Container>
