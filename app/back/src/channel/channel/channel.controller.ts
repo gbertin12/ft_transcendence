@@ -1,5 +1,14 @@
 import { Controller, Post, Body, Get, Param, HttpException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
+import { Type } from 'class-transformer';
+import { IsNumber, IsPositive } from 'class-validator';
+
+class ChannelDto {
+	@Type(() => Number)
+	@IsNumber()
+	@IsPositive()
+	channel_id: number;
+}
 
 @Controller('channel')
 export class ChannelController {
@@ -11,23 +20,13 @@ export class ChannelController {
         return await this.channelService.allChannels();
     }
 
-    @Get(':id/messages')
-    async channelMessages(@Param("id") id: string) {
-        let channelId: number = -1;
-        try {
-            channelId = parseInt(id);
-        } catch (error) {
-            throw new HttpException('Invalid Channel ID', 400);
-        }
-        return await this.channelService.getMessages(channelId);
+    @Get(':channel_id/messages')
+    async channelMessages(@Param() dto: ChannelDto) {
+        return await this.channelService.getMessages(dto.channel_id);
     }
 
-    @Post(':id/message')
-    async createMessage(@Param("id") id: string, @Body() body: any) {
-        let channelId: number = -1;
-        try {
-            channelId = parseInt(id);
-        } catch (error)                     { throw new HttpException('Invalid Channel ID', 400); }
+    @Post(':channel_id/message')
+    async createMessage(@Param() dto: ChannelDto, @Body() body: any) {
         if (!body || !body.content)         { throw new HttpException('Invalid Message', 400); }
         if (body.content.length > 2000)     { throw new HttpException('Message too long', 400); }
 
@@ -35,6 +34,6 @@ export class ChannelController {
         // TODO: Check that the user is in the channel
         // TODO: Get userId with session / cookies / token / whatever
         let senderId = 1;
-        return await this.channelService.createMessage(senderId, channelId, body.content);
+        return await this.channelService.createMessage(senderId, dto.channel_id, body.content);
     }
 }
