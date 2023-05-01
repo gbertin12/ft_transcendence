@@ -1,15 +1,15 @@
+import io from 'socket.io-client';
 import React, { useEffect, useState } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
-import io from 'socket.io-client';
-import { Avatar, Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
-import Chats from "@/components/chat/ChatFriendBrowser";
+import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
+import ChannelCreatePopover from "@/components/chat/ChannelCreatePopover";
 
 
 interface ChatBoxProps {
-    
+
 }
 
 function useSocket(url: string) {
@@ -123,12 +123,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
             </Container>
         );
     }
+
     return (
         <Container>
             <Grid.Container gap={2} justify="center" css={{ height: "100vh" }}>
                 <Grid xs={3} direction="column">
                     <Text h3>Chats</Text>
                     <hr />
+                    <Grid.Container>
+                        <Grid xs={10}>
+                            <Text h4>Salons</Text>
+                        </Grid>
+                        <ChannelCreatePopover />
+                    </Grid.Container>
+
                     {/* TODO: Display latest chats with friends */}
                     <ChatChannelBrowser
                         channels={channels}
