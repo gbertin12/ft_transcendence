@@ -23,7 +23,7 @@ function getStatusColor(isOnline: boolean, isPlaying: boolean) {
 }
 
 const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping, isPlaying, unreadMessages }) => {
-    if (unreadMessages === undefined) { unreadMessages = 2; }
+    if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
     return (
         <Grid.Container gap={1}>
             <Grid css={{w: "stretch"}} xs={2}>
