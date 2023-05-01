@@ -24,7 +24,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content, senderId, userId }) 
                         textAlign: senderId === userId ? "right" : "left",
                         borderRadius: "$2xl",
                         padding: "$xs",
-                        color: senderId === userId ? "$white" : "$black",
+                        color: senderId === userId ? "$white" : "default",
                     }}
                 >
                     {content}
