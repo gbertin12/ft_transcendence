@@ -31,7 +31,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
-    const [isPrivateMessage, setIsPrivateMessage] = useState(false);
 
     // ghostMessages is used to display the message before it is sent to the server
     const [ghostMessages, setGhostMessage] = useState<string[]>([]);
@@ -97,11 +96,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
             });
     };
 
-    const handleChannelChange = (index: number) => {
-        const newChannel = channels[index];
-        setSelectedChannel(newChannel);
-        setIsPrivateMessage(index >= channels.length);
-        fetchMessages(newChannel.id); // TODO: Replace with socket.io
+    const handleChannelChange = (channel: Channel) => {
+        setSelectedChannel(channel);
+        fetchMessages(channel.id);
     };
 
     if (isLoading) {
@@ -134,12 +131,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
                     <Text h3>Chats</Text>
                     <hr />
                     {/* TODO: Display latest chats with friends */}
-                    <ChatChannelBrowser />
+                    <ChatChannelBrowser
+                        channels={channels}
+                        channelChanged={handleChannelChange}
+                    />
                 </Grid>
                 <Grid xs={6}>
                     <Grid.Container>
                         <Grid>
-                            <Text h3 css={{ mx: "auto" }}>Current Chat</Text>
+                            <Text h3 css={{ mx: "auto" }}># {selectedChannel?.name}</Text>
                             <ul
                                 style={{
                                     listStyle: "none",
@@ -178,9 +178,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
                                 minLength={1}
                                 maxLength={2000}
                                 onKeyPress={(e: any) => {
-                                    if (e.key === "Enter") {
-                                        handleNewMessage(e.target.value);
-                                        e.target.value = "";
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        let message: string = e.target.value;
+                                        message = message.trim();
+                                        if (message.length > 0) {
+                                            handleNewMessage(message);
+                                            e.target.value = "";
+                                        }
                                     }
                                 }}
                             />
