@@ -38,7 +38,7 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping,
                     />
                 </Badge>
             </Grid>
-            <Grid xs={6} css={{my: "auto"}}>
+            <Grid xs={8} css={{my: "auto"}}>
                 <Text span>{name}</Text>
             </Grid>
             {(isPlaying ? (
