@@ -14,6 +14,8 @@ import { Message } from 'src/interfaces/chat.interfaces';
 // Map of user id to channel id
 let usersChannels: Record<number, number> = {};
 
+// FIXME: Make sure to not completely trust the client
+
 @WebSocketGateway(8001, { cors: '*' })
 export class ChatGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -50,6 +52,11 @@ export class ChatGateway
     @SubscribeMessage('join') // Message received from client
     handleJoin(client: Socket, payload: any) {
         usersChannels[client.id] = payload.channel;
+    }
+
+    @SubscribeMessage('newChannel') // Message received from client
+    handleNewChannel(client: Socket, payload: any) {
+        this.server.emit('newChannel', payload);
     }
 }
 

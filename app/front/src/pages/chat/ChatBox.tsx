@@ -59,6 +59,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
             socket.on('message', (payload: any) => {
                 setMessages((messages) => [payload.message, ...messages]);
             });
+            socket.on('newChannel', (payload: any) => {
+                setChannels((channels) => [...channels, payload.channel]);
+            });
         }
     }, [socket]);
 
@@ -94,6 +97,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                 });
             });
     };
+
+    const handleNewChannel = (channel: Channel) => {
+        socket.emit('newChannel', {
+            channel: channel,
+        });
+    }
 
     const handleChannelChange = (channel: Channel) => {
         setSelectedChannel(channel);
@@ -134,7 +143,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                         <Grid xs={10}>
                             <Text h4>Salons</Text>
                         </Grid>
-                        <ChannelCreatePopover />
+                        <ChannelCreatePopover onCreation={handleNewChannel} />
                     </Grid.Container>
 
                     {/* TODO: Display latest chats with friends */}
