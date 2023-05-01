@@ -5,6 +5,7 @@ import { Avatar, Container, Grid, Loading, Text, Textarea } from "@nextui-org/re
 import Chats from "@/components/chat/ChatFriendBrowser";
 import ChatMessage from "@/components/chat/ChatMessage";
 import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
+import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 
 
 interface ChatBoxProps {
@@ -132,6 +133,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ muted, privateMessages }) => {
                 <Grid xs={3} direction="column">
                     <Text h3>Chats</Text>
                     <hr />
+                    {/* TODO: Display latest chats with friends */}
+                    <ChatChannelBrowser />
                 </Grid>
                 <Grid xs={6}>
                     <Grid.Container>
