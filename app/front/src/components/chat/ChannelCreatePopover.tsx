@@ -105,6 +105,7 @@ const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                                         password: password,
                                     })
                                 })
+                                    // TODO: Handle errors
                                     .then((res) => res.json())
                                     .then((data) => {
                                         setCreating(false);
