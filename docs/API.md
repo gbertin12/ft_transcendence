@@ -96,11 +96,11 @@ Status HTTP :
 | `403` | Utilisateur n’est pas “owner” |
 | `404` | Salon n’existe pas |
 
-## 1.4 👤 POST `/new`
+## 1.4 👤 POST `/create`
 
 | État | Description |
 | :---: | :---: |
-| ❌ | Crée un nouveau salon |
+| ✅ | Crée un nouveau salon |
 
 Exemple :
 
@@ -186,7 +186,7 @@ Status HTTP :
 
 | État | Description |
 | :---: | :---: |
-| ❌ | WebSocket |
+| ⏳ | WebSocket |
 
 Permet de recevoir les informations suivantes :
 
