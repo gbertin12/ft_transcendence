@@ -14,7 +14,7 @@ async function createFakeChannel(size: number, isPrivate: boolean = false, isPas
                 private: isPrivate,
                 creation_date: faker.date.past().toISOString(),
                 owner_id: 1,
-                password: isPasswordProtected ? sha512(faker.internet.password()) : "",
+                password: isPasswordProtected ? sha512(faker.internet.password()) : null,
             };
         case 1: // long
             return {
@@ -23,7 +23,7 @@ async function createFakeChannel(size: number, isPrivate: boolean = false, isPas
                 private: isPrivate,
                 creation_date: faker.date.past().toISOString(),
                 owner_id: 2,
-                password: isPasswordProtected ? sha512(faker.internet.password()) : "",
+                password: isPasswordProtected ? sha512(faker.internet.password()) : null,
             };
         default:
             throw new Error("Invalid size");

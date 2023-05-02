@@ -23,7 +23,7 @@ model Channel {
   private       Boolean  @default(false) @db.Boolean
   creation_date DateTime @default(now()) @db.Timestamp(6)
   owner_id      Int
-  password      String?  @default("") @db.VarChar(128)
+  password      String?  @db.VarChar(128)
   owner         User     @relation(fields: [owner_id], references: [id])
 }
 
