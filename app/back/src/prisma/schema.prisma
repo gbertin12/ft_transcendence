@@ -16,4 +16,5 @@ model User {
     elo        Int       @default(1000)
     otp        Boolean   @default(false)
     otpSecret  String?
+    password   String?
 }

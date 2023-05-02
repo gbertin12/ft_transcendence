@@ -61,6 +61,27 @@ export class AuthController {
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
+    @Post('register')
+    async register(
+        @Body('username') username: string,
+        @Body('password') password: string
+    ) {
+        if (!await this.authService.register(username, password)) {
+            throw new HttpException('user already exists', HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @UseGuards(AuthGuard('local'))
+    @Post('login')
+    async login(
+        @Req() req: Request,
+        @Res() res: Response,
+    ) {
+        const token = await this.authService.generateJWT(req.user['id']);
+        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+    }
+
     // before starting the OAuth flow, we hit this endpoint
     // to generate a random value (UUID) to act as a CSRF token (state parameter)
     @Get('42/state')

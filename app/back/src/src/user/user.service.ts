@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { DbService } from 'src/db/db.service';
 
@@ -14,14 +14,10 @@ export class UserService {
     }
 
     async getUserByName(name: string): Promise<User> {
-        try {
-            const user = await this.db.user.findUniqueOrThrow({
-                where: { name },
-            });
-            return user;
-        } catch (_) {
-            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
-        }
+        const user = await this.db.user.findUniqueOrThrow({
+            where: { name },
+        });
+        return user;
     }
 
     async updateName(id: number, name: string) {
@@ -55,12 +51,12 @@ export class UserService {
         });
     }
 
-    // create a new user if it doesn't already exist (by id)
-    async createUser(name: string): Promise<User> {
+    // create a new user if it doesn't already exist
+    async createUser(name: string, password: string = null): Promise<User> {
         const user = await this.db.user.upsert({
             where: { name },
             update: {},
-            create: { name },
+            create: { name, password },
         });
         return user;
     }

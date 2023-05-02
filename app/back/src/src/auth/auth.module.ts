@@ -7,6 +7,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { Jwt2faStrategy } from './strategies/jwt-2fa.strategy';
 import { DiscordStrategy } from './strategies/discord.strategy'
 import { GithubStrategy } from './strategies/github.strategy'
+import { LocalStrategy } from './strategies/local.strategy'
 
 @Module({
     controllers: [AuthController],
@@ -16,6 +17,7 @@ import { GithubStrategy } from './strategies/github.strategy'
         Jwt2faStrategy,
         DiscordStrategy,
         GithubStrategy,
+        LocalStrategy,
     ],
     imports: [
         UserModule,

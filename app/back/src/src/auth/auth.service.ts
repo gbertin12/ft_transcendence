@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { User } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import * as OTPAuth from 'otpauth';
-import { User } from '@prisma/client';
+import * as argon2 from 'argon2';
 
 // the authorization server wants the POST data
 // in the multipart/form-data Content-Type
@@ -43,6 +44,17 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService,
     ) { }
+
+    async register(username: string, password: string): Promise<boolean> {
+        try {
+            await this.userService.getUserByName(username);
+            return false;
+        } catch (_) {
+            const hashed_pass = await argon2.hash(password);
+            this.userService.createUser(username, hashed_pass);
+            return true;
+        }
+    }
 
     async verifyState(state_param: string, state_cookie: string): Promise<Boolean> {
         const payload = await this.jwtService.verifyAsync(state_cookie);
@@ -117,7 +129,6 @@ export class AuthService {
             period: 30,
             secret,
         });
-        console.log(`set secret: ${secret.base32}`);
         await this.userService.updateOTPSecret(id, secret.base32);
         const uri = totp.toString();
         return uri;
@@ -126,7 +137,6 @@ export class AuthService {
     async verifyOTP(id: number, token: string): Promise<Boolean> {
         const otpSecret = await this.userService.getOTPSecretById(id);
         const secret = OTPAuth.Secret.fromBase32(otpSecret);
-        console.log(`get secret: ${secret}`);
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
             label: 'ft_transcendence',
@@ -135,9 +145,7 @@ export class AuthService {
             period: 30,
             secret,
         });
-        console.log(totp.generate());
         const result = totp.validate({ token, window: 1 });
-        console.log(result);
         return result !== null;
     }
 
