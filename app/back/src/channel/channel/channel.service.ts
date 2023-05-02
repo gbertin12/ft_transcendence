@@ -1,5 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
+import { sha512 } from 'sha512-crypt-ts';
 
 @Injectable()
 export class ChannelService {
@@ -55,9 +56,13 @@ export class ChannelService {
                 name: name,
                 owner_id: ownerId,
                 private: isPrivate,
-                password: password, // TODO: Hash password (maybe in the front-end?)
+                password: (password !== '' ? sha512.crypt(password, "aaaaaaaa") : null), // TODO: Salt password correctly
                 topic: ''
             }
+        }).then((channel) => {
+            // remove the (hashed) password from the response
+            channel.password = (channel.password !== null ? '' : null);
+            return channel;
         });
     }
 
@@ -71,7 +76,6 @@ export class ChannelService {
             }
         });
         // Check if the channel exists
-        console.log(channel);
         if (!channel) {
             throw new HttpException('Channel not found', 404);
         }
