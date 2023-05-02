@@ -6,7 +6,25 @@ export class ChannelService {
     constructor(private db: DbService) { }
 
     async allChannels() {
-        return await this.db.channel.findMany();
+        // return whether the password is set or not
+        return await this.db.channel.findMany(
+            {
+                select: {
+                    id: true,
+                    name: true,
+                    owner_id: true,
+                    private: true,
+                    topic: true,
+                    password: true
+                }
+            }
+        ).then((channels) => {
+            // TODO: Prettify this?
+            channels.forEach((channel) => 
+                channel.password = (channel.password !== '' ? '' : null)
+            );
+            return channels;
+        });
     }
 
     async getMessages(id: number) {
