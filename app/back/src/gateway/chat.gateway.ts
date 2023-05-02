@@ -58,6 +58,11 @@ export class ChatGateway
     handleNewChannel(client: Socket, payload: any) {
         this.server.emit('newChannel', payload);
     }
+
+    @SubscribeMessage('deleteChannel') // Message received from client
+    handleDeleteChannel(client: Socket, payload: any) {
+        this.server.emit('deleteChannel', payload);
+    }
 }
 
 export default ChatGateway;
