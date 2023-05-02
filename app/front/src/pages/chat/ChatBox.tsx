@@ -31,7 +31,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
 
-    // ghostMessages is used to display the message before it is sent to the server
+    // ghostMessages is used to display the message before it is sent to the server (currently not rendered)
     const [ghostMessages, setGhostMessage] = useState<string[]>([]);
 
     // Workaround to not re-create the socket on every render
@@ -61,6 +61,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
             });
             socket.on('newChannel', (payload: any) => {
                 setChannels((channels) => [...channels, payload.channel]);
+            });
+            socket.on('deleteChannel', (payload: any) => {
+                setChannels((channels) => channels.filter((c) => c.id !== payload.channel.id));
+                if (selectedChannel?.id === payload.channel.id) {
+                    setSelectedChannel(channels[0]);
+                }
             });
         }
     }, [socket]);
@@ -148,6 +154,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
 
                     {/* TODO: Display latest chats with friends */}
                     <ChatChannelBrowser
+                        onDelete={(channel: Channel) => {
+                            setChannels(channels.filter((c) => c.id !== channel.id));
+                            if (selectedChannel?.id === channel.id) {
+                                setSelectedChannel(channels[0]);
+                            }
+                            socket.emit('deleteChannel', {
+                                channel: channel,
+                            });
+                        }}
                         channels={channels}
                         channelChanged={handleChannelChange}
                     />
