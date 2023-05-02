@@ -39,12 +39,12 @@ volumes:
         name: front
         driver_opts:
             type: none
-            device: "./app/front"
+            device: "${PWD}/app/front"
             o: bind
     back:
         driver: local
         name: back
         driver_opts:
             type: none
-            device: "./app/back"
+            device: "${PWD}/app/back"
             o: bind
