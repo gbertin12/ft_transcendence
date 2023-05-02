@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 
 @Injectable()
@@ -57,6 +57,36 @@ export class ChannelService {
                 private: isPrivate,
                 password: password, // TODO: Hash password (maybe in the front-end?)
                 topic: ''
+            }
+        });
+    }
+
+    async deleteChannel(channelId: number, userId: number) {
+        let channel: any = await this.db.channel.findUnique({
+            select: {
+                owner_id: true
+            },
+            where: {
+                id: channelId
+            }
+        });
+        // Check if the channel exists
+        console.log(channel);
+        if (!channel) {
+            throw new HttpException('Channel not found', 404);
+        }
+        // Check if the user is the owner of the channel
+        if (channel.owner_id !== userId) {
+            throw new HttpException('You are not the owner of this channel', 403);
+        }
+        await this.db.channel.delete({
+            where: {
+                id: channelId
+            }
+        });
+        await this.db.message.deleteMany({
+            where: {
+                channel_id: channelId
             }
         });
     }

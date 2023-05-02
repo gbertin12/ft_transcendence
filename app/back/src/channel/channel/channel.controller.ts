@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive } from 'class-validator';
@@ -41,5 +41,12 @@ export class ChannelController {
     async createChannel(@Body() body: any) {
         let ownerId = 1;
         return await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
+    }
+
+    @Delete(':channel_id')
+    async deleteChannel(@Param() dto: ChannelDto) {
+        // TODO: Get userId with session / cookies / token / whatever
+        let userId = 1;
+        return await this.channelService.deleteChannel(dto.channel_id, userId);
     }
 }
