@@ -28,7 +28,15 @@ const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
     const [popIsOpen, setPopIsOpen] = React.useState<boolean>(false);
 
     return (
-        <Popover isOpen={popIsOpen} onOpenChange={(open) => setPopIsOpen(open)}>
+        <Popover isOpen={popIsOpen} onOpenChange={(open: boolean) => {
+            setPopIsOpen(open);
+            if (open) {
+                setName("");
+                setPassword("");
+                setPrivate(false);
+                setError("");
+            }
+        }}>
             <Popover.Trigger>
                 <Grid xs={2} justify="flex-end" css={{ my: "auto" }} as="a">
                     <FaPlus />
@@ -39,6 +47,7 @@ const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                     <Grid.Container gap={1}>
                         <Grid xs={10}>
                             <Input
+                                autoFocus
                                 underlined
                                 clearable
                                 placeholder="channel-name"
