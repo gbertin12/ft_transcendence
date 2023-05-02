@@ -27,7 +27,7 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                     key={channel.id}
                     name={channel.name}
                     channelId={channel.id}
-                    hasPassword={false} // todo: return this value with the backend
+                    hasPassword={channel.password !== null} // backend returns null if no password, empty string otherwise
                     ownerId={channel.owner_id}
                     unreadMessages={0}  // todo: return this value with the backend
                     onClick={() => {
