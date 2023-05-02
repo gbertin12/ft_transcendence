@@ -7,9 +7,10 @@ import { Channel } from "@/interfaces/chat.interfaces";
 interface ChatChannelBrowserProps {
     channelChanged: (channel: Channel) => void;
     channels?: Channel[];
+    onDelete: (channel: Channel) => void;
 }
 
-const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels }) => {
+const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels, onDelete }) => {
     const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
 
     if (!channels) {
@@ -25,11 +26,9 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
             {channels.map((channel, index) => (
                 <ChannelEntry
                     key={channel.id}
-                    name={channel.name}
-                    channelId={channel.id}
-                    hasPassword={channel.password !== null} // backend returns null if no password, empty string otherwise
-                    ownerId={channel.owner_id}
+                    channel={channel}
                     unreadMessages={0}  // todo: return this value with the backend
+                    onDelete={onDelete}
                     onClick={() => {
                         setSelectedIndex(index);
                         channelChanged(channel);
