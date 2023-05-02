@@ -1,14 +1,14 @@
-import { Badge, Grid, Text, Tooltip } from '@nextui-org/react';
+import { Badge, Button, Grid, Popover, Text } from '@nextui-org/react';
 import React from 'react';
 import { FaLock, FaTrash } from 'react-icons/fa';
+import ChannelDeleteIcon from './ChannelDeleteIcon';
+import { Channel } from '@/interfaces/chat.interfaces';
 
 interface ChannelEntryProps {
-    name: string;
-    channelId: number;
-    hasPassword: boolean; // TODO: use this to display a lock icon
-    ownerId: number;
     isSelected: boolean;
+    channel: Channel;
     onClick: () => void;
+    onDelete: (channel: Channel) => void;
     unreadMessages?: number;
 }
 
@@ -22,7 +22,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ name, channelId, hasPassword, ownerId, isSelected, onClick, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, onDelete, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -63,39 +63,35 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ name, channelId, hasPasswor
                     size="$xl"
                     weight="bold"
                 >
-                    {name}
+                    {channel.name}
                 </Text>
             </Grid>
-            {ownerId === 1 && (
-                <Grid xs={1} css={{ my: "auto" }}>
-                    <Tooltip
-                        content="Delete this channel"
-                        placement="bottom"
-                        trigger="hover"
-                        hideArrow={true}
-                    >
-                        <FaTrash />
-                    </Tooltip>
-                </Grid>
+            {channel.owner_id === 1 && (
+                <ChannelDeleteIcon onConfirm={() => {
+                    // TODO: Handle errors in a fancier way
+                    fetch(`http://localhost:3001/channel/${channel.id}`, {
+                        method: "DELETE",
+                    }).then((response) => {
+                        if (response.status === 200) {
+                            onDelete(channel);
+                        } else {
+                            alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
+                        }
+                    });
+                }} />
             ) || (
                     // empty grid to keep the icon in the same place
                     <Grid xs={1} />
                 )}
-            {hasPassword && (
+            {channel.password !== null && ( // TODO: Handle properly passwords (send a boolean rather than a string?)
                 <Grid xs={1} css={{ my: "auto" }}>
-                    <Tooltip
-                        content="This channel is password protected"
-                        placement="bottom"
-                        trigger="hover"
-                        hideArrow={true}
-                    >
-                        <FaLock />
-                    </Tooltip>
+                    <FaLock />
                 </Grid>
             ) || (
                     // empty grid to keep the icon in the same place
                     <Grid xs={1} />
-                )}
+                )
+            }
         </Grid.Container >
     );
 };
