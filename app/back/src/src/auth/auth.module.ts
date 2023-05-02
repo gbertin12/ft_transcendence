@@ -1,16 +1,22 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './jwt.strategy';
-import { Jwt2faStrategy } from './jwt-2fa.strategy';
-import { UserModule } from 'src/user/user.module';
-import { DiscordStrategy } from './discord.strategy'
-import { GithubStrategy } from './github.strategy'
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { Jwt2faStrategy } from './strategies/jwt-2fa.strategy';
+import { DiscordStrategy } from './strategies/discord.strategy'
+import { GithubStrategy } from './strategies/github.strategy'
 
 @Module({
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy, Jwt2faStrategy, DiscordStrategy, GithubStrategy],
+    providers: [
+        AuthService,
+        JwtStrategy,
+        Jwt2faStrategy,
+        DiscordStrategy,
+        GithubStrategy,
+    ],
     imports: [
         UserModule,
         JwtModule.register({

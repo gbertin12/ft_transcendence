@@ -1,4 +1,4 @@
-export default function Layout(props) {
+export default function Layout(props: any): JSX.Element {
     return (
         <div>
             {props.children}
