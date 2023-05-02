@@ -1,5 +1,6 @@
-import { Badge, Grid, Text } from '@nextui-org/react';
+import { Badge, Grid, Text, Tooltip } from '@nextui-org/react';
 import React from 'react';
+import { FaLock, FaTrash } from 'react-icons/fa';
 
 interface ChannelEntryProps {
     name: string;
@@ -40,7 +41,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ name, channelId, hasPasswor
                 transition: "background-color 0.05s ease-in-out",
             }}
         >
-            <Grid xs={1} css={{my: "auto"}}>
+            <Grid xs={1} css={{ my: "auto" }}>
                 <Badge
                     content={unreadMessages > 9 ? "9+" : unreadMessages.toString()}
                     placement="bottom-right"
@@ -56,7 +57,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ name, channelId, hasPasswor
                     </Text>
                 </Badge>
             </Grid>
-            <Grid xs={11} css={{my: "auto"}}>
+            <Grid xs={9} css={{ my: "auto" }}>
                 <Text
                     span
                     size="$xl"
@@ -65,6 +66,36 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ name, channelId, hasPasswor
                     {name}
                 </Text>
             </Grid>
+            {ownerId === 1 && (
+                <Grid xs={1} css={{ my: "auto" }}>
+                    <Tooltip
+                        content="Delete this channel"
+                        placement="bottom"
+                        trigger="hover"
+                        hideArrow={true}
+                    >
+                        <FaTrash />
+                    </Tooltip>
+                </Grid>
+            ) || (
+                    // empty grid to keep the icon in the same place
+                    <Grid xs={1} />
+                )}
+            {hasPassword && (
+                <Grid xs={1} css={{ my: "auto" }}>
+                    <Tooltip
+                        content="This channel is password protected"
+                        placement="bottom"
+                        trigger="hover"
+                        hideArrow={true}
+                    >
+                        <FaLock />
+                    </Tooltip>
+                </Grid>
+            ) || (
+                    // empty grid to keep the icon in the same place
+                    <Grid xs={1} />
+                )}
         </Grid.Container >
     );
 };
