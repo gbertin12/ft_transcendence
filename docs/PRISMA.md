@@ -10,7 +10,7 @@
 | `private` | `smallint` |  | 0 = public -- 1 = private -- 2 = password blocked |
 | `creation_date` | `timestamp` |  |  |
 | `owner_id` | `integer` |  | Related to users.id |
-| `password` | `varchar(128)` | default = “” | SHA512 + Custom Salt |
+| `password` | `varchar(128)` | default = `null` | SHA512 + Custom Salt |
 
 ## Indexes
 
