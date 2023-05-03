@@ -1,7 +1,7 @@
 import { Badge, Button, Grid, Popover, Text } from '@nextui-org/react';
 import React from 'react';
 import { FaLock, FaTrash } from 'react-icons/fa';
-import ChannelDeleteIcon from './icons/ChannelDeleteIcon';
+// import ChannelDeleteIcon from './icons/ChannelDeleteIcon';
 import { Channel } from '@/interfaces/chat.interfaces';
 import ChannelEditIcon from './icons/ChannelEditIcon';
 
@@ -10,6 +10,7 @@ interface ChannelEntryProps {
     channel: Channel;
     onClick: () => void;
     onDelete: (channel: Channel) => void;
+    onEdit: (channel: Channel) => void;
     unreadMessages?: number;
 }
 
@@ -23,7 +24,39 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, onDelete, unreadMessages }) => {
+function onDeleteConfirmed(channel: Channel, parentHandler: (channel: Channel) => void): boolean {
+    fetch(`http://localhost:3001/channel/${channel.id}`, {
+        method: "DELETE",
+    }).then((response) => {
+        if (response.ok) {
+            parentHandler(channel);
+        }
+        return response.ok;
+    });
+    return false;
+}
+
+function onChannelEdited(modifiedChannel: Channel, parentHandler: (channel: Channel) => void): boolean {
+    fetch(`http://localhost:3001/channel/${modifiedChannel.id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: modifiedChannel.name,
+            private: modifiedChannel.private,
+            password: modifiedChannel.password
+        })
+    }).then((res) => {
+        if (res.ok) {
+            parentHandler(modifiedChannel);
+        }
+        return res.ok;
+    });
+    return false;
+}
+
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, onDelete, onEdit, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -69,30 +102,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
             </Grid>
             {channel.owner_id === 1 && (
                 <>
-                    <ChannelDeleteIcon onConfirm={() => {
-                        // TODO: Handle errors in a fancier way
-                        fetch(`http://localhost:3001/channel/${channel.id}`, {
-                            method: "DELETE",
-                        }).then((response) => {
-                            if (response.status === 200) {
-                                onDelete(channel);
-                            } else {
-                                alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
-                            }
-                        });
-                    }} />
-                    <ChannelEditIcon onConfirm={() => {
-                        // TODO: Handle errors in a fancier way
-                        fetch(`http://localhost:3001/channel/${channel.id}`, {
-                            method: "DELETE",
-                        }).then((response) => {
-                            if (response.status === 200) {
-                                onDelete(channel);
-                            } else {
-                                alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
-                            }
-                        });
-                    }} />
+                    <ChannelEditIcon channel={channel} onDelete={() => onDeleteConfirmed(channel, onDelete)} onEdit={() => onChannelEdited(channel, onEdit)} />
                 </>
             ) || (
                     // empty grid to keep the icon in the same place
