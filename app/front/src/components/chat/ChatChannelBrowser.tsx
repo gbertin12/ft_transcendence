@@ -8,9 +8,10 @@ interface ChatChannelBrowserProps {
     channelChanged: (channel: Channel) => void;
     channels?: Channel[];
     onDelete: (channel: Channel) => void;
+    onEdit: (channel: Channel) => void;
 }
 
-const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels, onDelete }) => {
+const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels, onDelete, onEdit }) => {
     const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
 
     if (!channels) {
@@ -29,6 +30,7 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                     channel={channel}
                     unreadMessages={0}  // todo: return this value with the backend
                     onDelete={onDelete}
+                    onEdit={onEdit}
                     onClick={() => {
                         setSelectedIndex(index);
                         channelChanged(channel);
