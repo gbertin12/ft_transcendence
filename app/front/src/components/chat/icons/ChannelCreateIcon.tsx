@@ -19,7 +19,7 @@ interface ChannelCreateProps {
     onCreation: (channel: Channel) => void;
 }
 
-const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
+const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
     const [error, setError] = React.useState<string>("");
     const [creating, setCreating] = React.useState<boolean>(false);
     const [isPrivate, setPrivate] = React.useState<boolean>(false);
@@ -125,4 +125,4 @@ const ChannelCreatePopover: React.FC<ChannelCreateProps> = ({ onCreation }) => {
     );
 };
 
-export default ChannelCreatePopover;
+export default ChannelCreateIcon;

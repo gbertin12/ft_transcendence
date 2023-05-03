@@ -5,8 +5,7 @@ import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
-import ChannelCreatePopover from "@/components/chat/ChannelCreatePopover";
-
+import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
 
 interface ChatBoxProps {
 
@@ -149,7 +148,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                         <Grid xs={10}>
                             <Text h4>Salons</Text>
                         </Grid>
-                        <ChannelCreatePopover onCreation={handleNewChannel} />
+                        <ChannelCreateIcon onCreation={handleNewChannel} />
                     </Grid.Container>
 
                     {/* TODO: Display latest chats with friends */}
@@ -170,7 +169,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                 <Grid xs={6}>
                     <Grid.Container>
                         <Grid>
-                            <Text h3 css={{ mx: "auto" }}># {selectedChannel?.name}</Text>
+                            <Text h3># {selectedChannel?.name}</Text>
                             <ul
                                 style={{
                                     listStyle: "none",

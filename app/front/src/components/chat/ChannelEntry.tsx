@@ -1,8 +1,9 @@
 import { Badge, Button, Grid, Popover, Text } from '@nextui-org/react';
 import React from 'react';
 import { FaLock, FaTrash } from 'react-icons/fa';
-import ChannelDeleteIcon from './ChannelDeleteIcon';
+import ChannelDeleteIcon from './icons/ChannelDeleteIcon';
 import { Channel } from '@/interfaces/chat.interfaces';
+import ChannelEditIcon from './icons/ChannelEditIcon';
 
 interface ChannelEntryProps {
     isSelected: boolean;
@@ -57,7 +58,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                     </Text>
                 </Badge>
             </Grid>
-            <Grid xs={9} css={{ my: "auto" }}>
+            <Grid xs={8} css={{ my: "auto" }}>
                 <Text
                     span
                     size="$xl"
@@ -67,21 +68,38 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                 </Text>
             </Grid>
             {channel.owner_id === 1 && (
-                <ChannelDeleteIcon onConfirm={() => {
-                    // TODO: Handle errors in a fancier way
-                    fetch(`http://localhost:3001/channel/${channel.id}`, {
-                        method: "DELETE",
-                    }).then((response) => {
-                        if (response.status === 200) {
-                            onDelete(channel);
-                        } else {
-                            alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
-                        }
-                    });
-                }} />
+                <>
+                    <ChannelDeleteIcon onConfirm={() => {
+                        // TODO: Handle errors in a fancier way
+                        fetch(`http://localhost:3001/channel/${channel.id}`, {
+                            method: "DELETE",
+                        }).then((response) => {
+                            if (response.status === 200) {
+                                onDelete(channel);
+                            } else {
+                                alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
+                            }
+                        });
+                    }} />
+                    <ChannelEditIcon onConfirm={() => {
+                        // TODO: Handle errors in a fancier way
+                        fetch(`http://localhost:3001/channel/${channel.id}`, {
+                            method: "DELETE",
+                        }).then((response) => {
+                            if (response.status === 200) {
+                                onDelete(channel);
+                            } else {
+                                alert(`Error:\n HTTP: ${response.status}\n${response.statusText}`);
+                            }
+                        });
+                    }} />
+                </>
             ) || (
                     // empty grid to keep the icon in the same place
-                    <Grid xs={1} />
+                    <>
+                        <Grid xs={1} />
+                        <Grid xs={1} />
+                    </>
                 )}
             {channel.password !== null && ( // TODO: Handle properly passwords (send a boolean rather than a string?)
                 <Grid xs={1} css={{ my: "auto" }}>
