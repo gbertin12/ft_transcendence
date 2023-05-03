@@ -5,7 +5,7 @@ export interface Channel {
 	private: boolean;
 	creation_date: Date;
 	owner_id: number;
-	password: string;
+	password: string | null;
 	owner: any;
 }
 
