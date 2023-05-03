@@ -17,7 +17,7 @@
 | Envoi de messages privés | Envoi de messages privés à un utilisateur | ❌ |
 | Création de salons | Créer un salon avec / sans mot de passe / caché | ✅ |
 | Suppression de salons | Supprimer un salon (propriétaire seulement) | ✅ |
-| Modification de salon | Modifier le nom / topic / mot de passe d'un salon (propriétaire seulement) | ⏳ |
+| Modification de salon | Modifier le nom / topic / mot de passe d'un salon (propriétaire seulement) | ✅ |
 | Sanctions | Bannissement / Mute / Kick / Bloquer un utilisateur | ❌ |
 | Rejoindre un salon avec un mot de passe | Demander / vérifier le mot de passe du salon et stocker le hash localement | ❌ |
 | Invitations dans un salon caché | - | ❌ |
