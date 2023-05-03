@@ -119,6 +119,31 @@ Status HTTP :
 | `201` | Salon créé |
 | `400` | Nom / topic trop long / trop court |
 
+## 1.5 🔰 PATCH `/:id`
+
+| État | Description |
+| :---: | :---: |
+| ✅ | Modifie les paramètres du salon |
+
+Exemple :
+
+```json
+{
+	"name": "nom",
+	"topic": "topic",
+	"private": 0,
+}
+```
+
+Status HTTP :
+
+| Code | Description |
+| :---: | :---: |
+| `200` | Salon modifié |
+| `400` | Nom / topic trop long / trop court |
+| `403` | Utilisateur n’est pas “owner” |
+| `404` | Salon n’existe pas |
+
 ## 1.5 🛡️ PATCH `/:id/punish`
 
 | État | Description |
@@ -192,5 +217,6 @@ Permet de recevoir les informations suivantes :
 | Nouveau message | `message` | ✅ |
 | Nouveau salon | `newChannel` | ✅ |
 | Suppression de salon | `deleteChannel` | ✅ |
+| Modification de salon | `editChannel` | ✅ |
 | Un utilisateur est en train d’écrire | `typing` | ❌ |
 | Un utilisateur a été sanctionné | `punish` | ❌ |
