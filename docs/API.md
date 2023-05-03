@@ -86,7 +86,7 @@ Status HTTP :
 
 | État | Description |
 | :---: | :---: |
-| ❌ | Supprime le salon |
+| ✅ | Supprime le salon |
 
 Status HTTP :
 
@@ -182,29 +182,15 @@ Status HTTP :
 | `403` | Utilisateur banni / mute |
 | `404` | Salon introuvable |
 
-## 1.8 👤 GET `/:id/listen`
-
-| État | Description |
-| :---: | :---: |
-| ⏳ | WebSocket |
+## 1.8 👤 Socket
 
 Permet de recevoir les informations suivantes :
 
-* Nouveaux messages
-* Un utilisateur est en train d’écrire
-* Un utilisateur a arrêté d’écrire
-* Un utilisateur a été sanctionné
-* Un utilisateur a été dé-sanctionné
-
-Retourne :
-
-* (`101`) `200` si la connexion a réussi
-	* Le client doit envoyer un message JSON contenant l’id du salon (`channel_id`)
-	```json
-	{
-		"channel_id": 0
-	}
-	```
-
-* `403` si l’utilisateur n’a pas les droits d’accès au salon (ou est banni)
-* `404` si le salon n’existe pas
+| Message | Message | Implémenté |
+| :--- | :---: | :---: |
+| Ecouter un salon | `join` | ✅ |
+| Nouveau message | `message` | ✅ |
+| Nouveau salon | `newChannel` | ✅ |
+| Suppression de salon | `deleteChannel` | ✅ |
+| Un utilisateur est en train d’écrire | `typing` | ❌ |
+| Un utilisateur a été sanctionné | `punish` | ❌ |
