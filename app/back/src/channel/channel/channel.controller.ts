@@ -1,13 +1,27 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
+import { sha512 } from 'sha512-crypt-ts';
 
 class ChannelDto {
 	@Type(() => Number)
 	@IsNumber()
 	@IsPositive()
 	channel_id: number;
+}
+
+class ChannelUpdateDto {
+    @Type(() => String)
+    @Length(1, 20)
+    @Matches(/^[^#\s]+$/) // No spaces or #
+    name: string;
+
+    @Type(() => Boolean)
+    private: boolean;
+
+    @Type(() => String || null)
+    password: string | null;
 }
 
 @Controller('channel')
@@ -48,5 +62,28 @@ export class ChannelController {
         // TODO: Get userId with session / cookies / token / whatever
         let userId = 1;
         return await this.channelService.deleteChannel(dto.channel_id, userId);
+    }
+
+    @Patch(':channel_id')
+    async updateChannel(@Param() dto: ChannelDto, @Body() body: ChannelUpdateDto) {
+        // TODO: Get userId with session / cookies / token / whatever (check if owner)
+        let userId = 1;
+
+        let channel: any = await this.channelService.getChannel(dto.channel_id);
+        if (!channel) { throw new HttpException('Channel not found', 404); }
+        if (channel.owner_id !== userId) { throw new HttpException('You are not the owner of this channel', 403); }
+
+        // if password is null, remove it in the db
+        if (body.password === null) {
+            channel.password = null;
+        }
+        else if (body.password !== '') { // otherwise if password isn't empty, hash it
+            channel.password = sha512.crypt(body.password, "aaaaaaaa"); // TODO: Salt password correctly
+        }
+
+        channel.name = body.name;
+
+        // update the channel
+        return await this.channelService.updateChannel(dto.channel_id, channel);
     }
 }

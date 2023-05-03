@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { sha512 } from 'sha512-crypt-ts';
+import { Channel } from '@prisma/client';
 
 @Injectable()
 export class ChannelService {
@@ -19,13 +20,7 @@ export class ChannelService {
                     password: true
                 }
             }
-        ).then((channels) => {
-            // TODO: Prettify this?
-            channels.forEach((channel) => 
-                channel.password = (channel.password !== '' ? '' : null)
-            );
-            return channels;
-        });
+        );
     }
 
     async getMessages(id: number) {
@@ -91,6 +86,27 @@ export class ChannelService {
         await this.db.message.deleteMany({
             where: {
                 channel_id: channelId
+            }
+        });
+    }
+
+    async getChannel(channelId: number) {
+        return await this.db.channel.findUnique({
+            where: {
+                id: channelId
+            }
+        });
+    }
+
+    async updateChannel(channelId: number, editedChannel: Channel) {
+        return await this.db.channel.update({
+            where: {
+                id: channelId
+            },
+            data: {
+                name: editedChannel.name,
+                private: editedChannel.private,
+                password: editedChannel.password // hashed in the controller
             }
         });
     }
