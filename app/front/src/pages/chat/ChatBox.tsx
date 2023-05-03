@@ -67,6 +67,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                     setSelectedChannel(channels[0]);
                 }
             });
+            socket.on('editChannel', (payload: any) => {
+                setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
+            });
         }
     }, [socket]);
 
@@ -159,6 +162,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                                 setSelectedChannel(channels[0]);
                             }
                             socket.emit('deleteChannel', {
+                                channel: channel,
+                            });
+                        }}
+                        onEdit={(channel: Channel) => {
+                            setChannels(channels.map((c) => c.id === channel.id ? channel : c));
+                            if (selectedChannel?.id === channel.id) {
+                                setSelectedChannel(channel);
+                            }
+                            socket.emit('editChannel', {
                                 channel: channel,
                             });
                         }}
