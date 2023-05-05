@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:lts-alpine3.16
 
 COPY --chmod=0755 entrypoint.sh /entrypoint.sh
 
