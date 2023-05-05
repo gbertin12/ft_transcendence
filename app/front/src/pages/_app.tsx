@@ -1,4 +1,5 @@
 import '@/styles/globals.css'
+import Layout from '../components/layout'
 import type { AppProps } from 'next/app'
 import { createTheme } from "@nextui-org/react"
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
@@ -24,7 +25,9 @@ export default function App({ Component, pageProps }: AppProps) {
 			}}
 		>
 			<NextUIProvider>
-				<Component {...pageProps} />
+				<Layout>
+					<Component {...pageProps} />
+				</Layout>
 			</NextUIProvider>
 		</NextThemesProvider>
 	);

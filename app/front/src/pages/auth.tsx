@@ -11,9 +11,9 @@ async function login() {
 
 export default function Login() {
     return (
-        <Layout>
+        <>
             <h2>Login Page</h2>
             <button onClick={login}>login</button>
-        </Layout>
+        </>
     )
 }
