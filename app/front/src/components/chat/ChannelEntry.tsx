@@ -25,7 +25,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
 }
 
 function onDeleteConfirmed(channel: Channel, parentHandler: (channel: Channel) => void): boolean {
-    fetch(`http://localhost:3001/channel/${channel.id}`, {
+    fetch(`http://localhost:3000/channel/${channel.id}`, {
         method: "DELETE",
     }).then((response) => {
         if (response.ok) {
@@ -37,7 +37,7 @@ function onDeleteConfirmed(channel: Channel, parentHandler: (channel: Channel) =
 }
 
 function onChannelEdited(modifiedChannel: Channel, parentHandler: (channel: Channel) => void): boolean {
-    fetch(`http://localhost:3001/channel/${modifiedChannel.id}`, {
+    fetch(`http://localhost:3000/channel/${modifiedChannel.id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"

@@ -37,7 +37,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
     const socket = useSocket('http://localhost:8001');
 
     const fetchMessages = (channelId: number) => {
-        fetch(`http://localhost:3001/channel/${channelId}/messages`)
+        fetch(`http://localhost:3000/channel/${channelId}/messages`)
             .then((res) => res.json())
             .then((data) => {
                 setMessages(data);
@@ -45,7 +45,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
     };
 
     useEffect(() => {
-        fetch("http://localhost:3001/channel/all")
+        fetch("http://localhost:3000/channel/all")
             .then((res) => res.json())
             .then((data) => {
                 setChannels(data);
@@ -88,7 +88,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
         setGhostMessage([...ghostMessages, message]);
 
         // POST request to send the message to the server
-        fetch(`http://localhost:3001/channel/${selectedChannel?.id}/message`, {
+        fetch(`http://localhost:3000/channel/${selectedChannel?.id}/message`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -120,7 +120,7 @@ const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                             onClick={() => {
                                 setCreating(true);
                                 // Send a POST to /channel/create
-                                fetch("http://localhost:3001/channel/create", {
+                                fetch("http://localhost:3000/channel/create", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",

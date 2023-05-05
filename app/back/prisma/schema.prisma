@@ -1,6 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,11 +8,16 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  username String
-  password String
-  role     String
-  Channel  Channel[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  avatar    String    @default("default.jpg")
+  wins      Int       @default(0)
+  losses    Int       @default(0)
+  elo       Int       @default(1000)
+  otp       Boolean   @default(false)
+  otpSecret String?
+  password  String?
+  Channel   Channel[]
 }
 
 model Channel {

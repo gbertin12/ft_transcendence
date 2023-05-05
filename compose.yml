@@ -2,7 +2,7 @@ services:
     front:
         build: ./app/front
         env_file:
-          - ./env/front.env
+            - ./env/front.env
         volumes:
             - front:/app
         ports:
@@ -10,7 +10,7 @@ services:
         networks:
             - front
         healthcheck:
-            test: ["CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1"]
+            test: [ "CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1" ]
             interval: 30s
             timeout: 30s
             retries: 5
@@ -22,7 +22,7 @@ services:
     back:
         build: ./app/back
         env_file:
-          - ./env/back.env
+            - ./env/back.env
         volumes:
             - back:/app
         ports:
@@ -31,7 +31,7 @@ services:
             - front
             - back
         healthcheck:
-            test: ["CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1"]
+            test: [ "CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1" ]
             interval: 2s
             timeout: 5s
             retries: 5
@@ -47,7 +47,7 @@ services:
         networks:
             - back
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            test: [ "CMD-SHELL", "pg_isready -U postgres" ]
             interval: 1s
             timeout: 5s
             retries: 5
@@ -61,3 +61,14 @@ volumes:
             type: none
             device: "${PWD}/app/back"
             o: bind
+    front:
+        driver: local
+        name: front
+        driver_opts:
+            type: none
+            device: "${PWD}/app/front"
+            o: bind
+
+networks:
+    front:
+    back:

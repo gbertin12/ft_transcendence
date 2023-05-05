@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { DbService } from 'src/db/db.service';
+import { DbService } from '../db/db.service';
 import { sha512 } from 'sha512-crypt-ts';
 import { Channel } from '@prisma/client';
 

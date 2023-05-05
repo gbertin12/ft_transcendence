@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-import { Message } from 'src/interfaces/chat.interfaces';
+import { Message } from '../interfaces/chat.interfaces';
 
 // Map of user id to channel id
 let usersChannels: Record<number, number> = {};

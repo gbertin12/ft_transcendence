@@ -1,19 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationError, ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
+import * as compression from 'compression';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    const options = {
-        origin: "*",
-        methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
-        credentials: true
-    };
-
-    app.enableCors(options); // Bypass CORS
+    app.enableCors({ origin: process.env.FRONT_URL, credentials: true });
+    app.use(cookieParser());
+    app.useStaticAssets('/app/files');
+    app.use(compression());
 
     app.useGlobalPipes(new ValidationPipe(
 		{

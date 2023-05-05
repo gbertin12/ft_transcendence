@@ -1,5 +1,5 @@
 FROM node:lts
 
-WORKDIR /front
+WORKDIR /app
 
 ENTRYPOINT ["npm", "run", "dev"]

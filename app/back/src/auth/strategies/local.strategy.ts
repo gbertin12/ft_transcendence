@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../../user/user.service';
 import * as argon2 from 'argon2';
 
 @Injectable()
