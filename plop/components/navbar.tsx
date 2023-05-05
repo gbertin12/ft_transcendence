@@ -5,11 +5,11 @@ import { IconMessageCircle2 } from '@tabler/icons-react';
 import { IconDeviceGamepad } from '@tabler/icons-react';
 
 // <div className="grid text-center grid-cols-3 bg-[#DFDFDF] justify-items-center">
-// dark:bg-slate-800 dark:fill-whit
+// dark:bg-slate-800                                  dark:bg-[#121212]
 export default function Navbar() {
   return (
 	<>
-	<div className="flex flex-row justify-between items-center h-16 xl:h-20 bg-[#DFDFDF] ">
+	<div className="flex flex-row justify-between items-center h-16 xl:h-20 bg-[#DFDFDF]">
 		<Link href="/" className="px-5 py-4">
 			Home
 		</Link>
