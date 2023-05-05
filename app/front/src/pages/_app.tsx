@@ -11,7 +11,6 @@ const darkTheme = createTheme({
 	type: 'dark',
 })
 
-
 import { NextUIProvider } from '@nextui-org/react';
 
 export default function App({ Component, pageProps }: AppProps) {

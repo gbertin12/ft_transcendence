@@ -1,9 +1,8 @@
 import React from "react";
-import ChatBox from "./chat/ChatBox";
 
 const Home: React.FC = () => {
 	return (
-		<ChatBox />
+		<h1>home</h1>
 	);
 };	
 export default Home;
