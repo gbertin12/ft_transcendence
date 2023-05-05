@@ -7,8 +7,10 @@ export default function Game() {
 		<Head>
 			<title> Game </title>
 		</Head>
-		<h1 className={`flex min-h-screen flex-col items-center justify-between p-24`}>Game</h1>
-		<GamePage />
+		<div className="flex min-h-screen flex-col items-center justify-between p-24">
+			<h1>Game</h1>
+			<GamePage />
+		</div>
 	</>
 	);
 }

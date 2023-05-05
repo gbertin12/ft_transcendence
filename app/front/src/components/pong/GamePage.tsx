@@ -20,7 +20,7 @@ function useSocket(url: string) {
 
 export default function GamePage() {
 	
-	const socket = useSocket('http://10.12.1.5:8001');
+	const socket = useSocket('http://localhost:8001');
 	  return (
 	<>
 		<GameBody socket={socket} />
