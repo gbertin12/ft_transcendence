@@ -148,9 +148,4 @@ export class AuthService {
         const result = totp.validate({ token, window: 1 });
         return result !== null;
     }
-
-    // DON'T PUT THIS IN PROD LMAO
-    async resetOTP(name: string) {
-        await this.userService.resetOTP(name);
-    }
 }

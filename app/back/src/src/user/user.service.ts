@@ -60,12 +60,4 @@ export class UserService {
         });
         return user;
     }
-
-    // DON'T PUT THIS IN PROD LMAO
-    async resetOTP(name: string) {
-        await this.db.user.update({
-            data: { otp: false, otpSecret: null },
-            where: { name },
-        });
-    }
 }

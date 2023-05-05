@@ -4,7 +4,6 @@ import {
     Get,
     HttpException,
     HttpStatus,
-    Param,
     Post,
     Query,
     Req,
@@ -111,11 +110,5 @@ export class AuthController {
         const token = await this.authService.generateJWT(req.user['id'], true);
         res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
         res.end();
-    }
-
-    // DON'T PUT THIS IN PROD LMAO
-    @Get('2fa/reset/:username')
-    async resetOTP(@Param('username') username: string) {
-        await this.authService.resetOTP(username);
     }
 }
