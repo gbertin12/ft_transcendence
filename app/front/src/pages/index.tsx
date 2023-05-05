@@ -14,7 +14,7 @@ export default function Home() {
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
     >
-    Home page
+    <h1>home</h1>
     </main>
 	</>
   )
