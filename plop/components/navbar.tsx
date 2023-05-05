@@ -13,7 +13,8 @@ export default function Navbar() {
 		<Link href="/" className="px-5 py-4">
 			Home
 		</Link>
-	<div className="flex flex-row justify-between items-center lg:space-x-[75px]">
+
+	  <div className="flex flex-row justify-between justify-items-center w-1/3 ">
 		<Link href="/leaderboard">
 			<IconMedal size={50} strokeWidth={1.5}/>
 		</Link>
@@ -21,16 +22,14 @@ export default function Navbar() {
 		<Link href="/game ">
 			<IconDeviceGamepad size={50} strokeWidth={1.5}/>
 		</Link>
-
-		  <Link href="/chat">
+	    <Link href="/chat">
 			<IconMessageCircle2 size={50} strokeWidth={1.5}/>
-		  </Link>
-		  </div>
+	    </Link>
+	  </div>
 
 		  <Link href="/auth"
 			  className="px-5 py-4">
 			Se connecter
-
 		</Link>
 		</div>
  	</>
