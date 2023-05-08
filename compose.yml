@@ -12,9 +12,9 @@ services:
         healthcheck:
             test: [ "CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1" ]
             interval: 30s
-            timeout: 90s
+            timeout: 30s
             retries: 5
-            start_period: 30s
+            start_period: 90s
         depends_on:
             back:
                 condition: service_healthy
