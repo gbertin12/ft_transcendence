@@ -181,7 +181,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                 <Grid xs={6}>
                     <Grid.Container>
                         <Grid>
-                            <Text h3># {selectedChannel?.name}</Text>
+                            <Text h3>{selectedChannel?.name.replace(/^/, '# ')}</Text>
                             <ul
                                 style={{
                                     listStyle: "none",
