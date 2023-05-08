@@ -23,7 +23,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={false}
                 isPlaying={false}
                 unreadMessages={0}
-                key={0}
+                key={1}
             />
             <ChatEntry
                 name="Default Playing User"
@@ -32,7 +32,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={false}
                 isPlaying={true}
                 unreadMessages={0}
-                key={0}
+                key={2}
             />
             <ChatEntry
                 name="Typing Online User"
@@ -41,7 +41,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={true}
                 isPlaying={false}
                 unreadMessages={0}
-                key={0}
+                key={3}
             />
             <ChatEntry
                 name="Typing Playing User"
@@ -50,7 +50,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={true}
                 isPlaying={true}
                 unreadMessages={0}
-                key={0}
+                key={4}
             />
             <ChatEntry
                 name="Default Online User (Unread)"
@@ -59,7 +59,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={false}
                 isPlaying={false}
                 unreadMessages={1}
-                key={0}
+                key={5}
             />
             <ChatEntry
                 name="Default Offline User (Unread)"
@@ -68,7 +68,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={false}
                 isPlaying={false}
                 unreadMessages={1}
-                key={0}
+                key={6}
             />
             <ChatEntry
                 name="Spamming User (Unread 9+)"
@@ -77,7 +77,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={true}
                 isPlaying={false}
                 unreadMessages={12}
-                key={0}
+                key={7}
             />
             <ChatEntry
                 name="Spamming User (Unread 9)"
@@ -86,7 +86,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={true}
                 isPlaying={false}
                 unreadMessages={9}
-                key={0}
+                key={8}
             />
             <ChatEntry
                 name="Spamming User / Playing (Unread)"
@@ -95,7 +95,7 @@ const ChatFriendBrowser: React.FC = () => {
                 isTyping={true}
                 isPlaying={true}
                 unreadMessages={9}
-                key={0}
+                key={9}
             />
         </Container>
     );
