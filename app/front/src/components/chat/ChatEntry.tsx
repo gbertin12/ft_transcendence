@@ -65,13 +65,14 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping,
             <Grid xs={8} css={{my: "auto"}}>
                 <Text span>{name}</Text>
             </Grid>
+            {/* TODO: Use tabler icons instead */}
             {(isPlaying ? (
                 <Grid xs={1} css={{my: "auto"}}>
-                    <FaEye size="md"/>
+                    <FaEye />
                 </Grid>
             ) : (
                 <Grid xs={1} css={{my: "auto"}}>
-                    <FaGamepad size="md"/>
+                    <FaGamepad />
                 </Grid>
             ))}
             <Grid xs={1} css={{my: "auto"}}>
