@@ -6,10 +6,20 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
 const lightTheme = createTheme({
 	type: 'light',
+	theme: {
+		colors: {
+			background: "#ECEDEE",
+		}
+	}
 })
 
 const darkTheme = createTheme({
 	type: 'dark',
+	theme: {
+		colors: {
+			background: "#0F0F0F",
+		}
+	}
 })
 
 import { NextUIProvider } from '@nextui-org/react';
