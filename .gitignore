@@ -11,3 +11,4 @@
 **/.DS_Store
 **/.vscode
 **/migrations/
+**/.npm_modules_installed

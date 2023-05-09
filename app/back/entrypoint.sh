@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# TODO: check if DB already exists before running the migration
-# DB should be in a volume for persistance
+FLAG_FILE=.npm_modules_installed
+if [ ! -f "$FLAG_FILE" ]; then
+    npm install
+    touch "$FLAG_FILE"
+fi
+
 npx prisma db push --accept-data-loss
-npm run start:dev
+exec npm run start:dev
