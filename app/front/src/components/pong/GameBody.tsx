@@ -29,10 +29,11 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const handleCloseCardEndGame = () => {
 		setEndGame(false);
 	}
-
-	return <>
-		{ !playGame && !endGame && <ButtonStart socket={socket} playGame={playGame} handleGameStart={handleGameStart} />}
-		{ !playGame && endGame && <CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} handleCloseCardEndGame={handleCloseCardEndGame} />}
-		{ playGame && <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} /> }
-	</>
+	return <CardEndGame win={true} score1={8} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
+	if (!playGame && !endGame)
+		return <ButtonStart socket={socket} playGame={playGame} handleGameStart={handleGameStart} />
+	else if (!playGame && endGame)
+		return <CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} handleCloseCardEndGame={handleCloseCardEndGame} />
+	else if (playGame)
+		return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
 }

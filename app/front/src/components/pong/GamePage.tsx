@@ -2,6 +2,7 @@ import Pong from './Pong'
 import io, { Socket } from 'socket.io-client';
 import { useState, useEffect } from 'react';
 import GameBody from './GameBody';
+import CardEndGame from './CardEndGame';
 import Image from 'next/image';
 
 function useSocket(url: string) {
@@ -25,6 +26,7 @@ export default function GamePage() {
 	<>
 		<div>
 			<GameBody socket={socket} />
+
 		</div>
 	</>
   )
