@@ -22,7 +22,7 @@ function Power ({isActive, x, y, type} : {isActive: boolean, x: number, y: numbe
 	else if (type === 1)
 		return <>{isActive && <Image src="/bounce.png" alt='power' width={40} height={40} className={styles.power} style={{top: y, left: x}} />}</>
 	else
-		return <>{isActive && <Image src="/bounce.png" alt='power' width={40} height={40} className={styles.power} style={{top: y, left: x}} />}</>
+		return <>{isActive && <Image src="/fence.png" alt='power' width={40} height={40} className={styles.power} style={{top: y, left: x}} />}</>
 }
 
 const convertToPixel = (value: number, maxValue: number) => {
@@ -39,6 +39,11 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		{isActive: false, x: 0, y: 0, id: 0, type: 0},
 		{isActive: false, x: 0, y: 0, id: 0, type: 0}
 	]); // [{x: 0, y: 0, type: 'speedUp', time: 0}]
+	const [obstacles, setObstacles] = useState([
+		{isActive: false, x: 0, y:0, type: 0},
+		{isActive: false, x: 0, y:0, type: 0},
+		{isActive: false, x: 0, y:0, type: 0}
+	])
 	const ref = useRef(null);
 
 

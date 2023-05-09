@@ -23,7 +23,6 @@ export const handleNewPower = (
 		timeToNewPower = 0;
 	  	if (powers.length < 3) 
 		{
-			console.log('new power', powers.length);
 			idPower += 1;
 
 			const newPower = {
@@ -66,28 +65,36 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, pow
 			server.to(room.pongState.player2.id).emit('removePower', {
 			  	id: power.id,
 			});
-			powers.splice(powers.indexOf(power), 1);
 			// random power
 			const random = Math.floor(Math.random() * 3);
-			if (random === 0) 
+			if (power.type === 0) 
 			{
-			  	console.log("speed up")
-			  	room.pongState.ball.speedX + 0.5;
-			  	room.pongState.ball.speedY + 0.5;
+				//speed up bonus
+				if (room.pongState.ball.speedX < 0)
+					room.pongState.ball.speedX -= 0.3;
+				else
+					room.pongState.ball.speedX += 0.3;
+				if (room.pongState.ball.speedY < 0)
+				room.pongState.ball.speedY -= 0.3;
+				else
+				room.pongState.ball.speedY += 0.3;
 			} 
-			else if (random === 1) 
+			else if (power.type === 1) 
 			{
-			  	console.log("change direction ")
-			  	let newSpeedY = -room.pongState.ball.speedY
-			  	if (newSpeedY < 0)
-					newSpeedY - 0.2;
-			  	else
-					newSpeedY + 0.2;
+				// bounce bonus
+				console.log("change direction ")
+				let newSpeedY = -room.pongState.ball.speedY
+				if (newSpeedY < 0)
+				newSpeedY - 0.2;
+				else
+				newSpeedY + 0.2;
 			  	room.pongState.ball.speedY = newSpeedY;
 			} else 
 			{
-			  console.log('change size');
+				// spawn obstacles bonus
+				console.log('spawn object');
 			}
+			powers.splice(powers.indexOf(power), 1);
 		}
 	});
   };

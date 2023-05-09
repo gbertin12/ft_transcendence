@@ -23,7 +23,9 @@ export default function GamePage() {
 	const socket = useSocket('http://localhost:8001');
 	  return (
 	<>
-		<GameBody socket={socket} />
+		<div>
+			<GameBody socket={socket} />
+		</div>
 	</>
   )
 }
