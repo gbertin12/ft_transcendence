@@ -2,23 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-@media (prefers-color-scheme: light) {
-	body {
-		background-color: #ECEDEE;
-	}
+html,
+body,
+body > div:first-child,
+div#__next,
+div#__next > div {
+	@apply h-full;
 }
 
-@media (prefers-color-scheme: dark) {
-	body {
-		background-color: #0F0F0F;
-	}
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
 }
 
 html,
 body {
   padding: 0;
   margin: 0;
-  background-color: #ECEDEE;
   font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
     Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }

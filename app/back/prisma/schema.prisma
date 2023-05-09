@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  avatar    String    @default("default.jpg")
+  wins      Int       @default(0)
+  losses    Int       @default(0)
+  elo       Int       @default(1000)
+  otp       Boolean   @default(false)
+  otpSecret String?
+  password  String?
+  Channel   Channel[]
+}
+
+model Channel {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(64)
+  topic         String   @db.VarChar(128)
+  private       Boolean  @default(false) @db.Boolean
+  creation_date DateTime @default(now()) @db.Timestamp(6)
+  owner_id      Int
+  password      String?  @db.VarChar(128)
+  owner         User     @relation(fields: [owner_id], references: [id])
+}
+
+model ChannelAdmin {
+  channel_id Int
+  user_id    Int
+
+  @@id([channel_id, user_id])
+}
+
+model Message {
+  channel_id Int
+  sender_id  Int
+  message_id Int      @id @default(autoincrement())
+  timestamp  DateTime @default(now()) @db.Timestamp(6)
+  content    String   @db.VarChar(2000)
+
+  @@index([channel_id, timestamp], name: "channel_id_timestamp")
+}
+
+model Punishment {
+  issuer_id   Int
+  punished_id Int
+  channel_id  Int
+  type        Int      @db.SmallInt
+  punished_at DateTime @default(now()) @db.Timestamp(6)
+  expires_at  DateTime @default(dbgenerated("CURRENT_TIMESTAMP + INTERVAL '1 HOUR'")) @db.Timestamp(6) // default
+
+  @@id([issuer_id, punished_id, channel_id])
+  @@index([punished_id, issuer_id, type], name: "punished_id_issuer_id_type")
+  @@index([punished_id, channel_id, type], name: "punished_id_channel_id_type")
+}

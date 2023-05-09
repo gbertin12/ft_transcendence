@@ -1,0 +1,13 @@
+**/*.env
+**/node_modules
+**/dist
+**/.next/
+**/out/
+**/*.tsbuildinfo
+**/next-env.d.ts
+**/.vercel
+**/npm-debug.log*
+**/*.pem
+**/.DS_Store
+**/.vscode
+**/migrations/
