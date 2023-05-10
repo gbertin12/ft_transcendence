@@ -1,3 +1,12 @@
 #!/bin/sh
 
-npm run build && npm run start
+FLAG_FILE=.npm_modules_installed
+if [ ! -f "$FLAG_FILE" ]; then
+    npm install
+    touch "$FLAG_FILE"
+fi
+
+# prod
+#npm run build && npm run start
+
+exec npm run dev

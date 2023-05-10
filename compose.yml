@@ -33,16 +33,16 @@ services:
             - back
         healthcheck:
             test: [ "CMD-SHELL", "curl http://127.0.0.1:3000/ || exit 1" ]
-            interval: 30s
+            interval: 2s
             timeout: 30s
-            retries: 5
-            start_period: 90s
+            retries: 10
+            start_period: 6s
         depends_on:
             db:
                 condition: service_healthy
 
     db:
-        image: postgres:15
+        image: postgres:15-alpine
         env_file:
             - ./env/db.env
         networks:
