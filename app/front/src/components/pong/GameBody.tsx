@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Pong from './Pong'
+import {Container, Row, Spacer, Text } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
+import CardPlayerInformation from './CardPlayerInformation';
 import ButtonStart  from './ButtonStart'
 import CardEndGame from './CardEndGame';
 
@@ -29,11 +31,32 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const handleCloseCardEndGame = () => {
 		setEndGame(false);
 	}
-	return <CardEndGame win={true} score1={8} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
+	//return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
 	if (!playGame && !endGame)
-		return <ButtonStart socket={socket} playGame={playGame} handleGameStart={handleGameStart} />
+	{
+		return <>
+			<Container>
+				<Row justify='center'>
+					<CardPlayerInformation username={"gbertin"} avatar="https://i.imgur.com/fjZQLH6.png" elo={1200} nbWin={8} nbLoose={3} />
+					<Spacer x={2} />
+					<Text css={{ my:'auto' }} h1>VS</Text>
+					<Spacer x={2} />
+					<CardPlayerInformation username={"Adversary"} avatar="https://i.imgur.com/pLGJ0Oj.jpeg" elo={0} nbWin={0} nbLoose={0} />
+				</Row>
+			</Container>
+			<Spacer y={2} />
+			<ButtonStart socket={socket} playGame={playGame} handleGameStart={handleGameStart} />
+		</>
+	}
 	else if (!playGame && endGame)
-		return <CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} handleCloseCardEndGame={handleCloseCardEndGame} />
-	else if (playGame)
-		return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
+	{
+		return <>
+			<CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} handleCloseCardEndGame={handleCloseCardEndGame} />
+		</>
+	}
+	else if (playGame) {
+		return <>
+			<Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
+		</>
+	}
 }

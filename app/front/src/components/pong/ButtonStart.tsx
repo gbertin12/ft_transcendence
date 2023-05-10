@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
 
 export default function ButtonStart({socket, playGame, handleGameStart} : {socket: Socket, playGame: boolean, handleGameStart: (roomName:string) => void}) {
@@ -31,11 +32,16 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 			}
 	}, [handleGameStart]);
 	
-	return <>
-		{ searchGame === true ? (
-		<button onClick={handleCancelGame}>Cancel Game</button>
-	) : (
-		<button onClick={handleSearchGame}>Search Game</button>
-	)}
-	</>
+	if (searchGame === true)
+	{
+		return <>
+			<Button css={{ mx:'auto' }} onClick={handleCancelGame} color="error">Cancel Game</Button>
+		</>
+	}
+	else
+	{
+		return <>
+			<Button css={{ mx:'auto' }} bordered onClick={handleSearchGame} color="success">Search Game</Button>
+		</>
+	}
 }

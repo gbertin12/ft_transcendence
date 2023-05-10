@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import GamePage from '../components/pong/GamePage'
+import { Text, Spacer } from '@nextui-org/react'
 
 export default function Game() {
 	return (
@@ -7,8 +8,9 @@ export default function Game() {
 		<Head>
 			<title> Game </title>
 		</Head>
-		<div className="flex min-h-screen flex-col items-center p-24">
-			<h1>Game</h1>
+		<div className="flex flex-col items-center">
+			<Text h1>Pong Game</Text>
+			<Spacer y={3} />
 			<GamePage />
 		</div>
 	</>
