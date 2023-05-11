@@ -7,10 +7,6 @@ import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
 
-interface ChatBoxProps {
-
-}
-
 function useSocket(url: string) {
     const [socket, setSocket] = useState<any>();
     useEffect(() => {
@@ -24,14 +20,11 @@ function useSocket(url: string) {
     return socket
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
+const ChatBox: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
-
-    // ghostMessages is used to display the message before it is sent to the server (currently not rendered)
-    const [ghostMessages, setGhostMessage] = useState<string[]>([]);
 
     // Workaround to not re-create the socket on every render
     const socket = useSocket('http://localhost:8001');
@@ -84,9 +77,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
 
 
     const handleNewMessage = (message: string) => {
-        // Add ghost message
-        setGhostMessage([...ghostMessages, message]);
-
         // POST request to send the message to the server
         fetch(`http://localhost:3000/channel/${selectedChannel?.id}/message`, {
             method: "POST",
@@ -95,15 +85,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
             },
             body: JSON.stringify({ content: message }),
         }) // TODO: check that API sent a 200
-            .then((res) => res.json())
-            .then((data) => {
-                // Remove ghost message
-                setGhostMessage(ghostMessages.filter((msg) => msg !== message));
-                // Emit message to the server using socket.io
-                // socket.emit('message', {
-                //     message: data,
-                // });
-            });
     };
 
     const handleChannelChange = (channel: Channel) => {
@@ -189,16 +170,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                                         />
                                     </li>
                                 ))}
-                                {/* {ghostMessages.map((message) => (
-                                    <li key={message}>
-                                        <ChatMessage
-                                            content={message}
-                                            senderId={1}
-                                            userId={1}
-                                            ghost
-                                        />
-                                    </li>
-                                ))} */}
                             </ul>
                         </Grid>
                         <Grid xs={12}>
