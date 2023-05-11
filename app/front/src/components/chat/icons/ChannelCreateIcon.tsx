@@ -14,10 +14,6 @@ function transformName(name: string): string {
     return name.replace(/\s+/g, '-').toLowerCase().replace(/#/g, '');
 }
 
-interface ChannelCreateProps {
-    onCreation: (channel: Channel) => void;
-}
-
 export const ChannelNameInput: React.FC<any> = ({ setName, error, setError, name }: {setName: (name: string) => void, error: string, setError: (error: string) => void, name?: string}) => {
     setError(respectCriteria(name || ""));
     return (
@@ -55,7 +51,7 @@ export const ChannelPrivateSwitch: React.FC<any> = ({ error, isPrivate, setPriva
 }
 
 
-const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
+const ChannelCreateIcon: React.FC = () => {
     const [creating, setCreating] = React.useState<boolean>(false);
     const [isPrivate, setPrivate] = React.useState<boolean>(false);
     const [password, setPassword] = React.useState<string>("");
@@ -135,7 +131,6 @@ const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                                     .then((res) => res.json())
                                     .then((data) => {
                                         setCreating(false);
-                                        onCreation(data);
                                         setPopIsOpen(false);
                                     });
                             }}

@@ -3,6 +3,8 @@ import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
 import { sha512 } from 'sha512-crypt-ts';
+import ChatGateway, { usersChannels } from '../gateway/chat.gateway';
+import { Channel, Message } from '@prisma/client';
 
 class ChannelDto {
 	@Type(() => Number)
@@ -26,7 +28,11 @@ class ChannelUpdateDto {
 
 @Controller('channel')
 export class ChannelController {
-    constructor(private channelService: ChannelService) { }
+    constructor(
+        private channelService: ChannelService,
+        private chatGateway: ChatGateway,
+    )
+    { }
 
     // /channel/all
     @Get('all')
@@ -48,20 +54,30 @@ export class ChannelController {
         // TODO: Check that the user is in the channel
         // TODO: Get userId with session / cookies / token / whatever
         let senderId = 1;
-        return await this.channelService.createMessage(senderId, dto.channel_id, body.content);
+        let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
+        for (const [id, channel] of Object.entries(usersChannels)) {
+            if (channel === dto.channel_id) {
+                this.chatGateway.server.to(id).emit('message', message);
+            }
+        }
+        return message;
     }
 
     @Post('create')
     async createChannel(@Body() body: any) {
         let ownerId = 1;
-        return await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
+        let channel: Channel = await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
+        this.chatGateway.server.emit('newChannel', channel);
+        console.log('Created channel', channel);
+        return channel;
     }
 
     @Delete(':channel_id')
     async deleteChannel(@Param() dto: ChannelDto) {
         // TODO: Get userId with session / cookies / token / whatever
         let userId = 1;
-        return await this.channelService.deleteChannel(dto.channel_id, userId);
+        await this.channelService.deleteChannel(dto.channel_id, userId);
+        this.chatGateway.server.emit('deleteChannel', dto.channel_id);
     }
 
     @Patch(':channel_id')
@@ -84,6 +100,8 @@ export class ChannelController {
         channel.name = body.name;
 
         // update the channel
-        return await this.channelService.updateChannel(dto.channel_id, channel);
+        let updatedChannel: Channel = await this.channelService.updateChannel(dto.channel_id, channel);
+        this.chatGateway.server.emit('editChannel', updatedChannel);
+        return updatedChannel;
     }
 }

@@ -55,20 +55,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
 
         // Listen for new messages
         if (socket) {
-            socket.on('message', (payload: any) => {
-                setMessages((messages) => [payload.message, ...messages]);
+            socket.on('message', (payload: Message) => {
+                setMessages((messages) => [payload, ...messages]);
             });
-            socket.on('newChannel', (payload: any) => {
-                setChannels((channels) => [...channels, payload.channel]);
+            socket.on('newChannel', (payload: Channel) => {
+                setChannels((channels) => [...channels, payload]);
             });
-            socket.on('deleteChannel', (payload: any) => {
-                setChannels((channels) => channels.filter((c) => c.id !== payload.channel.id));
-                if (selectedChannel?.id === payload.channel.id) {
+            socket.on('deleteChannel', (payload: number) => {
+                setChannels((channels) => channels.filter((c) => c.id !== payload));
+                if (selectedChannel?.id === payload) {
                     setSelectedChannel(channels[0]);
                 }
             });
-            socket.on('editChannel', (payload: any) => {
-                setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
+            socket.on('editChannel', (payload: Channel) => {
+                setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
             });
         }
     }, [socket]);
@@ -100,17 +100,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                 // Remove ghost message
                 setGhostMessage(ghostMessages.filter((msg) => msg !== message));
                 // Emit message to the server using socket.io
-                socket.emit('message', {
-                    message: data,
-                });
+                // socket.emit('message', {
+                //     message: data,
+                // });
             });
     };
-
-    const handleNewChannel = (channel: Channel) => {
-        socket.emit('newChannel', {
-            channel: channel,
-        });
-    }
 
     const handleChannelChange = (channel: Channel) => {
         setSelectedChannel(channel);
@@ -151,7 +145,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                         <Grid xs={10}>
                             <Text h4>Salons</Text>
                         </Grid>
-                        <ChannelCreateIcon onCreation={handleNewChannel} />
+                        <ChannelCreateIcon />
                     </Grid.Container>
 
                     {/* TODO: Display latest chats with friends */}
@@ -161,18 +155,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ }) => {
                             if (selectedChannel?.id === channel.id) {
                                 setSelectedChannel(channels[0]);
                             }
-                            socket.emit('deleteChannel', {
-                                channel: channel,
-                            });
                         }}
                         onEdit={(channel: Channel) => {
                             setChannels(channels.map((c) => c.id === channel.id ? channel : c));
                             if (selectedChannel?.id === channel.id) {
                                 setSelectedChannel(channel);
                             }
-                            socket.emit('editChannel', {
-                                channel: channel,
-                            });
                         }}
                         channels={channels}
                         channelChanged={handleChannelChange}
