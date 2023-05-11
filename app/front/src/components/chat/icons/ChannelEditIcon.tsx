@@ -7,8 +7,6 @@ import { Channel } from '@/interfaces/chat.interfaces';
 
 interface ChannelEditIconProps {
     channel: Channel;
-    onDelete: (channel: Channel) => void; // confirm channel deletion (button onClick)
-    onEdit: (channel: Channel) => void; // channel edited (in any way)
 }
 
 const ChannelDeleteButton: React.FC<any> = ({ onClick }: { onClick: () => void }) => {
@@ -82,7 +80,7 @@ const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, o
     );
 }
 
-    const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel, onDelete, onEdit }) => {
+    const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
         const [isOpen, setIsOpen] = React.useState<boolean>(false);
         const [isPrivate, setIsPrivate] = React.useState<boolean>(channel.private || channel.password !== null);
         const [error, setError] = React.useState<string>("");
@@ -149,19 +147,18 @@ const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, o
                                     // close popover
                                     onClick={() => {
                                         setIsOpen(false);
-                                        onDelete(channel);
                                     }}
                                 />
                             </Grid>
                             <Grid xs={(channel.password !== null ? 3 : 6)}>
                                 <ChannelSaveButton error={error} onClick={() => {
-                                    let editedChannel = channel;
-                                    editedChannel.name = name;
-                                    editedChannel.private = isPrivate;
-                                    editedChannel.password = password;
-                                    setIsOpen(false);
-                                    onEdit(editedChannel);
-                                }} />
+                                        let editedChannel = channel;
+                                        editedChannel.name = name;
+                                        editedChannel.private = isPrivate;
+                                        editedChannel.password = password;
+                                        setIsOpen(false);
+                                    }}
+                                />
                             </Grid>
                             {/* prompt to remove password */}
                             {channel.password !== null && (
@@ -173,7 +170,6 @@ const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, o
                                             let editedChannel = channel;
                                             editedChannel.password = null;
                                             setIsOpen(false);
-                                            onEdit(editedChannel);
                                         }}
                                     >
                                         Remove password

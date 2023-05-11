@@ -9,8 +9,6 @@ interface ChannelEntryProps {
     isSelected: boolean;
     channel: Channel;
     onClick: () => void;
-    onDelete: (channel: Channel) => void;
-    onEdit: (channel: Channel) => void;
     unreadMessages?: number;
 }
 
@@ -56,7 +54,7 @@ function onChannelEdited(modifiedChannel: Channel, parentHandler: (channel: Chan
     return false;
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, onDelete, onEdit, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -102,7 +100,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
             </Grid>
             {channel.owner_id === 1 && (
                 <>
-                    <ChannelEditIcon channel={channel} onDelete={() => onDeleteConfirmed(channel, onDelete)} onEdit={() => onChannelEdited(channel, onEdit)} />
+                    <ChannelEditIcon channel={channel} />
                 </>
             ) || (
                     // empty grid to keep the icon in the same place

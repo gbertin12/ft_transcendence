@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
@@ -29,13 +29,15 @@ const ChatBox: React.FC = () => {
     // Workaround to not re-create the socket on every render
     const socket = useSocket('http://localhost:8001');
 
-    const fetchMessages = (channelId: number) => {
-        fetch(`http://localhost:3000/channel/${channelId}/messages`)
-            .then((res) => res.json())
-            .then((data) => {
-                setMessages(data);
-            });
-    };
+    function fetchMessages(channelId: number): Promise<Message[]> {
+        return new Promise<Message[]>((resolve, reject) => {
+            const url = `http://localhost:3000/channel/${channelId}/messages`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+        });
+    }
 
     useEffect(() => {
         fetch("http://localhost:3000/channel/all")
@@ -102,7 +104,7 @@ const ChatBox: React.FC = () => {
                         <Loading size="xl" css={{ mx: "auto" }} />
                     </Grid>
                     <Grid xs={6} direction="column">
-                        <Text h3>Current Chat</Text>
+                        <Text h3></Text>
                         <Loading size="xl" css={{ mx: "auto" }} />
                     </Grid>
                     <Grid xs={3} direction="column">
@@ -131,18 +133,6 @@ const ChatBox: React.FC = () => {
 
                     {/* TODO: Display latest chats with friends */}
                     <ChatChannelBrowser
-                        onDelete={(channel: Channel) => {
-                            setChannels(channels.filter((c) => c.id !== channel.id));
-                            if (selectedChannel?.id === channel.id) {
-                                setSelectedChannel(channels[0]);
-                            }
-                        }}
-                        onEdit={(channel: Channel) => {
-                            setChannels(channels.map((c) => c.id === channel.id ? channel : c));
-                            if (selectedChannel?.id === channel.id) {
-                                setSelectedChannel(channel);
-                            }
-                        }}
                         channels={channels}
                         channelChanged={handleChannelChange}
                     />
