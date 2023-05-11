@@ -111,4 +111,14 @@ export class AuthController {
         res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
         res.end();
     }
+
+    @Get('dummy')
+    async dummy(
+        @Res() res: Response,
+    ) {
+        const user = await this.userService.createDummyUser();
+        const token = await this.authService.generateJWT(user.id);
+        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+    }
 }
