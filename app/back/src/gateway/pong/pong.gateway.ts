@@ -55,6 +55,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     	if (player) {
     	  player.state = 1;
     	}
+		//matchmaking
     	const waitingPlayer = this.players.find(
     		(player) => player.state === 1 && player.id !== playerId,
     	);
@@ -76,6 +77,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     	    	},
     	  	};
     	  	this.rooms.push(newRoom);
+			// envoyer les donnees de l'adversaire (avatar,username, elo...)
     	  	this.server.to(playerId).emit('searchGame', newRoom.name);
     	  	this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
     	  	handleGame(newRoom, this.server);

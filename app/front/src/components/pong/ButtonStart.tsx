@@ -20,6 +20,7 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 		{
 			socket.emit('searchGame', {
 				clientId: socket.id
+				
 			});
 			setSearchGame(true);
 		}

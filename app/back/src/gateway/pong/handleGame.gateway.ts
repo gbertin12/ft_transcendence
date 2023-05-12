@@ -85,7 +85,7 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
   	});
 };
 
-const handleCheckCollision = (room: roomInterface, server: Server) => {
+const handleCheckCollision = (room: roomInterface) => {
 	// check collision with player 1
 	if (room.pongState.ball.x - radiusBall <= spaceBetweenPlayerAndWall &&
 		room.pongState.ball.y >= convertToPixel(75 - room.pongState.player1.y, canvasHeight) &&
@@ -108,9 +108,9 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
 		room.pongState.ball.y + radiusBall <= convertToPixel(room.pongState.player2.y, canvasHeight) + playerHeight
 	) 
 	{
-		room.pongState.ball.speedX = -room.pongState.ball.speedX;
 		if (room.pongState.ball.speedX > 0) 
 		{
+			room.pongState.ball.speedX = -room.pongState.ball.speedX;
 			room.pongState.ball.speedX = udpdateBallSpeedX(
 			  	room.pongState.ball.speedX,
 			);
@@ -154,13 +154,19 @@ const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
   // check who lose round
     if (room.pongState.ball.x <= radiusBall) 
 	{
-      	room.pongState.player2.score++;
-      	room.pongState.ball = player1Start;
+		room.pongState.player2.score++;
+		//room.pongState.ball = player1Start;
+		room.pongState.ball.speedX = 0.6;
+		room.pongState.ball.speedY = 0.4;
+		console.log(room.pongState.ball)
     } 
 	else 
 	{
       	room.pongState.player1.score++;
-      	room.pongState.ball = player2Start;
+      	//room.pongState.ball = player2Start;
+		room.pongState.ball.speedX = -0.6;
+		room.pongState.ball.speedY = -0.4;
+		console.log(room.pongState.ball)
     }
 	initPlayerPosition(room, server);
     sendScore(room, server);
@@ -203,7 +209,7 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	  	// send ball position
   	  	sendBallPosition(room, server);
 		// check collision with players && walls
-		handleCheckCollision(room, server);
+		handleCheckCollision(room);
 		// check if someone loose the round
   	  	if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
   	  	  	handleResetPlayerPosition(room, server);

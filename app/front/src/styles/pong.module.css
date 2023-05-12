@@ -1,23 +1,11 @@
 .board {
   background: #fff;
   box-shadow: 0 0 0 2px rgba(50, 190, 0, 0.44);
-  width: 500px;
-  height: 300px;
+  height: 350px;
   position: relative;
+  padding-bottom: 50%;
   background-color: #000000;
 }
-
-
-
-.pong {
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-}
-
 .player {
   position: absolute;
   top: 0;
