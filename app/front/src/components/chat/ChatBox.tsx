@@ -6,6 +6,7 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
+import FriendList from './FriendList';
 
 interface ChatBoxProps {
     socket: Socket;
@@ -176,9 +177,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
                     </Grid.Container>
                 </Grid>
                 <Grid xs={3} direction="column">
-                    <Text h3>Friends</Text>
-                    <hr />
-                    <ChatFriendBrowser />
+                    <FriendList />
                 </Grid>
             </Grid.Container>
         </Container>
