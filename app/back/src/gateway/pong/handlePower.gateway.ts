@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
-import {roomInterface, BallData, PowerInterface} from 'src/interfaces/pong.interface';
+import {roomInterface, BallData, PowerInterface, ObstacleInterface} from 'src/interfaces/pong.interface';
 import {convertToPixel} from './handleGame.gateway';
+import {getType,createObstacle} from './handleObstacle.gateway'
 
 // set playground value
 const canvasHeight = 300;
@@ -9,7 +10,6 @@ const playerHeight = canvasHeight / 4;
 const radiusBall = 10;
 const spaceBetweenPlayerAndWall = canvasWidth * 0.05;
 
-
 // Create New Power on Canvas && Add Power to the list of power in game
 export const handleNewPower = (
 	room: roomInterface,
@@ -17,6 +17,7 @@ export const handleNewPower = (
 	timeToNewPower: number,
 	powers: PowerInterface[],
 	idPower: number,
+	obstacles: ObstacleInterface[]
   	) => {
 	if (timeToNewPower === 100) 
 	{
@@ -24,11 +25,11 @@ export const handleNewPower = (
 	  	if (powers.length < 3) 
 		{
 			idPower += 1;
-
+			let type = getType(obstacles, powers);
 			const newPower = {
 		  	x: Math.floor(Math.random() * 60) + 20,
 		  	y: Math.floor(Math.random() * 60) + 20,
-		  	type: Math.floor(Math.random() * 3),
+		  	type: type,
 		  	time: 0,
 		  	id: idPower,
 			};
@@ -65,8 +66,6 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, pow
 			server.to(room.pongState.player2.id).emit('removePower', {
 			  	id: power.id,
 			});
-			// random power
-			const random = Math.floor(Math.random() * 3);
 			if (power.type === 0) 
 			{
 				//speed up bonus
@@ -93,8 +92,9 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, pow
 			{
 				// spawn obstacles bonus
 				console.log('spawn object');
+				createObstacle();
 			}
 			powers.splice(powers.indexOf(power), 1);
 		}
 	});
-  };
+};

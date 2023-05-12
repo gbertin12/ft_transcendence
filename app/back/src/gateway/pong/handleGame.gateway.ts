@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
-import {roomInterface, BallData, PowerInterface} from 'src/interfaces/pong.interface';
+import {roomInterface, BallData, PowerInterface, ObstacleInterface} from 'src/interfaces/pong.interface';
 import { handleNewPower, handleColisionWithPower } from './handlePower.gateway';
+import { NetworkInterfaceInfo } from 'os';
 
 // set playground value
 const canvasHeight = 300;
@@ -148,6 +149,8 @@ const initPlayerPosition = (room: roomInterface, server: Server) => {
 	// send players position to client side
 	server.to(room.pongState.player1.id).emit('resetPlayers', {percentP1: 38.5, percentP2: 38.5});
 	server.to(room.pongState.player2.id).emit('resetPlayers', {percentP1: 38.5, percentP2: 38.5});
+	server.to(room.pongState.player1.id).emit('resetObstacles');
+	server.to(room.pongState.player2.id).emit('resetObstacles');
 }
 
 const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
@@ -156,16 +159,16 @@ const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
 	{
 		room.pongState.player2.score++;
 		//room.pongState.ball = player1Start;
-		room.pongState.ball.speedX = 0.6;
-		room.pongState.ball.speedY = 0.4;
+		room.pongState.ball.speedX = 1;
+		room.pongState.ball.speedY = 0.8;
 		console.log(room.pongState.ball)
     } 
 	else 
 	{
       	room.pongState.player1.score++;
       	//room.pongState.ball = player2Start;
-		room.pongState.ball.speedX = -0.6;
-		room.pongState.ball.speedY = -0.4;
+		room.pongState.ball.speedX = -1;
+		room.pongState.ball.speedY = -0.8;
 		console.log(room.pongState.ball)
     }
 	initPlayerPosition(room, server);
@@ -182,6 +185,7 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	let idPower = 0;
 	let initPlayer = true;
   	const powers: PowerInterface[] = [];
+	const obstacles: ObstacleInterface[];
 
   	const interval = setInterval(() => {
 		if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0)
@@ -198,7 +202,7 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	  	}
 		timeToNewPower += 1;
 		// return 1 if a new power was create
-		if (handleNewPower(room, server, timeToNewPower, powers, idPower))
+		if (handleNewPower(room, server, timeToNewPower, powers, idPower, obstacles))
 			idPower += 1;
 	  	if (timeToNewPower === 100) 
 			timeToNewPower = 0;

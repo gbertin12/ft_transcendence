@@ -36,3 +36,11 @@ export interface PowerInterface {
   	time: number;
   	id: number;
 }
+
+export interface obstaclesInterface {
+	x: number;
+	y: number;
+	size: number;
+	id: number;
+	isActive: number;
+}
