@@ -128,7 +128,6 @@ export class AuthController {
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.end();
     }
-
     @Get('dummy')
     async dummy(
         @Res() res: Response,

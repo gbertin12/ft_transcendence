@@ -1,11 +1,5 @@
-// 		   88                        		 88
-// 	       88                   	  	     88
-// 		   88                        	     88
-// ,adPPYb,88  ,adPPYba, ,adPPYYba,  ,adPPYb,88
-// a8"    `Y88 a8P_____88 ""     `Y8 a8"    `Y88
-// 8b       88 8PP""""""" ,adPPPPP88 8b       88
-// "8a,   ,d88 "8b,   ,aa 88,    ,88 "8a,   ,d88
-// `"8bbdP"Y8  `"Ybbd8"' `"8bbdP"Y8  `"8bbdP"Y8
+import Layout from '@/components/layout'
+//import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 async function login() {
     const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
@@ -16,6 +10,7 @@ async function login() {
 function dummyLogin() {
     window.location.href = 'http://localhost:3000/auth/dummy';
 }
+
 
 export default function Login() {
     return (
