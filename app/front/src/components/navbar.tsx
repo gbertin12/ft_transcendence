@@ -4,9 +4,13 @@ import { IconMessageCircle2 } from '@tabler/icons-react';
 import { IconDeviceGamepad } from '@tabler/icons-react';
 import { Navbar , Button, Link, Text} from "@nextui-org/react";
 
+// type NavbarMaxWidth = "fluid";
+
 export default function myNavbar() {
+	type NavbarMaxWidth = "fluid";
+
   return (
-	      <Navbar variant="static" color="backgroundAlpha">
+	      <Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
 		  <Navbar.Brand >
               <Text color="primary">ft_pong</Text>
           </Navbar.Brand >

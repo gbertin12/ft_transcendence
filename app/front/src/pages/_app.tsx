@@ -10,7 +10,8 @@ const lightTheme = createTheme({
 		colors: {
 			backgroundAlpha: "#DFDFDF",
 			background: "#ECEDEE",
-			primary: "$black"
+			primary: "$black",
+			primaryLightContrast: "$black"
 		}
 	}
 })
@@ -19,9 +20,10 @@ const darkTheme = createTheme({
 	type: 'dark',
 	theme: {
 		colors: {
-			backgroundAlpha: "#171717",
+			backgroundAlpha: "#121212",
 			background: "#0F0F0F",
-			primary: "#32BE32"
+			primary: "#32BE32",
+			primaryLightContrast: "#289828"
 		}
 	}
 })
