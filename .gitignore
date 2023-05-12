@@ -12,3 +12,4 @@
 **/.vscode
 **/migrations/
 **/.npm_modules_installed
+**/.pnpm-store
