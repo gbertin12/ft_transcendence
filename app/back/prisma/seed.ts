@@ -5,6 +5,7 @@ import { sha512 } from 'js-sha512';
 
 const prisma = new PrismaClient()
 
+
 async function createFakeChannel(size: number, isPrivate: boolean = false, isPasswordProtected: boolean = false) {
     switch (size) {
         case 0: // short
@@ -147,6 +148,17 @@ async function seedMessages() {
             data: messages
         });
     }
+}
+
+async function seedFriends() {
+    await prisma.friend.createMany({
+        data: [
+            {
+                user_id: 1,
+                friend_id: 1,
+            },
+        ],
+    });
 }
 
 async function main() {
