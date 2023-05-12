@@ -1,5 +1,5 @@
-import io from 'socket.io-client';
-import React, { Suspense, useEffect, useState } from "react";
+import io, { Socket } from 'socket.io-client';
+import React, { Suspense, useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
@@ -7,37 +7,22 @@ import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
 
-function useSocket(url: string) {
-    const [socket, setSocket] = useState<any>();
-    useEffect(() => {
-        const socketIo = io(url);
-        setSocket(socketIo);
-        function cleanup() {
-            socketIo.disconnect()
-        }
-        return cleanup
-    }, [])
-    return socket
+interface ChatBoxProps {
+    socket: Socket;
 }
 
-const ChatBox: React.FC = () => {
+const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
 
-    // Workaround to not re-create the socket on every render
-    const socket = useSocket('http://localhost:8001');
-
-    function fetchMessages(channelId: number): Promise<Message[]> {
-        return new Promise<Message[]>((resolve, reject) => {
-            const url = `http://localhost:3000/channel/${channelId}/messages`;
-            fetch(url)
-                .then(res => res.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
-        });
-    }
+    const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
+        const url = `http://localhost:3000/channel/${channelId}/messages`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data;
+    }, []);
 
     useEffect(() => {
         fetch("http://localhost:3000/channel/all")
@@ -49,36 +34,42 @@ const ChatBox: React.FC = () => {
             });
 
         // Listen for new messages
-        if (socket) {
-            socket.on('message', (payload: Message) => {
-                setMessages((messages) => [payload, ...messages]);
-            });
-            socket.on('newChannel', (payload: Channel) => {
-                setChannels((channels) => [...channels, payload]);
-            });
-            socket.on('deleteChannel', (payload: number) => {
-                setChannels((channels) => channels.filter((c) => c.id !== payload));
-                if (selectedChannel?.id === payload) {
-                    setSelectedChannel(channels[0]);
-                }
-            });
-            socket.on('editChannel', (payload: Channel) => {
-                setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
-            });
-        }
+        socket.on('message', (payload: Message) => {
+            setMessages((messages) => [payload, ...messages]);
+        });
+        socket.on('newChannel', (payload: Channel) => {
+            setChannels((channels) => [...channels, payload]);
+        });
+        socket.on('deleteChannel', (payload: number) => {
+            setChannels((channels) => channels.filter((c) => c.id !== payload));
+            if (selectedChannel?.id === payload) {
+                setSelectedChannel(channels[0]);
+            }
+        });
+        socket.on('editChannel', (payload: Channel) => {
+            setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
+        });
+
+        return () => {
+            socket.off('message');
+            socket.off('newChannel');
+            socket.off('deleteChannel');
+            socket.off('editChannel');
+        };
     }, [socket]);
 
     useEffect(() => {
         if (selectedChannel) {
-            fetchMessages(selectedChannel.id);
+            fetchMessages(selectedChannel.id).then((data) => {
+                setMessages(data);
+            });
             socket.emit('join', {
                 channel: selectedChannel.id,
             });
         }
-    }, [selectedChannel]);
+    }, [selectedChannel, fetchMessages, socket]);
 
-
-    const handleNewMessage = (message: string) => {
+    const handleNewMessage = useCallback((message: string) => {
         // POST request to send the message to the server
         fetch(`http://localhost:3000/channel/${selectedChannel?.id}/message`, {
             method: "POST",
@@ -87,17 +78,18 @@ const ChatBox: React.FC = () => {
             },
             body: JSON.stringify({ content: message }),
         }) // TODO: check that API sent a 200
-    };
+    }, [selectedChannel]);
 
-    const handleChannelChange = (channel: Channel) => {
+    const handleChannelChange = useCallback((channel: Channel) => {
         setSelectedChannel(channel);
-        fetchMessages(channel.id);
-    };
+    }, []);
+
+    const memoizedMessages = useMemo(() => messages, [messages]);
 
     if (isLoading) {
         return (
             <Container>
-                <Grid.Container gap={2} justify="center" css={{ height: "100vh" }}>
+                <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
                     <Grid xs={3} direction="column">
                         <Text h3>Chats</Text>
                         <hr />
@@ -120,7 +112,7 @@ const ChatBox: React.FC = () => {
 
     return (
         <Container>
-            <Grid.Container gap={2} justify="center" css={{ height: "100vh" }}>
+            <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
                 <Grid xs={3} direction="column">
                     <Text h3>Chats</Text>
                     <hr />
@@ -151,7 +143,7 @@ const ChatBox: React.FC = () => {
                                     flexDirection: "column-reverse",
                                 }}
                             >
-                                {messages.map((message) => (
+                                {memoizedMessages.map((message) => (
                                     <li key={message.message_id}>
                                         <ChatMessage
                                             content={message.content}
@@ -193,4 +185,4 @@ const ChatBox: React.FC = () => {
     );
 };
 
-export default ChatBox;
+export default React.memo(ChatBox);
