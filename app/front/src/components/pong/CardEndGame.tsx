@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import {Card, Grid, Text, Button, Row, Col, Avatar} from "@nextui-org/react"
+import {Card, Grid, Text, Button, Row, Col, Avatar, Badge } from "@nextui-org/react"
 
 
 function DisplayNewElo({win, elo, pts} : {win: boolean, elo: number, pts: number})
@@ -23,7 +23,7 @@ function DisplayNewElo({win, elo, pts} : {win: boolean, elo: number, pts: number
 	}
 	return (
 		<>
-			<Text color={color}>{elo}{operator}</Text>
+			<Text css={{ ta:'center' }} color={color}>{elo}{operator}</Text>
 		</>
 	)
 	
@@ -31,24 +31,26 @@ function DisplayNewElo({win, elo, pts} : {win: boolean, elo: number, pts: number
 
 
 function PlayerInfos ({win, score, username, avatar} : {win: boolean, score: number, username: string, avatar: string}) {
-	let color = "success";
+	let color: String = "success";
+	let badgeContent: String = "+15";
 	if (!win)
+	{
+		badgeContent = "-15";
 		color = "error"
+	}
 	return (
 		<>
-			<Avatar 
-				bordered 
-				size='xl' 
-				css={{ mx:'auto'}} 
-				src={avatar}
-				color={color}
-			/>
-			<Text css={{mt:"5px", ta:'center', mb:"0px"}} h4>{username}</Text>
-			<DisplayNewElo 
-				win={win}
-				elo={1200}
-				pts={15}
-			/>
+			<Badge disableOutline content={badgeContent} color={color} size={"sm"} css={{ m:'auto'}}>
+				<Avatar 
+					bordered 
+					size='xl'
+					css={{ m:'auto'}}
+					src={avatar}
+					color={color}
+				/>
+			</Badge>
+			<Text css={{mt:"5px", ta:'center', mb:"0px", minWidth: "150px" }} h4>{username}</Text>
+			<Text css={{ ta:'center' }} color={color}>1200</Text>
 			<Text css={{mt:"5px", ta:'center'}} h3 >{score} pts</Text>
 		</>
 	)
@@ -57,7 +59,7 @@ function PlayerInfos ({win, score, username, avatar} : {win: boolean, score: num
 
 export default function CardEndGame({win, score1, score2, handleCloseCardEndGame} : {win: boolean, score1: number, score2: number, handleCloseCardEndGame: () => void}) {
 	return <> 
-		<Card css={{ w: "400px" }}>
+		<Card >
 			<Card.Header css={{jc:'center', }}>
 				<Text h2 b>YOU { win ? "WIN !" : "LOOSE !"}</Text>
 			</Card.Header>
@@ -72,12 +74,12 @@ export default function CardEndGame({win, score1, score2, handleCloseCardEndGame
 							avatar='https://i.imgur.com/fjZQLH6.png'
 						/>
 					</Grid>
-					<Grid ><Text css={{mx: "15px"}} h1 b> - </Text></Grid>
+					<Grid  ><Text css={{mx: "15px"}} h1 b> - </Text></Grid>
 					<Grid>
 						<PlayerInfos
 							win={!win}
 							score={score2}
-							username='Adversary'
+							username='AdversaryAdversary'
 							avatar='https://i.imgur.com/pLGJ0Oj.jpeg'
 						/>
 					</Grid>

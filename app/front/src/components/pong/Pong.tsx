@@ -1,8 +1,48 @@
 import styles from '../../styles/pong.module.css'
 import { useState, useEffect, useRef, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { Text, Avatar, Container, Grid, Row, Card, Spacer } from '@nextui-org/react';
 import Image from 'next/image'
 
+function DisplayInfoPlayer ({avatar, username, score, elo, reversed} : {avatar: string, username: string, score: number, elo: number, reversed: boolean}) {
+	if (!reversed)
+	{
+		return <>
+			<Container>
+				<Row justify='flex-start'>
+					<Avatar size={'xl'} src={avatar} />
+					<Spacer x={1} />
+					<Text css={{transform:'translateY(25%)'}}>{username}</Text>
+				</Row>
+			</Container>
+		</>
+	} else {
+		return <>
+			<Container>
+				<Row justify='flex-end'>
+					<Text css={{transform:'translateY(25%)'}}>{username}</Text>
+					<Spacer x={1} />
+					<Avatar size={'xl'} src={avatar} />
+				</Row>
+			</Container>
+		</>
+
+	}
+}
+
+function DisplayScore ({scorePlayer1, scorePlayer2} : {scorePlayer1: number, scorePlayer2: number}) {
+	return <>
+		<Container>
+			<Row justify='center'>
+				<Text h1>{scorePlayer1}</Text>
+				<Spacer x={1} />
+				<Text h1>-</Text>
+				<Spacer x={1} />
+				<Text h1>{scorePlayer2}</Text>
+			</Row>
+		</Container>
+	</>
+}
 
 function Player ({ x, y, canvasHeight } : {x: number, y: number, canvasHeight: number} ) {
 	return (
@@ -106,7 +146,10 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		setBall({ x: ball.x, y: ball.y});
 	}, [ball, callBackSetCanvasProperties]);
 
-	// ======================== Boucle de jeu ============================================
+	// =================================================================================================================
+	
+	// =============================== Handle receive socket information ===============================================
+
 
 	const handleMovePlayer = (message: number) => {
 		const newPos = message * canvas.height / 100;
@@ -123,7 +166,7 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		setBall({x, y});
 	}
 
-	const handleNewPowers = ({x, y, id, type} : {x: number, y: number, id:number, type:number}) => {
+	const handleNewPowers = ({x, y, id, type} : {x: number, y: number, id: number, type: number}) => {
 		console.log(x, y);
 		const PixelX = convertToPixel(x, canvas.width);
 		const PixelY = convertToPixel(y, canvas.height);
@@ -168,22 +211,23 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		handleSetEndGame(win, score1, score2);
 		console.log(win, score1, score2);
 	}
+
 	useEffect(() => {
-			socket.on('playerMove', handleMovePlayer)
-			socket.on('updateScore', handleUpdateScore)
-			socket.on('updateBall', handleUpdateBall)
-			socket.on('resetPlayers', handleResetPlayer)
-			socket.on('newPower', handleNewPowers)
-			socket.on('removePower', handleRemovePower)
-			socket.on('endGame', handleEndGame)
+			// socket.on('playerMove', handleMovePlayer)
+			// socket.on('updateScore', handleUpdateScore)
+			// socket.on('updateBall', handleUpdateBall)
+			// socket.on('resetPlayers', handleResetPlayer)
+			// socket.on('newPower', handleNewPowers)
+			// socket.on('removePower', handleRemovePower)
+			// socket.on('endGame', handleEndGame)
 			return () => {
-				socket.off('playerMove', handleMovePlayer);
-				socket.off('updateScore', handleUpdateScore);
-				socket.off('updateBall', handleUpdateBall);
-				socket.off('newPower', handleNewPowers);
-				socket.off('resetPlayers')
-				socket.off('removePower', handleRemovePower);
-				socket.off('endGame', handleEndGame);
+				// socket.off('playerMove', handleMovePlayer);
+				// socket.off('updateScore', handleUpdateScore);
+				// socket.off('updateBall', handleUpdateBall);
+				// socket.off('newPower', handleNewPowers);
+				// socket.off('resetPlayers')
+				// socket.off('removePower', handleRemovePower);
+				// socket.off('endGame', handleEndGame);
 			}
 	}, [handleMovePlayer, handleUpdateScore, handleUpdateBall]);
 
@@ -204,12 +248,16 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 	// <Ball x={ball.x } y={ball.y } />
 	return (
 		<>
-			<h1>My Pong</h1>
-			<div className={styles.pong}>
+			<Container>
+				<Row>
+					<DisplayInfoPlayer avatar='https://i.imgur.com/fjZQLH6.png' username='gbertin' score={score.scorePlayer1} elo={1200} reversed={false} />
+					<Spacer y={1} />
+					<DisplayScore scorePlayer1={score.scorePlayer1} scorePlayer2={score.scorePlayer2} />
+					<Spacer y={1} />
+					<DisplayInfoPlayer avatar='https://i.imgur.com/pLGJ0Oj.jpeg' username='Adversary' score={score.scorePlayer2} elo={1200} reversed={true} />
+				</Row>
+				<div className={styles.pong}>
 				<div ref={ref} id="pong" className={styles.board}>
-					<h2></h2>
-					<h2 className={styles.scorePlayerOne}>{score.scorePlayer1}</h2>
-					<h2 className={styles.scorePlayerTwo}>{score.scorePlayer2}</h2>
 					<Ball x={ ball.x } y={ ball.y } />
 					<Player x={canvas.width * 5 / 100 - 12} y={playerPosition.yPlayerOne} canvasHeight={canvas.height}/>
 					<Player x={canvas.width - canvas.width * 5 / 100} y={playerPosition.yPlayerTwo} canvasHeight={canvas.height}/>
@@ -218,6 +266,7 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 					<Power x={powers[2].x} y={powers[2].y} isActive={powers[2].isActive} type={powers[2].type}/>
 				</div>
 			</div>
+			</Container>
 		</>
 	);
 }
