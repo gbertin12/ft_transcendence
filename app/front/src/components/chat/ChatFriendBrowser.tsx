@@ -1,103 +1,70 @@
-import { Avatar, Container } from "@nextui-org/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Text, Grid, Spinner } from "@nextui-org/react";
 import ChatEntry from "./ChatEntry";
 
-// FIXME: Connect to socket / database, demo data currently
+interface Friend {
+    id: number;
+    name: string;
+    avatar: string;
+    userId: number;
+    isOnline: boolean;
+    isTyping: boolean;
+    isPlaying: boolean;
+    unreadMessages: number;
+}
 
 const ChatFriendBrowser: React.FC = () => {
+    const [friends, setFriends] = useState<Friend[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        fetch("http://localhost:3000/friends/", { credentials: 'include' })
+            .then((response) => response.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    const friends: Friend[] = data.map((friend) => {
+                        return {
+                            id: friend.User.id,
+                            name: friend.User.name,
+                            avatar: friend.User.avatar,
+                            userId: friend.User.id,
+                            isOnline: false, // TODO: implement
+                            isTyping: false,
+                            isPlaying: false,
+                            unreadMessages: 0,
+                        };
+                    });
+                    setFriends(friends);
+                } else {
+                    console.error("Error fetching friends: data is not an array");
+                }
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error("Error fetching friends:", error);
+                setIsLoading(false);
+            });
+    }, []);
+
+    if (isLoading) {
+        return <Spinner />;
+    }
+
     return (
-        <Container css={{p: 0}}>
-            <ChatEntry
-                name="Default Online User"
-                userId={0}
-                isOnline={true}
-                isTyping={false}
-                isPlaying={false}
-                unreadMessages={0}
-                key={0}
-            />
-            <ChatEntry
-                name="Default Offline User"
-                userId={0}
-                isOnline={false}
-                isTyping={false}
-                isPlaying={false}
-                unreadMessages={0}
-                key={1}
-            />
-            <ChatEntry
-                name="Default Playing User"
-                userId={0}
-                isOnline={true}
-                isTyping={false}
-                isPlaying={true}
-                unreadMessages={0}
-                key={2}
-            />
-            <ChatEntry
-                name="Typing Online User"
-                userId={0}
-                isOnline={true}
-                isTyping={true}
-                isPlaying={false}
-                unreadMessages={0}
-                key={3}
-            />
-            <ChatEntry
-                name="Typing Playing User"
-                userId={0}
-                isOnline={true}
-                isTyping={true}
-                isPlaying={true}
-                unreadMessages={0}
-                key={4}
-            />
-            <ChatEntry
-                name="Default Online User (Unread)"
-                userId={0}
-                isOnline={true}
-                isTyping={false}
-                isPlaying={false}
-                unreadMessages={1}
-                key={5}
-            />
-            <ChatEntry
-                name="Default Offline User (Unread)"
-                userId={0}
-                isOnline={false}
-                isTyping={false}
-                isPlaying={false}
-                unreadMessages={1}
-                key={6}
-            />
-            <ChatEntry
-                name="Spamming User (Unread 9+)"
-                userId={0}
-                isOnline={true}
-                isTyping={true}
-                isPlaying={false}
-                unreadMessages={12}
-                key={7}
-            />
-            <ChatEntry
-                name="Spamming User (Unread 9)"
-                userId={0}
-                isOnline={true}
-                isTyping={true}
-                isPlaying={false}
-                unreadMessages={9}
-                key={8}
-            />
-            <ChatEntry
-                name="Spamming User / Playing (Unread)"
-                userId={0}
-                isOnline={true}
-                isTyping={true}
-                isPlaying={true}
-                unreadMessages={9}
-                key={9}
-            />
-        </Container>
+        <>
+            {friends.map((friend) => (
+                <ChatEntry
+                    name={friend.name}
+                    avatar={friend.avatar}
+                    userId={friend.userId}
+                    isOnline={friend.isOnline}
+                    isTyping={friend.isTyping}
+                    isPlaying={friend.isPlaying}
+                    unreadMessages={friend.unreadMessages}
+                    key={friend.userId}
+                />
+            ))}
+        </>
     );
 };
 

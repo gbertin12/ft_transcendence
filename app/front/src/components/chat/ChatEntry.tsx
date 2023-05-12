@@ -5,6 +5,7 @@ import { FaEye, FaGamepad } from 'react-icons/fa';
 
 interface ChatEntryProps {
     name: string;
+    avatar: string;
     userId: number;
     isOnline: boolean;
     isTyping: boolean;
@@ -32,7 +33,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping, isPlaying, unreadMessages }) => {
+const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, isTyping, isPlaying, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -59,6 +60,7 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping,
                 >
                     <Avatar
                         size="lg"
+                        src={`http://localhost:3000/static/avatars/${avatar}`}
                     />
                 </Badge>
             </Grid>
