@@ -7,11 +7,11 @@ export default function SignIn() {
 			<Grid.Container direction="column">
 			<Grid>
 
-			 <Input placeholder="Email" label="Email" color="primaryLightContrast"/>
+			 <Input placeholder="Username" label="Username" color="primaryLightContrast"/>
 			 </Grid>
 			  <Spacer y={1} />
 		 <Grid>
-		 <Input placeholder="Password" label="Password" color="primaryLightContrast"/>
+		 <Input.Password placeholder="Password" label="Password" color="primaryLightContrast"/>
 		 </Grid>
 		 <Spacer y={1}/>
 		 <Grid.Container justify='flex-end'>

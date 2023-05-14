@@ -1,3 +1,13 @@
+
+// 		   88                        		 88
+// 	       88                   	  	     88
+// 		   88                        	     88
+// ,adPPYb,88  ,adPPYba, ,adPPYYba,  ,adPPYb,88
+// a8"    `Y88 a8P_____88 ""     `Y8 a8"    `Y88
+// 8b       88 8PP""""""" ,adPPPPP88 8b       88
+// "8a,   ,d88 "8b,   ,aa 88,    ,88 "8a,   ,d88
+// `"8bbdP"Y8  `"Ybbd8"' `"8bbdP"Y8  `"8bbdP"Y8
+
 import Layout from '@/components/layout'
 //import jwtDecode, { JwtPayload } from 'jwt-decode';
 
@@ -17,3 +27,31 @@ export default function Login() {
         </>
     )
 }
+//
+// import Head from 'next/head';
+// import {Grid, Spacer} from "@nextui-org/react";
+//
+// import SignIn from '../components/auth/SignIn';
+// import SignUp from '../components/auth/SignUp';
+// export default function Game() {
+// 	return (
+// 	<>
+// 		<Head>
+// 			<title> Sign in </title>
+// 		</Head>
+// 		<Spacer y={4} />
+// 		<Grid direction="row" >
+// 		<Grid.Container justify='center' gap={4} >
+// 		<Grid>
+// 			<SignIn/>
+// 			</Grid>
+// 			<Grid>
+// 			<SignUp/>
+// 			</Grid>
+//
+// 			</Grid.Container>
+//
+// 		</Grid>
+// 	</>
+// 	);
+// }

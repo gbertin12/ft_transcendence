@@ -2,8 +2,8 @@ import Image from 'next/image';
 import { IconMedal } from '@tabler/icons-react';
 import { IconMessageCircle2 } from '@tabler/icons-react';
 import { IconDeviceGamepad } from '@tabler/icons-react';
-import { Navbar , Button, Link, Text} from "@nextui-org/react";
-
+import { Navbar , Button, Link, Modal, Text, Input, Spacer, Grid} from "@nextui-org/react";
+import ModalSign from "./auth/ModalSign";
 // type NavbarMaxWidth = "fluid";
 
 export default function myNavbar() {
@@ -27,10 +27,7 @@ export default function myNavbar() {
 
 	          </Navbar.Content>
 			  <Navbar.Content color="primarySolidContrast">
-
-			  <Navbar.Link href="/auth" color="primary">
-				  Se connecter
-			  </Navbar.Link>
+			  <ModalSign/>
 			  </Navbar.Content>
 	    </Navbar>
   )
