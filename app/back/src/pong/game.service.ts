@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { roomInterface, BallData, PowerInterface } from 'src/interfaces/pong.interface';
-import { handleNewPower, handleColisionWithPower } from './power.service';
+import { handleNewPower, handleColisionWithPower } from './power';
+import { UserService } from 'src/user/user.service';
 
 // set playground value
 const canvasHeight = 300;
@@ -52,22 +54,6 @@ const updateBallSpeedY = (room: roomInterface, player: number) => {
     }
     return newSpeed;
 };
-
-const handleEndGame = (room: roomInterface, server: Server) => {
-    console.log('HANDLE ENDGAME CALLED SLDKFJSDLFKJSDFLKJSDFKLJ');
-    const scoreP1: number = room.pongState.player1.score;
-    const scoreP2: number = room.pongState.player2.score;
-    room.pongState.player1.score = 0;
-    room.pongState.player2.score = 0;
-    if (scoreP1 == 10) {
-        server.to(room.pongState.player1.id).emit('endGame', { win: true, score1: scoreP1, score2: scoreP2 });
-        server.to(room.pongState.player2.id).emit('endGame', { win: false, score1: scoreP2, score2: scoreP1 });
-    }
-    else {
-        server.to(room.pongState.player1.id).emit('endGame', { win: false, score1: scoreP1, score2: scoreP2 });
-        server.to(room.pongState.player2.id).emit('endGame', { win: true, score1: scoreP2, score2: scoreP1 });
-    }
-}
 
 const sendBallPosition = (room: roomInterface, server: Server) => {
     const x = convertToPercent(room.pongState.ball.x, canvasWidth);
@@ -156,44 +142,76 @@ const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
     sendScore(room, server);
 }
 
-export const handleGame = (room: roomInterface, server: Server) => {
-    // set ball position
-    room.pongState.ball.x = convertToPixel(50, canvasWidth);
-    room.pongState.ball.y = convertToPixel(50, canvasHeight);
-    room.pongState.player1.y = canvasHeight / 3;
-    room.pongState.player2.y = canvasHeight / 3;
-    let timeToNewPower = 0;
-    let idPower = 0;
-    let initPlayer = true;
-    const powers: PowerInterface[] = [];
+@Injectable()
+export class GameService {
+    constructor(
+        private userService: UserService,
+    ) { }
 
-    const interval = setInterval(() => {
-        if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0) {
-            initPlayer = false;
-            initPlayerPosition(room, server);
+    handleGame(room: roomInterface, server: Server) {
+        // set ball position
+        room.pongState.ball.x = convertToPixel(50, canvasWidth);
+        room.pongState.ball.y = convertToPixel(50, canvasHeight);
+        room.pongState.player1.y = canvasHeight / 3;
+        room.pongState.player2.y = canvasHeight / 3;
+        let timeToNewPower = 0;
+        let idPower = 0;
+        let initPlayer = true;
+        const powers: PowerInterface[] = [];
+
+        const interval = setInterval(() => {
+            if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0) {
+                initPlayer = false;
+                initPlayerPosition(room, server);
+            }
+            // check if game is finished
+            if (room.pongState.player1.score == 10 || room.pongState.player2.score == 10) {
+                clearInterval(interval);
+                this.handleEndGame(room, server);
+                return;
+            }
+            timeToNewPower += 1;
+            // return 1 if a new power was create
+            if (handleNewPower(room, server, timeToNewPower, powers, idPower))
+                idPower += 1;
+            if (timeToNewPower === 100)
+                timeToNewPower = 0;
+            handleColisionWithPower(room, server, powers);
+            // update ball position
+            room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
+            room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
+            // send ball position
+            sendBallPosition(room, server);
+            // check collision with players && walls
+            handleCheckCollision(room, server);
+            // check if someone loose the round
+            if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
+                handleResetPlayerPosition(room, server);
+        }, 40);
+    }
+
+    async handleEndGame(room: roomInterface, server: Server) {
+        const score1: number = room.pongState.player1.score;
+        const score2: number = room.pongState.player2.score;
+        const player1Name: string = room.pongState.player1.name;
+        const player2Name: string = room.pongState.player2.name;
+        const win = { win: true, score1, score2 };
+        const loose = { win: false, score1, score2 };
+
+        room.pongState.player1.score = 0;
+        room.pongState.player2.score = 0;
+
+        if (score1 == 10) {
+            server.to(room.pongState.player1.id).emit('endGame', win);
+            server.to(room.pongState.player2.id).emit('endGame', loose);
+            await this.userService.incrementWin(player1Name);
+            await this.userService.incrementLoose(player2Name);
+            //TODO: update elo
+        } else {
+            server.to(room.pongState.player1.id).emit('endGame', loose);
+            server.to(room.pongState.player2.id).emit('endGame', win);
+            await this.userService.incrementWin(player2Name);
+            await this.userService.incrementLoose(player1Name);
         }
-        // check if game is finished
-        if (room.pongState.player1.score == 10 || room.pongState.player2.score == 10) {
-            clearInterval(interval);
-            handleEndGame(room, server);
-            return;
-        }
-        timeToNewPower += 1;
-        // return 1 if a new power was create
-        if (handleNewPower(room, server, timeToNewPower, powers, idPower))
-            idPower += 1;
-        if (timeToNewPower === 100)
-            timeToNewPower = 0;
-        handleColisionWithPower(room, server, powers);
-        // update ball position
-        room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
-        room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
-        // send ball position
-        sendBallPosition(room, server);
-        // check collision with players && walls
-        handleCheckCollision(room, server);
-        // check if someone loose the round
-        if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
-            handleResetPlayerPosition(room, server);
-    }, 40);
-};
+    }
+}

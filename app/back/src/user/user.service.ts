@@ -82,4 +82,22 @@ export class UserService {
         });
         return user;
     }
+
+    async incrementWin(name: string) {
+        await this.db.user.update({
+            data: {
+                wins: { increment: 1 }
+            },
+            where: { name },
+        });
+    }
+
+    async incrementLoose(name: string) {
+        await this.db.user.update({
+            data: {
+                losses: { increment: 1 }
+            },
+            where: { name },
+        });
+    }
 }

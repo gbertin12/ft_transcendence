@@ -9,7 +9,7 @@ import {
 import { UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from 'src/interfaces/pong.interface';
-import { handleGame } from './game.service';
+import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as cookie from 'cookie';
@@ -24,6 +24,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private jwtService: JwtService,
         private userService: UserService,
+        private gameService: GameService,
     ) { }
 
     players: PlayerInterface[] = [];
@@ -106,7 +107,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.rooms.push(newRoom);
             this.server.to(playerId).emit('searchGame', newRoom.name);
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
-            handleGame(newRoom, this.server);
+            this.gameService.handleGame(newRoom, this.server);
         }
         console.log(this.rooms);
     }
