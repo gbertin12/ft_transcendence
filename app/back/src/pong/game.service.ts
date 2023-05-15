@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import { roomInterface, BallData, PowerInterface } from 'src/interfaces/pong.interface';
-import { handleNewPower, handleColisionWithPower } from './handlePower.gateway';
+import { handleNewPower, handleColisionWithPower } from './power.service';
 
 // set playground value
 const canvasHeight = 300;

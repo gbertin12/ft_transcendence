@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import {roomInterface, BallData, PowerInterface} from 'src/interfaces/pong.interface';
-import {convertToPixel} from './handleGame.gateway';
+import { convertToPixel } from './game.service';
 
 // set playground value
 const canvasHeight = 300;

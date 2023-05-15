@@ -9,7 +9,7 @@ import {
 import { UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from 'src/interfaces/pong.interface';
-import { handleGame } from './handleGame.gateway';
+import { handleGame } from './game.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as cookie from 'cookie';
@@ -35,15 +35,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // when a client connects, we add it to the connectedUsers array
     async handleConnection(client: Socket) 
     {
-        // verify user
+        // verify user with 'session' cookie
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
             client.disconnect();
-            throw new UnauthorizedException();
+            throw new UnauthorizedException;
         }
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
-            console.log(payload);
             const user = await this.userService.getUserById(payload.id);
 
             // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
@@ -60,7 +59,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.emit('playerId', client.id);
         } catch {
             client.disconnect();
-            throw new UnauthorizedException();
+            throw new UnauthorizedException;
         }
     }
 
