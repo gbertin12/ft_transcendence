@@ -11,6 +11,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const [playGame, setPlayGame] = useState(false);
 	const [endGame, setEndGame] = useState(false);
 	const [roomId, setRoomId] = useState('');
+	const [searchGame, setSearchGame] = useState(false);
 	const [dataEndGame, setDataEndGame] = useState({
 		win: false, score1: 0, score2: 0 
 	})
@@ -19,6 +20,10 @@ export default function GameBody({socket} : {socket: Socket}) {
 		setPlayGame(true);
 		setRoomId(roomName);
 		setEndGame(false);
+	}
+
+	const handleSetSearchGame = (value: boolean) => {
+			setSearchGame(value);
 	}
 
 	const handleSetEndGame = (win: boolean, score1: number, score2: number)  => {
@@ -31,22 +36,22 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const handleCloseCardEndGame = () => {
 		setEndGame(false);
 	}
-	// return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
+	//return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
 	//return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
 	if (!playGame && !endGame)
 	{
 		return <>
 			<Container>
 				<Row justify='center'>
-					<CardPlayerInformation username={"gbertin"} avatar="https://i.imgur.com/fjZQLH6.png" elo={1200} nbWin={8} nbLoose={3} />
+					<CardPlayerInformation searchGame={false} username={"gbertin"} avatar="https://i.imgur.com/fjZQLH6.png" elo={1200} nbWin={8} nbLoose={3} />
 					<Spacer x={2} />
 					<Text css={{ my:'auto' }} h1>VS</Text>
 					<Spacer x={2} />
-					<CardPlayerInformation username={"Adversary"} avatar="https://i.imgur.com/pLGJ0Oj.jpeg" elo={0} nbWin={0} nbLoose={0} />
+					<CardPlayerInformation searchGame={searchGame} username={"Adversary"} avatar="https://i.imgur.com/pLGJ0Oj.jpeg" elo={0} nbWin={0} nbLoose={0} />
 				</Row>
 			</Container>
 			<Spacer y={2} />
-			<ButtonStart socket={socket} playGame={playGame} handleGameStart={handleGameStart} />
+			<ButtonStart searchGame={searchGame} socket={socket} playGame={playGame} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
 		</>
 	}
 	else if (!playGame && endGame)

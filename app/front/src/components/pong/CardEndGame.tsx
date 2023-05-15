@@ -66,7 +66,6 @@ export default function CardEndGame({win, score1, score2, handleCloseCardEndGame
             <Card.Divider />
             <Card.Body css={{ py: "$10" }}>
                 <Grid.Container gap={2} justify='center' alignItems='center'>
-                    
                     <PlayerInfos
                         win={win}
                         score={score1}

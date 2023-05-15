@@ -202,25 +202,25 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 	}
 
 	useEffect(() => {
-			socket.on('playerMove', handleMovePlayer)
-			socket.on('updateScore', handleUpdateScore)
-			socket.on('updateBall', handleUpdateBall)
-			socket.on('resetPlayers', handleResetPlayer)
-			socket.on('newPower', handleNewPowers)
-			socket.on('removePower', handleRemovePower)
-			socket.on('resetObstacles',resetObstacles)
-			socket.on('addObstacle',handleAddObstacle)
-			socket.on('endGame', handleEndGame)
+			// socket.on('playerMove', handleMovePlayer)
+			// socket.on('updateScore', handleUpdateScore)
+			// socket.on('updateBall', handleUpdateBall)
+			// socket.on('resetPlayers', handleResetPlayer)
+			// socket.on('newPower', handleNewPowers)
+			// socket.on('removePower', handleRemovePower)
+			// socket.on('resetObstacles',resetObstacles)
+			// socket.on('addObstacle',handleAddObstacle)
+			// socket.on('endGame', handleEndGame)
 			return () => {
-				socket.off('playerMove', handleMovePlayer);
-				socket.off('updateScore', handleUpdateScore);
-				socket.off('updateBall', handleUpdateBall);
-				socket.off('newPower', handleNewPowers);
-				socket.off('resetPlayers')
-				socket.off('removePower', handleRemovePower);
-				socket.off('addObstacle',handleAddObstacle)
-				socket.off('resetObstacles', resetObstacles);
-				socket.off('endGame', handleEndGame);
+				// socket.off('playerMove', handleMovePlayer);
+				// socket.off('updateScore', handleUpdateScore);
+				// socket.off('updateBall', handleUpdateBall);
+				// socket.off('newPower', handleNewPowers);
+				// socket.off('resetPlayers')
+				// socket.off('removePower', handleRemovePower);
+				// socket.off('addObstacle',handleAddObstacle)
+				// socket.off('resetObstacles', resetObstacles);
+				// socket.off('endGame', handleEndGame);
 			}
 	}, [handleMovePlayer, handleUpdateScore, handleUpdateBall]);
 

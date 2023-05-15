@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
 
-export default function ButtonStart({socket, playGame, handleGameStart} : {socket: Socket, playGame: boolean, handleGameStart: (roomName:string) => void}) {
-	const [searchGame, setSearchGame] = useState(false);
+export default function ButtonStart({searchGame, socket, playGame, handleGameStart, handleSetSearchGame} : {searchGame:boolean, socket: Socket, playGame: boolean, handleGameStart: (roomName:string) => void, handleSetSearchGame: (value: boolean) => void}) {
 	// Cancel Game
 	function handleCancelGame() {
 		if (socket)
@@ -11,7 +10,7 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 			socket.emit('cancelGame', {
 				clientId: socket.id
 			});
-			setSearchGame(false);
+			handleSetSearchGame(false);
 		}
 	}
 	// Search game
@@ -22,7 +21,7 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 				clientId: socket.id
 				
 			});
-			setSearchGame(true);
+			handleSetSearchGame(true);
 		}
 	}
 
