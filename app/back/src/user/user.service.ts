@@ -100,4 +100,11 @@ export class UserService {
             where: { name },
         });
     }
+
+    async updateElo(name: string, elo: number) {
+        await this.db.user.update({
+            data : { elo },
+            where: { name },
+        });
+    }
 }
