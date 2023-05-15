@@ -6,120 +6,149 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-
+import { UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from 'src/interfaces/pong.interface';
 import { handleGame } from './handleGame.gateway';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
+import * as cookie from 'cookie';
 
-@WebSocketGateway(8001, { cors: '*' })
+@WebSocketGateway(8001, {
+    cors: {
+        origin: process.env.FRONT_URL,
+        credentials: true,
+    },
+})
 export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  	players: PlayerInterface[] = [];
-  	rooms: roomInterface[] = [];
+    constructor(
+        private jwtService: JwtService,
+        private userService: UserService,
+    ) { }
 
-  	@WebSocketServer()
-  	server: Server;
+    players: PlayerInterface[] = [];
+    rooms: roomInterface[] = [];
 
-  	// when a client connects, we add it to the connectedUsers array
-  	handleConnection(client: Socket) 
-	{
-    	// player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
-    	const player: PlayerInterface = {
-    		id: client.id,
-    		state: 0,
-    		y: 0,
-    		score: 0,
-    	};
-    	this.players.push(player);
-    	console.log('players', this.players);
-    	// send the player id to the client
-    	client.emit('playerId', client.id);
-  	}
+    @WebSocketServer()
+    server: Server;
 
-	// remove player from the players array
-	handleDisconnect(client: Socket) 
-	{
-    	// Retirer le joueur de la liste des joueurs actifs
-    	const playerIndex = this.players.findIndex(
-			(player) => player.id === client.id,
-    	);
-    	if (playerIndex !== -1) {
-    		this.players.splice(playerIndex, 1);
-    	}
-	}
+    // when a client connects, we add it to the connectedUsers array
+    async handleConnection(client: Socket) 
+    {
+        // verify user
+        const cookies = cookie.parse(client.handshake.headers.cookie || '');
+        if (!cookies || !cookies.hasOwnProperty('session')) {
+            client.disconnect();
+            throw new UnauthorizedException();
+        }
+        try {
+            const payload = await this.jwtService.verifyAsync(cookies.session);
+            console.log(payload);
+            const user = await this.userService.getUserById(payload.id);
 
-	@SubscribeMessage('searchGame')
-	searchGame(@MessageBody() data: {clientId: string}) 
-	{
-    	const playerId = data.clientId;
-    	const player = this.players.find((player) => player.id === playerId);
-    	if (player) {
-    	  player.state = 1;
-    	}
-    	const waitingPlayer = this.players.find(
-    		(player) => player.state === 1 && player.id !== playerId,
-    	);
-    	if (waitingPlayer && player) {
-    	  	player.state = 2;
-    	  	waitingPlayer.state = 2;
-    	  	const newRoom: roomInterface = {
-    	    	name: 'room' + this.rooms.length,
-    	    	state: 0,
-    	    	pongState: {
-    	    	  	ball: {
-    	    	  	  	x: 0,
-    	    	  	  	y: 0,
-    	    	  	  	speedX: 0.6,
-    	    	  	  	speedY: 0.4,
-    	    	  	},
-    	    	  	player1: waitingPlayer,
-    	    	  	player2: player,
-    	    	},
-    	  	};
-    	  	this.rooms.push(newRoom);
-    	  	this.server.to(playerId).emit('searchGame', newRoom.name);
-    	  	this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
-    	  	handleGame(newRoom, this.server);
-    	}
-    	console.log(this.rooms);
-	}
+            // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
+            const player: PlayerInterface = {
+                id: client.id,
+                name: user.name,
+                state: 0,
+                y: 0,
+                score: 0,
+            };
+            this.players.push(player);
+            console.log('players', this.players);
+            // send the player id to the client
+            client.emit('playerId', client.id);
+        } catch {
+            client.disconnect();
+            throw new UnauthorizedException();
+        }
+    }
 
-	@SubscribeMessage('playerMove')
-	playerMove(@MessageBody() data: { percent: number; clientId: string; room: string }) 
-	{
-    	const room = this.rooms.find((room) => room.name === data.room);
-    	if (room) 
-		{
-      		if (room.pongState.player1.id === data.clientId) 
-			{
-        		const percent = 75 - data.percent;
-        		room.pongState.player2.y = percent;
-        		room.pongState.player1.y = percent;
-        		this.server.to(room.pongState.player2.id).emit('playerMove', percent);
-      		} 
-			else if (room.pongState.player2.id === data.clientId) 
-			{
-        		const percent = 75 - data.percent;
-        		room.pongState.player2.y = percent;
-        		this.server.to(room.pongState.player1.id).emit('playerMove', percent);
-    		}
-    	}
-  	}
+    // remove player from the players array
+    handleDisconnect(client: Socket) 
+    {
+        // Retirer le joueur de la liste des joueurs actifs
+        const playerIndex = this.players.findIndex(
+            (player) => player.id === client.id,
+        );
+        if (playerIndex !== -1) {
+            this.players.splice(playerIndex, 1);
+        }
+    }
 
-  	@SubscribeMessage('cancelGame')
-  	cancelGame(@MessageBody() data: {clientId: string}) 
-  	{
-		const playerId = data.clientId;
-		const player = this.players.find((player) => player.id === playerId);
-		if (player) {
-			player.state = 0;
-		}
-		this.server.to(playerId).emit('cancelGame');
-  	}
+    @SubscribeMessage('searchGame')
+    searchGame(@MessageBody() data: {clientId: string}) 
+    {
+        const playerId = data.clientId;
+        const player = this.players.find((player) => player.id === playerId);
+        if (player) {
+            player.state = 1;
+        }
+        const waitingPlayer = this.players.find(
+            (player) => player.state === 1 && player.id !== playerId,
+        );
+        if (waitingPlayer && player) {
+            player.state = 2;
+            waitingPlayer.state = 2;
+            const newRoom: roomInterface = {
+                name: 'room' + this.rooms.length,
+                state: 0,
+                pongState: {
+                    ball: {
+                        x: 0,
+                        y: 0,
+                        speedX: 0.6,
+                        speedY: 0.4,
+                    },
+                    player1: waitingPlayer,
+                    player2: player,
+                },
+            };
+            this.rooms.push(newRoom);
+            this.server.to(playerId).emit('searchGame', newRoom.name);
+            this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
+            handleGame(newRoom, this.server);
+        }
+        console.log(this.rooms);
+    }
 
-	@SubscribeMessage('startGame')
-	handleMessage(@MessageBody() clientId: string): void 
-	{
-		console.log(clientId);
-    	this.server.emit('startGame', clientId);
-  	}
+    @SubscribeMessage('playerMove')
+    playerMove(@MessageBody() data: { percent: number; clientId: string; room: string }) 
+    {
+        const room = this.rooms.find((room) => room.name === data.room);
+        if (room) 
+        {
+            if (room.pongState.player1.id === data.clientId) 
+            {
+                const percent = 75 - data.percent;
+                room.pongState.player2.y = percent;
+                room.pongState.player1.y = percent;
+                this.server.to(room.pongState.player2.id).emit('playerMove', percent);
+            } 
+            else if (room.pongState.player2.id === data.clientId) 
+            {
+                const percent = 75 - data.percent;
+                room.pongState.player2.y = percent;
+                this.server.to(room.pongState.player1.id).emit('playerMove', percent);
+            }
+        }
+    }
+
+    @SubscribeMessage('cancelGame')
+    cancelGame(@MessageBody() data: {clientId: string}) 
+    {
+        const playerId = data.clientId;
+        const player = this.players.find((player) => player.id === playerId);
+        if (player) {
+            player.state = 0;
+        }
+        this.server.to(playerId).emit('cancelGame');
+    }
+
+    @SubscribeMessage('startGame')
+    handleMessage(@MessageBody() clientId: string): void 
+    {
+        console.log(clientId);
+        this.server.emit('startGame', clientId);
+    }
 }
