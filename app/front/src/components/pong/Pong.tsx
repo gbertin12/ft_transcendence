@@ -18,10 +18,9 @@ function Ball ({x, y} : {x: number, y: number}) {
 	)
 }
 
-function Obstacle ({x, y} : {x: number, y: number}) {
-	return (
-		<div style={{ top: y, left: x}}></div>
-	)
+function Obstacle ({x, y, size, isActive} : {x: number, y: number, size: number, isActive: boolean}) {
+	
+		return <>{isActive && <div className={styles.obstacle} style={{ top: y, left: x, height: size}}></div>}</>
 }
 
 function Power ({isActive, x, y, type} : {isActive: boolean, x: number, y: number, type: number}) {
@@ -44,12 +43,15 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 	const [canvas, setCanvas] = useState({height: 0, width: 0, speedPlayer: 0});
 	const [powers, setPowers] = useState([
 		{isActive: false, x: 0, y: 0, id: 0, type: 0},
-		{isActive: false, x: 0, y: 0, id: 0, type: 0},
-		{isActive: false, x: 0, y: 0, id: 0, type: 0}
+		{isActive: false, x: 0, y: 0, id: 1, type: 0},
+		{isActive: false, x: 0, y: 0, id: 2, type: 0},
+		{isActive: false, x: 0, y: 0, id: 3, type: 0},
+		{isActive: false, x: 0, y: 0, id: 4, type: 0},
+		{isActive: false, x: 0, y: 0, id: 5, type: 0}
 	]); // [{x: 0, y: 0, type: 'speedUp', time: 0}]
 	const [obstacles, setObstacles] = useState([
-		{isActive: false, x: 0, y:0, size: 0, id:0},
-		{isActive: false, x: 0, y:0, size: 0, id: 1}
+		{isActive: true, x: 280, y:0, size: 100, id:0},
+		{isActive: true, x: 420, y:300, size: 100, id: 1}
 	])
 	const ref = useRef(null);
 
@@ -290,6 +292,8 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 						<Power x={powers[0].x} y={powers[0].y} isActive={powers[0].isActive} type={powers[0].type}/>
 						<Power x={powers[1].x} y={powers[1].y} isActive={powers[1].isActive} type={powers[1].type}/>
 						<Power x={powers[2].x} y={powers[2].y} isActive={powers[2].isActive} type={powers[2].type}/>
+						<Obstacle x={obstacles[0].x} y={obstacles[0].y} size={obstacles[0].size} isActive={obstacles[0].isActive}/>
+						<Obstacle x={obstacles[1].x} y={obstacles[1].y} size={obstacles[1].size} isActive={obstacles[1].isActive}/>
 					</div>
 				</div>
 			</Col>

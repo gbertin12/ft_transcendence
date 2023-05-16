@@ -21,6 +21,15 @@
   transform: translate(-50%, -50%)
 }
 
+.obstacle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 100px;
+  background-color: #32BE32CF;
+}
+
 .ball {
   position: absolute;
   top: 0;

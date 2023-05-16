@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
-import {roomInterface, BallData, PowerInterface, ObstacleInterface} from 'src/interfaces/pong.interface';
+import {roomInterface, BallData, PowerInterface, obstaclesInterface} from '../../interfaces/pong.interface';
 import { handleNewPower, handleColisionWithPower } from './handlePower.gateway';
 import { NetworkInterfaceInfo } from 'os';
+import { handleColisionWithObstacle } from './handleObstacle.gateway';
 
 // set playground value
 const canvasHeight = 300;
@@ -9,20 +11,6 @@ const canvasWidth = 500;
 const playerHeight = canvasHeight / 4;
 const radiusBall = 10;
 const spaceBetweenPlayerAndWall = canvasWidth * 0.05;
-
-const player1Start: BallData = {
-  	x: canvasHeight / 2,
-  	y: canvasWidth / 2,
-  	speedX: 0.6,
-  	speedY: 0.8,
-};
-
-const player2Start: BallData = {
-  	x: canvasHeight / 2,
-  	y: canvasWidth / 2,
-  	speedX: -0.6,
-  	speedY: -0.4,
-};
 
 const convertToPercent = (value: number, maxValue: number) => {
   	return (value / maxValue) * 100;
@@ -87,6 +75,8 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 };
 
 const handleCheckCollision = (room: roomInterface) => {
+	// check collision with obstacles
+
 	// check collision with player 1
 	if (room.pongState.ball.x - radiusBall <= spaceBetweenPlayerAndWall &&
 		room.pongState.ball.y >= convertToPixel(75 - room.pongState.player1.y, canvasHeight) &&
@@ -182,10 +172,17 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	room.pongState.player1.y = canvasHeight / 3;
   	room.pongState.player2.y = canvasHeight / 3;
   	let timeToNewPower = 0;
-  	let idPower = 0;
 	let initPlayer = true;
   	const powers: PowerInterface[] = [];
-	const obstacles: ObstacleInterface[];
+	const obstacles: obstaclesInterface[] = [];
+	const powersAvailables: { key: number, value: boolean }[] = [
+		{ key: 0, value: true },
+		{ key: 1, value: true },
+		{ key: 2, value: true },
+		{ key: 3, value: true },
+		{ key: 4, value: true },
+		{ key: 5, value: true },
+	];
 
   	const interval = setInterval(() => {
 		if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0)
@@ -202,11 +199,10 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	  	}
 		timeToNewPower += 1;
 		// return 1 if a new power was create
-		if (handleNewPower(room, server, timeToNewPower, powers, idPower, obstacles))
-			idPower += 1;
+		handleNewPower(room, server, timeToNewPower, powers, powersAvailables, obstacles);
 	  	if (timeToNewPower === 100) 
 			timeToNewPower = 0;
-  	  	handleColisionWithPower(room, server, powers);
+  	  	handleColisionWithPower(room, server, powers, obstacles, powersAvailables);
   	  	// update ball position
   	  	room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
   	  	room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);

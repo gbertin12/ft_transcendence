@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // interface de la ball
 
 export interface BallData {
@@ -42,5 +43,4 @@ export interface obstaclesInterface {
 	y: number;
 	size: number;
 	id: number;
-	isActive: number;
 }
