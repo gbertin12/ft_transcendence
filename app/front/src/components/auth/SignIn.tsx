@@ -1,6 +1,6 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button , Grid, Text} from "@nextui-org/react";
+import { Input, Spacer, Button , Grid, Text, Image} from "@nextui-org/react";
 
 async function login() {
     const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
@@ -45,8 +45,8 @@ export default function SignIn() {
 		 />
 		 </Grid>
 		 <Grid>
-		   <Button bordered onClick={login} color="$white" auto>
-			 <Text >42</Text>
+		   <Button bordered onClick={login} color="$white" auto
+			  icon="42">
 		   </Button>
 		 </Grid>
 		 <Grid>
