@@ -1,12 +1,13 @@
 import Head from 'next/head';
+import Leaderboard from '../components/leaderboard/leaderboard'
 
-export default function Leaderboard() {
+export default function LeaderboardPage() {
 	return (
 	<>
 		<Head>
 			<title> Leaderboard </title>
 		</Head>
-		<h1 className={`flex min-h-screen flex-col items-center justify-between p-24`}>Leaderboard</h1>
+		<Leaderboard/>
 		</>
 	);
 }

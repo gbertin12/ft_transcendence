@@ -13,8 +13,7 @@ import { useState, useEffect } from 'react';
 
 export default function Profile(): JSX.Element {
     //const { data, error } = useSWR('http://localhost:3000/user/me', fetcher);
-    const [ name, setName ] = useState<string>('');
-    const [ avatar, setAvatar ] = useState<string>('');
+    const [ profile, setProfile ] = useState<any>(null);
 
     useEffect(() => {
         (async () => {
@@ -23,8 +22,7 @@ export default function Profile(): JSX.Element {
             );
             if (res?.ok) {
                 const profile = await res.json();
-                setName(profile.name);
-                setAvatar(profile.avatar);
+                setProfile(profile);
             } else {
                 window.location.href = '/login';
             }
@@ -32,13 +30,13 @@ export default function Profile(): JSX.Element {
     }, []);
 
     //if (error) window.location.href = '/login';
-    if (!name) return <div>loading...</div>
+    if (!profile) return <div>loading...</div>
 
     return (
         <LayoutAuth>
             <h2>User Profile</h2>
-            <img src={`http://localhost:3000/static/avatars/${avatar}`}/>
-            <pre>{name}</pre>
+            <img src={`http://localhost:3000/static/avatars/${profile.avatar}`}/>
+            <pre>{JSON.stringify(profile, null, 2)}</pre>
         </LayoutAuth>
     )
 }
