@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
-import {roomInterface, PowerInterface, obstaclesInterface} from '../../interfaces/pong.interface';
+import {roomInterface, PowerInterface, obstaclesInterface, powerAvailables } from '../../interfaces/pong.interface';
 import { handleNewPower, handleColisionWithPower } from './handlePower.gateway';
 import { NetworkInterfaceInfo } from 'os';
 import { handleColisionWithObstacle } from './handleObstacle.gateway';
@@ -75,8 +75,6 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 };
 
 const handleCheckCollision = (room: roomInterface) => {
-	// check collision with obstacles
-
 	// check collision with player 1
 	if (room.pongState.ball.x - radiusBall <= spaceBetweenPlayerAndWall &&
 		room.pongState.ball.y >= convertToPixel(75 - room.pongState.player1.y, canvasHeight) &&
@@ -130,7 +128,11 @@ const sendScore = (room: roomInterface, server: Server) => {
 	});
 };
 
-const initPlayerPosition = (room: roomInterface, server: Server) => {
+const initPosition = (
+	room: roomInterface, 
+	server: Server, 
+	obstacles: obstaclesInterface[],
+	powerAvailables: powerAvailables[]) => {
 	// set players && ball on server side 
 	room.pongState.ball.x = convertToPixel(50, canvasWidth);
     room.pongState.ball.y = convertToPixel(50, canvasHeight);
@@ -139,16 +141,17 @@ const initPlayerPosition = (room: roomInterface, server: Server) => {
 	// send players position to client side
 	server.to(room.pongState.player1.id).emit('resetPlayers', {percentP1: 38.5, percentP2: 38.5});
 	server.to(room.pongState.player2.id).emit('resetPlayers', {percentP1: 38.5, percentP2: 38.5});
-	server.to(room.pongState.player1.id).emit('resetObstacles');
-	server.to(room.pongState.player2.id).emit('resetObstacles');
 }
 
-const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
+const handleResetPlayerPosition = (
+	room: roomInterface, 
+	server: Server, 
+	obstacles: obstaclesInterface[],
+	powerAvailables: powerAvailables[]) => {
   // check who lose round
     if (room.pongState.ball.x <= radiusBall) 
 	{
 		room.pongState.player2.score++;
-		//room.pongState.ball = player1Start;
 		room.pongState.ball.speedX = 1;
 		room.pongState.ball.speedY = 0.8;
 		console.log(room.pongState.ball)
@@ -156,12 +159,11 @@ const handleResetPlayerPosition = (room: roomInterface, server: Server) => {
 	else 
 	{
       	room.pongState.player1.score++;
-      	//room.pongState.ball = player2Start;
 		room.pongState.ball.speedX = -1;
 		room.pongState.ball.speedY = -0.8;
 		console.log(room.pongState.ball)
     }
-	initPlayerPosition(room, server);
+	initPosition(room, server, obstacles,powerAvailables);
     sendScore(room, server);
 }
 
@@ -173,22 +175,21 @@ export const handleGame = (room: roomInterface, server: Server) => {
   	room.pongState.player2.y = canvasHeight / 3;
   	let timeToNewPower = 0;
 	let initPlayer = true;
-  	const powers: PowerInterface[] = [];
 	const obstacles: obstaclesInterface[] = [];
-	const powersAvailables: { key: number, value: boolean }[] = [
-		{ key: 0, value: true },
-		{ key: 1, value: true },
-		{ key: 2, value: true },
-		{ key: 3, value: true },
-		{ key: 4, value: true },
-		{ key: 5, value: true },
-	];
+	const powersAvailables: powerAvailables[] = [
+		{ id: 0, isActive: false, type: -1, x: 20, y:20 },
+		{ id: 1, isActive: false, type: -1, x: 25, y:50 },
+		{ id: 2, isActive: false, type: -1, x: 50, y:25 },
+		{ id: 3, isActive: false, type: -1, x: 75, y:25 },
+		{ id: 4, isActive: false, type: -1, x: 75, y:50 },
+		{ id: 5, isActive: false, type: -1, x: 80, y:80 },
+	]
 
   	const interval = setInterval(() => {
 		if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0)
 		{
 			initPlayer = false;
-		  	initPlayerPosition(room, server);
+		  	initPosition(room, server, obstacles, powersAvailables);
 		}
 		// check if game is finished
 		if (room.pongState.player1.score == 10 || room.pongState.player2.score == 10) 
@@ -201,10 +202,10 @@ export const handleGame = (room: roomInterface, server: Server) => {
 		{
 			timeToNewPower += 1;
 			// return 1 if a new power was create
-			handleNewPower(room, server, timeToNewPower, powers, powersAvailables, obstacles);
+			handleNewPower(room, server, timeToNewPower, powersAvailables, obstacles);
 			if (timeToNewPower === 100) 
 				timeToNewPower = 0;
-			handleColisionWithPower(room, server, powers, obstacles, powersAvailables);
+			handleColisionWithPower(room, server, obstacles, powersAvailables);
 			handleColisionWithObstacle(room, obstacles);
 		}
   	  	// update ball position
@@ -216,6 +217,6 @@ export const handleGame = (room: roomInterface, server: Server) => {
 		handleCheckCollision(room);
 		// check if someone loose the round
   	  	if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
-  	  	  	handleResetPlayerPosition(room, server);
+  	  	  	handleResetPlayerPosition(room, server, obstacles, powersAvailables);
   	}, 40);
 };

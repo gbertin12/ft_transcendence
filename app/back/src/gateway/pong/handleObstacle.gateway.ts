@@ -2,7 +2,7 @@
 /* eslint-disable prettier/prettier */
 
 import { Server } from 'socket.io';
-import {roomInterface, PowerInterface,  obstaclesInterface} from '../../interfaces/pong.interface';
+import {roomInterface, PowerInterface,  obstaclesInterface, powerAvailables} from '../../interfaces/pong.interface';
 import { convertToPixel } from './handleGame.gateway';
 
 const canvasHeight = 300;
@@ -36,7 +36,7 @@ export const handleColisionWithObstacle = (room: roomInterface, obstacles: obsta
 	}
 }
 
-export const getType = (obstacles: obstaclesInterface[], powers: PowerInterface[]) => {
+export const getType = (obstacles: obstaclesInterface[], powers: powerAvailables[]) => {
 	let type = Math.floor(Math.random() * 3);
 	if (type == 2)
 	{

@@ -36,7 +36,6 @@ export interface PowerInterface {
   	x: number;
   	y: number;
   	type: number;
-  	time: number;
   	id: number;
 }
 
@@ -45,4 +44,12 @@ export interface obstaclesInterface {
 	y: number;
 	size: number;
 	id: number;
+}
+
+export interface powerAvailables {
+	id: number,
+	isActive: boolean,
+	type: number,
+	x: number,
+	y:number
 }

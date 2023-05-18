@@ -50,8 +50,8 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		{isActive: false, x: 0, y: 0, id: 5, type: 0}
 	]); // [{x: 0, y: 0, type: 'speedUp', time: 0}]
 	const [obstacles, setObstacles] = useState([
-		{isActive: true, x: 280, y:0, size: 100, id:0},
-		{isActive: true, x: 420, y:300, size: 100, id: 1}
+		{isActive: false, x: 280, y:0, size: 100, id:0},
+		{isActive: false, x: 420, y:300, size: 100, id: 1}
 	])
 	const ref = useRef(null);
 
@@ -136,33 +136,27 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 	}
 
 	const handleNewPowers = ({x, y, id, type} : {x: number, y: number, id: number, type: number}) => {
-		console.log(x, y);
 		const PixelX = convertToPixel(x, canvas.width);
 		const PixelY = convertToPixel(y, canvas.height);
 		var i = 0;
-		console.log("new power id", id);
-		while (i < 3 && powers[i].isActive)
-			i++;
-		if (i < 3)
-		{
-			setPowers(prevPowers => {
-				return prevPowers.map((power, index) => {
-					if (index === i) { 
-						return { isActive: true, x: PixelX, y: PixelY, id: id, type: type};
-				  	} else {
-						return power; 
-				  	}
-				});
+		console.log("new power id", id, PixelX, PixelY);
+		setPowers(prevPowers => {
+			return prevPowers.map((power) => {
+				if (power.id === id) { 
+					return { isActive: true, x: PixelX, y: PixelY, id: id, type: type};
+			  	} else {
+					return power; 
+			  	}
 			});
-		}
-			
+		});
+		console.log("after ", powers, id);
 	}
 
 	const handleRemovePower = ({id} : {id: number}) => {
 		setPowers(prevPowers => {
 			return prevPowers.map((power) => {
 			  if (power.id == id) {
-				return { isActive: true, x:0, y: 0, id: 0, type: 0};
+				return { isActive: false, x:0, y: 0, id: id, type: 0};
 			  } else {
 				return power; 
 			  }
@@ -185,14 +179,8 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		});
 	}
 
-	const resetObstacles = () => {
-		setObstacles([
-			{isActive: false, x: 0, y:0, size: 0, id:0},
-			{isActive: false, x: 0, y:0, size: 0, id:1}
-		])
-	}
-
 	const handleResetPlayer = ({percentP1, percentP2} : {percentP1: number, percentP2: number}) => {
+		console.log('resetPlayers');
 		const newYP1 = convertToPixel(percentP1, canvas.height);
 		const newYP2 = convertToPixel(percentP2, canvas.height);
 		setPlayerPosition({yPlayerOne: newYP1, yPlayerTwo:newYP2});
@@ -204,25 +192,23 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 	}
 
 	useEffect(() => {
-			// socket.on('playerMove', handleMovePlayer)
-			// socket.on('updateScore', handleUpdateScore)
-			// socket.on('updateBall', handleUpdateBall)
-			// socket.on('resetPlayers', handleResetPlayer)
-			// socket.on('newPower', handleNewPowers)
-			// socket.on('removePower', handleRemovePower)
-			// socket.on('resetObstacles',resetObstacles)
-			// socket.on('addObstacle',handleAddObstacle)
-			// socket.on('endGame', handleEndGame)
+			socket.on('playerMove', handleMovePlayer);
+			socket.on('updateScore', handleUpdateScore);
+			socket.on('updateBall', handleUpdateBall);
+			socket.on('resetPlayers', handleResetPlayer);
+			socket.on('newPower', handleNewPowers);
+			socket.on('removePower', handleRemovePower);
+			socket.on('addObstacle',handleAddObstacle);
+			socket.on('endGame', handleEndGame);
 			return () => {
-				// socket.off('playerMove', handleMovePlayer);
-				// socket.off('updateScore', handleUpdateScore);
-				// socket.off('updateBall', handleUpdateBall);
-				// socket.off('newPower', handleNewPowers);
-				// socket.off('resetPlayers')
-				// socket.off('removePower', handleRemovePower);
-				// socket.off('addObstacle',handleAddObstacle)
-				// socket.off('resetObstacles', resetObstacles);
-				// socket.off('endGame', handleEndGame);
+				socket.off('playerMove', handleMovePlayer);
+				socket.off('updateScore', handleUpdateScore);
+				socket.off('updateBall', handleUpdateBall);
+				socket.off('newPower', handleNewPowers);
+				socket.off('resetPlayers', handleResetPlayer);
+				socket.off('removePower', handleRemovePower);
+				socket.off('addObstacle',handleAddObstacle);
+				socket.off('endGame', handleEndGame);
 			}
 	}, [handleMovePlayer, handleUpdateScore, handleUpdateBall]);
 
@@ -292,6 +278,9 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 						<Power x={powers[0].x} y={powers[0].y} isActive={powers[0].isActive} type={powers[0].type}/>
 						<Power x={powers[1].x} y={powers[1].y} isActive={powers[1].isActive} type={powers[1].type}/>
 						<Power x={powers[2].x} y={powers[2].y} isActive={powers[2].isActive} type={powers[2].type}/>
+						<Power x={powers[3].x} y={powers[3].y} isActive={powers[3].isActive} type={powers[3].type}/>
+						<Power x={powers[4].x} y={powers[4].y} isActive={powers[4].isActive} type={powers[4].type}/>
+						<Power x={powers[5].x} y={powers[5].y} isActive={powers[5].isActive} type={powers[5].type}/>
 						<Obstacle x={obstacles[0].x} y={obstacles[0].y} size={obstacles[0].size} isActive={obstacles[0].isActive}/>
 						<Obstacle x={obstacles[1].x} y={obstacles[1].y} size={obstacles[1].size} isActive={obstacles[1].isActive}/>
 					</div>

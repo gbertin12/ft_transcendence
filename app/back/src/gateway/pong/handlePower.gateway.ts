@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
-import {roomInterface, PowerInterface, obstaclesInterface} from '../../interfaces/pong.interface';
+import {roomInterface, PowerInterface, obstaclesInterface, powerAvailables} from '../../interfaces/pong.interface';
 import {convertToPixel} from './handleGame.gateway';
 import {getType,createObstacle} from './handleObstacle.gateway'
 import { get } from 'http';
@@ -13,80 +13,87 @@ const radiusBall = 10;
 const spaceBetweenPlayerAndWall = canvasWidth * 0.05;
 
 
-const getAvailablePower = (powerAvailables: { key: number, value: boolean }[], nbPowers : number) => {
-	const id = Math.floor(Math.random() *  powerAvailables.length - nbPowers);
+const setAvailablePower = (
+	powerAvailables: powerAvailables[],
+	nbPowers : number,
+	obstacles: obstaclesInterface[],
+	) : number  => {
+
+	const id = Math.floor(Math.random() *  (powerAvailables.length - nbPowers));
 	let i = 0;
 	let nbAvailable = 0;
-	while (nbAvailable < id && i < powerAvailables.length)
+	while (nbAvailable != id && i < powerAvailables.length)
 	{
-		if (powerAvailables[i].value == true)
-		{
+		if (powerAvailables[i].isActive == false)
 			nbAvailable++;
-			if (nbAvailable == id)
-			{
-				powerAvailables[i].value = false;
-				return powerAvailables[i].key;
-			}
-		}
 		i++;
 	}
-	return 0;
+	//const type = getType(obstacles, powerAvailables);
+	while (powerAvailables[i].isActive && i < powerAvailables.length)
+		i++;
+	const type = 1;
+	powerAvailables[i].isActive = true;
+	powerAvailables[i].type = type;
+	return i;
 };
 
+const countNbPowersUses = (powerAvailables: powerAvailables[]) : number => {
+	let count = 0;
+	let i = 0;
+  	while (i < powerAvailables.length)
+	{
+		if (powerAvailables[i].isActive)
+			count++;
+		i++
+	}
+	return count;
+}
 
 // Create New Power on Canvas && Add Power to the list of power in game
 export const handleNewPower = (
 	room: roomInterface,
 	server: Server,
 	timeToNewPower: number,
-	powers: PowerInterface[],
-	powerAvailables: { key: number, value: boolean }[],
+	powerAvailables: powerAvailables[],
 	obstacles: obstaclesInterface[]
-  	) => {
+  	) : boolean => {
 	if (timeToNewPower === 100) 
 	{
 		timeToNewPower = 0;
-	  	if (powers.length < 3) 
+		const nbPowers = countNbPowersUses(powerAvailables);
+	  	if (nbPowers < 3) 
 		{
-			const idPower = getAvailablePower(powerAvailables, obstacles.length);
-			const type = getType(obstacles, powers);
-			const newPower = {
-		  	x: Math.floor(Math.random() * 60) + 20,
-		  	y: Math.floor(Math.random() * 60) + 20,
-		  	type: type,
-		  	time: 0,
-		  	id: idPower,
-			};
-			powers.push(newPower);
-			server.to(room.pongState.player1.id).emit('newPower', {
-			  	x: newPower.x,
-			  	y: newPower.y,
-			  	id: idPower,
-				type: newPower.type
-			});
-			server.to(room.pongState.player2.id).emit('newPower', {
-			  	x: 100 - newPower.x,
-			  	y: 100 - newPower.y,
-			  	id: idPower,
-				type: newPower.type
-			});
-			return true;
+			const id = setAvailablePower(powerAvailables, nbPowers, obstacles);
+				server.to(room.pongState.player1.id).emit('newPower', {
+					x: powerAvailables[id].x,
+					y: powerAvailables[id].y,
+					id: powerAvailables[id].id,
+					type: powerAvailables[id].type
+				});
+				server.to(room.pongState.player2.id).emit('newPower', {
+					x: 100 - powerAvailables[id].x,
+					y: 100 - powerAvailables[id].y,
+					id: powerAvailables[id].id,
+					type: powerAvailables[id].type
+				});
+				return true;
 	  	}
 	}
 	return false;
   };
 
-export const handleColisionWithPower = (room: roomInterface, server: Server, powers: PowerInterface[], obstacles: obstaclesInterface[], powerAvailables: { key: number, value: boolean }[]) => {
-	powers.forEach((power) => {
-	  if (room.pongState.ball.x > convertToPixel(power.x, canvasWidth) - 10 &&
+export const handleColisionWithPower = (room: roomInterface, server: Server, obstacles: obstaclesInterface[], powerAvailables: powerAvailables[]) => {
+	let id : number = -1;
+	powerAvailables.forEach((power) => {
+	  if (power.isActive &&
+		room.pongState.ball.x > convertToPixel(power.x, canvasWidth) - 10 &&
 		room.pongState.ball.x < convertToPixel(power.x, canvasWidth) + 10 &&
 		room.pongState.ball.y > convertToPixel(power.y, canvasHeight) - 20 &&
 		room.pongState.ball.y < convertToPixel(power.y, canvasHeight) + 20
 	  ) 
 	  	{
-			powerAvailables[power.id].value = true;
 			server.to(room.pongState.player1.id).emit('removePower', {
-			  	id: power.id,
+				id: power.id,
 			});
 			server.to(room.pongState.player2.id).emit('removePower', {
 			  	id: power.id,
@@ -98,28 +105,27 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, pow
 					room.pongState.ball.speedX -= 0.3;
 				else
 					room.pongState.ball.speedX += 0.3;
-				if (room.pongState.ball.speedY < 0)
-				room.pongState.ball.speedY -= 0.3;
-				else
-				room.pongState.ball.speedY += 0.3;
-			} 
+					if (room.pongState.ball.speedY < 0)
+					room.pongState.ball.speedY -= 0.3;
+					else
+					room.pongState.ball.speedY += 0.3;
+				} 
 			else if (power.type === 1) 
 			{
 				// bounce bonus
-				console.log("change direction ")
-				let newSpeedY = -room.pongState.ball.speedY
+				let newSpeedY = -room.pongState.ball.speedY;
 				if (newSpeedY < 0)
 					newSpeedY -= 0.2;
 				else
 					newSpeedY += 0.2;
-			  	room.pongState.ball.speedY = newSpeedY;
-			} else 
+				room.pongState.ball.speedY = newSpeedY;
+			} else if (power.type === 2)
 			{
 				// spawn obstacles bonus
-				console.log('spawn object');
 				createObstacle(server, room, obstacles);
 			}
-			powers.splice(powers.indexOf(power), 1);
+			powerAvailables[power.id].isActive = false;	
+			powerAvailables[power.id].type = -1;
 		}
 	});
 };
