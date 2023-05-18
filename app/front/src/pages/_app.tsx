@@ -12,7 +12,7 @@ const lightTheme = createTheme({
 			background: "#ECEDEE",
 			primary: "$black",
 			primaryLightContrast: "$black",
-			secondary:  "#DFDFDF"
+			secondary: "#DFDFDF"
 		}
 	}
 })

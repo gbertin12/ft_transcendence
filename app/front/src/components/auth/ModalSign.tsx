@@ -14,29 +14,29 @@ export default function App() {
 
 	return (
 		<div>
-		<Button auto   onPress={handler}>
-		<Text color="secondary">Se connecter </Text>
-		</Button>
-		<Modal closeButton
-		blur
-		aria-labelledby="SignIn"
-		width="80%"
-		open={visible}
-		onClose={closeHandler}
-		>
-		<Modal.Body >
-		<Grid direction="row" >
-		<Grid.Container justify='center' gap={4} >
-		<Grid>
-		<SignIn/>
-		</Grid>
-		<Grid>
-		<SignUp/>
-		</Grid>
-		</Grid.Container>
-		</Grid>
-		</Modal.Body>
-		</Modal>
+			<Button auto onPress={handler}>
+				<Text color="secondary">Se connecter </Text>
+			</Button>
+			<Modal closeButton
+				blur
+				aria-labelledby="SignIn"
+				width="80%"
+				open={visible}
+				onClose={closeHandler}
+			>
+				<Modal.Body >
+					<Grid direction="row" >
+						<Grid.Container justify='center' gap={4} >
+							<Grid>
+								<SignIn />
+							</Grid>
+							<Grid>
+								<SignUp />
+							</Grid>
+						</Grid.Container>
+					</Grid>
+				</Modal.Body>
+			</Modal>
 		</div>
 	);
 }
