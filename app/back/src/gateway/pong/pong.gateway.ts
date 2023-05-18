@@ -29,6 +29,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     		state: 0,
     		y: 0,
     		score: 0,
+			modes: true,
     	};
     	this.players.push(player);
     	console.log('players', this.players);
@@ -49,18 +50,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('searchGame')
-	searchGame(@MessageBody() data: {clientId: string}) 
+	searchGame(@MessageBody() data: {clientId: string, modes: boolean}) 
 	{
     	const playerId = data.clientId;
     	const player = this.players.find((player) => player.id === playerId);
     	if (player) {
     	  player.state = 1;
+		  player.modes = data.modes;
     	}
 		//matchmaking
     	const waitingPlayer = this.players.find(
-    		(player) => player.state === 1 && player.id !== playerId,
+    		(player) => player.state === 1 && player.id !== playerId && player.modes === data.modes,
     	);
-    	if (waitingPlayer && player) {
+    	if (waitingPlayer && player) 
+		{
     	  	player.state = 2;
     	  	waitingPlayer.state = 2;
     	  	const newRoom: roomInterface = {
@@ -75,6 +78,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     	    	  	},
     	    	  	player1: waitingPlayer,
     	    	  	player2: player,
+					modes: data.modes,
     	    	},
     	  	};
     	  	this.rooms.push(newRoom);

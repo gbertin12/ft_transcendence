@@ -15,6 +15,7 @@ export interface PlayerInterface {
   	state: number;
   	y: number;
   	score: number;
+	modes: boolean;
 }
 
 // interface du state
@@ -22,6 +23,7 @@ export interface PongState {
   	ball: BallData;
   	player1: PlayerInterface;
   	player2: PlayerInterface;
+	modes: boolean;
 }
 // room state : 0 = not started, 1 = started, 2 = finished
 export interface roomInterface {

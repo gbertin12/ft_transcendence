@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
 
-export default function ButtonStart({searchGame, socket, playGame, handleGameStart, handleSetSearchGame} : {searchGame:boolean, socket: Socket, playGame: boolean, handleGameStart: (roomName:string) => void, handleSetSearchGame: (value: boolean) => void}) {
+export default function ButtonStart({searchGame, socket, modes, handleGameStart, handleSetSearchGame} : {searchGame:boolean, socket: Socket, modes: boolean, handleGameStart: (roomName:string) => void, handleSetSearchGame: (value: boolean) => void}) {
 	// Cancel Game
 	function handleCancelGame() {
 		if (socket)
@@ -18,8 +18,8 @@ export default function ButtonStart({searchGame, socket, playGame, handleGameSta
 		if (socket)
 		{
 			socket.emit('searchGame', {
-				clientId: socket.id
-				
+				clientId: socket.id,
+				modes: modes
 			});
 			handleSetSearchGame(true);
 		}

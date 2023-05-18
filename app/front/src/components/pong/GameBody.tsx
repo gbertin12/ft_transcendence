@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pong from './Pong'
-import {Container, Row, Spacer, Text } from '@nextui-org/react'
+import {Container, Row, Spacer, Text, Checkbox } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
 import CardPlayerInformation from './CardPlayerInformation';
 import ButtonStart  from './ButtonStart'
@@ -12,6 +12,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const [endGame, setEndGame] = useState(false);
 	const [roomId, setRoomId] = useState('');
 	const [searchGame, setSearchGame] = useState(false);
+	const [modes, setModes] = useState(true);
 	const [dataEndGame, setDataEndGame] = useState({
 		win: false, score1: 0, score2: 0 
 	})
@@ -36,11 +37,14 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const handleCloseCardEndGame = () => {
 		setEndGame(false);
 	}
-	return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
+	//return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
 	//return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
 	if (!playGame && !endGame)
 	{
 		return <>
+			<div>
+				<Checkbox defaultSelected onChange={() => setModes(!modes)}>Modes</Checkbox>
+			</div>
 			<Container>
 				<Row justify='center'>
 					<CardPlayerInformation searchGame={false} username={"gbertin"} avatar="https://i.imgur.com/fjZQLH6.png" elo={1200} nbWin={8} nbLoose={3} />
@@ -51,7 +55,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 				</Row>
 			</Container>
 			<Spacer y={2} />
-			<ButtonStart searchGame={searchGame} socket={socket} playGame={playGame} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
+			<ButtonStart searchGame={searchGame} socket={socket} modes={modes} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
 		</>
 	}
 	else if (!playGame && endGame)

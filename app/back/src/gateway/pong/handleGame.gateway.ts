@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
-import {roomInterface, BallData, PowerInterface, obstaclesInterface} from '../../interfaces/pong.interface';
+import {roomInterface, PowerInterface, obstaclesInterface} from '../../interfaces/pong.interface';
 import { handleNewPower, handleColisionWithPower } from './handlePower.gateway';
 import { NetworkInterfaceInfo } from 'os';
 import { handleColisionWithObstacle } from './handleObstacle.gateway';
@@ -197,12 +197,16 @@ export const handleGame = (room: roomInterface, server: Server) => {
 			handleEndGame(room, server);
 			return;
   	  	}
-		timeToNewPower += 1;
-		// return 1 if a new power was create
-		handleNewPower(room, server, timeToNewPower, powers, powersAvailables, obstacles);
-	  	if (timeToNewPower === 100) 
-			timeToNewPower = 0;
-  	  	handleColisionWithPower(room, server, powers, obstacles, powersAvailables);
+		if (room.pongState.modes)
+		{
+			timeToNewPower += 1;
+			// return 1 if a new power was create
+			handleNewPower(room, server, timeToNewPower, powers, powersAvailables, obstacles);
+			if (timeToNewPower === 100) 
+				timeToNewPower = 0;
+			handleColisionWithPower(room, server, powers, obstacles, powersAvailables);
+			handleColisionWithObstacle(room, obstacles);
+		}
   	  	// update ball position
   	  	room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
   	  	room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
