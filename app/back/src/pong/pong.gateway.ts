@@ -8,10 +8,10 @@ import {
 } from '@nestjs/websockets';
 import { UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { roomInterface, PlayerInterface } from 'src/interfaces/pong.interface';
+import { roomInterface, PlayerInterface } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
 
 @WebSocketGateway(8001, {
@@ -53,6 +53,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 state: 0,
                 y: 0,
                 score: 0,
+                modes: true,
             };
             this.players.push(player);
             console.log('players', this.players);
@@ -77,15 +78,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('searchGame')
-    searchGame(@MessageBody() data: {clientId: string}) 
+    searchGame(@MessageBody() data: {clientId: string, modes: boolean}) 
     {
         const playerId = data.clientId;
         const player = this.players.find((player) => player.id === playerId);
         if (player) {
             player.state = 1;
+            player.modes = data.modes;
         }
         const waitingPlayer = this.players.find(
-            (player) => player.state === 1 && player.id !== playerId,
+            (player) => player.state === 1 && player.id !== playerId && player.modes === data.modes,
         );
         if (waitingPlayer && player) {
             player.state = 2;
@@ -102,6 +104,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     },
                     player1: waitingPlayer,
                     player2: player,
+                    modes: data.modes
                 },
             };
             this.rooms.push(newRoom);

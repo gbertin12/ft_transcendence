@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { Button } from '@nextui-org/react'
 import io, { Socket } from 'socket.io-client';
 
-export default function ButtonStart({socket, playGame, handleGameStart} : {socket: Socket, playGame: boolean, handleGameStart: (roomName:string) => void}) {
-	const [searchGame, setSearchGame] = useState(false);
+export default function ButtonStart({searchGame, socket, modes, handleGameStart, handleSetSearchGame} : {searchGame:boolean, socket: Socket, modes: boolean, handleGameStart: (roomName:string) => void, handleSetSearchGame: (value: boolean) => void}) {
 	// Cancel Game
 	function handleCancelGame() {
 		if (socket)
@@ -10,7 +10,7 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 			socket.emit('cancelGame', {
 				clientId: socket.id
 			});
-			setSearchGame(false);
+			handleSetSearchGame(false);
 		}
 	}
 	// Search game
@@ -18,9 +18,10 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 		if (socket)
 		{
 			socket.emit('searchGame', {
-				clientId: socket.id
+				clientId: socket.id,
+				modes: modes
 			});
-			setSearchGame(true);
+			handleSetSearchGame(true);
 		}
 	}
 
@@ -31,11 +32,16 @@ export default function ButtonStart({socket, playGame, handleGameStart} : {socke
 			}
 	}, [handleGameStart]);
 	
-	return <>
-		{ searchGame === true ? (
-		<button onClick={handleCancelGame}>Cancel Game</button>
-	) : (
-		<button onClick={handleSearchGame}>Search Game</button>
-	)}
-	</>
+	if (searchGame === true)
+	{
+		return <>
+			<Button css={{ mx:'auto' }} onClick={handleCancelGame} color="error">Cancel Game</Button>
+		</>
+	}
+	else
+	{
+		return <>
+			<Button css={{ mx:'auto' }} bordered onClick={handleSearchGame} color="success">Search Game</Button>
+		</>
+	}
 }
