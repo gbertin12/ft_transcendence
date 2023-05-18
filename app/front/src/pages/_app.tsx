@@ -11,7 +11,8 @@ const lightTheme = createTheme({
 			backgroundAlpha: "#DFDFDF",
 			background: "#ECEDEE",
 			primary: "$black",
-			primaryLightContrast: "$black"
+			primaryLightContrast: "$black",
+			secondary:  "#DFDFDF"
 		}
 	}
 })
@@ -23,6 +24,8 @@ const darkTheme = createTheme({
 			backgroundAlpha: "#121212",
 			background: "#0F0F0F",
 			primary: "#32BE32",
+			secondary: "#121212",
+
 			primaryLightContrast: "#289828"
 		}
 	}

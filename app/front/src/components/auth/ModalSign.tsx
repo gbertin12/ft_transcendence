@@ -15,7 +15,7 @@ export default function App() {
 	return (
 		<div>
 		<Button auto   onPress={handler}>
-		Se connecter
+		<Text color="secondary">Se connecter </Text>
 		</Button>
 		<Modal closeButton
 		blur
