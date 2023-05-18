@@ -40,7 +40,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
             client.disconnect();
-            throw new UnauthorizedException;
+            return "UnauthorizedException";
         }
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
@@ -61,7 +61,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.emit('playerId', client.id);
         } catch {
             client.disconnect();
-            throw new UnauthorizedException;
+            return "UnauthorizedException";
         }
     }
 
