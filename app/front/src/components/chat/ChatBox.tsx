@@ -17,16 +17,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
+    const [user, setUser] = useState<any>();
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
         const url = `http://localhost:3000/channel/${channelId}/messages`;
-        const res = await fetch(url);
+        const res = await fetch(url, { credentials: "include" });
         const data = await res.json();
         return data;
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:3000/channel/all")
+        fetch("http://localhost:3000/user/me", { credentials: "include" })
+            .then((res) => res.json())
+            .then((data) => {
+                setUser(data);
+            });
+        fetch("http://localhost:3000/channel/all", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => {
                 setChannels(data);
@@ -74,11 +80,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
         // POST request to send the message to the server
         fetch(`http://localhost:3000/channel/${selectedChannel?.id}/message`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ content: message }),
-        }) // TODO: check that API sent a 200
+        })
     }, [selectedChannel]);
 
     const handleChannelChange = useCallback((channel: Channel) => {
@@ -149,7 +156,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
                                         <ChatMessage
                                             content={message.content}
                                             senderId={message.sender_id}
-                                            userId={1}
+                                            userId={user?.id}
                                         />
                                     </li>
                                 ))}

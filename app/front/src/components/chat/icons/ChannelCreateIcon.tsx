@@ -118,6 +118,7 @@ const ChannelCreateIcon: React.FC = () => {
                                 // Send a POST to /channel/create
                                 fetch("http://localhost:3000/channel/create", {
                                     method: "POST",
+                                    credentials: "include",
                                     headers: {
                                         "Content-Type": "application/json",
                                     },

@@ -1,10 +1,11 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
 import { sha512 } from 'sha512-crypt-ts';
 import ChatGateway, { usersChannels } from '../gateway/chat.gateway';
 import { Channel, Message } from '@prisma/client';
+import { AuthGuard } from '@nestjs/passport';
 
 class ChannelDto {
 	@Type(() => Number)
@@ -35,25 +36,27 @@ export class ChannelController {
     { }
 
     // /channel/all
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Get('all')
-    async allUsers() {
+    async allUsers(@Req() req) {
         return await this.channelService.allChannels();
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Get(':channel_id/messages')
-    async channelMessages(@Param() dto: ChannelDto) {
+    async channelMessages(@Param() dto: ChannelDto, @Req() req) {
         return await this.channelService.getMessages(dto.channel_id);
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post(':channel_id/message')
-    async createMessage(@Param() dto: ChannelDto, @Body() body: any) {
+    async createMessage(@Param() dto: ChannelDto, @Body() body: any, @Req() req) {
         if (!body || !body.content)         { throw new HttpException('Invalid Message', 400); }
         if (body.content.length > 2000)     { throw new HttpException('Message too long', 400); }
 
         // TODO: Check that the channel exists
         // TODO: Check that the user is in the channel
-        // TODO: Get userId with session / cookies / token / whatever
-        let senderId = 1;
+        let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
         for (const [id, channel] of Object.entries(usersChannels)) {
             if (channel === dto.channel_id) {
@@ -63,27 +66,27 @@ export class ChannelController {
         return message;
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post('create')
-    async createChannel(@Body() body: any) {
-        let ownerId = 1;
+    async createChannel(@Body() body: any, @Req() req) {
+        let ownerId = req.user['id'];
         let channel: Channel = await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
         this.chatGateway.server.emit('newChannel', channel);
-        console.log('Created channel', channel);
         return channel;
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Delete(':channel_id')
-    async deleteChannel(@Param() dto: ChannelDto) {
-        // TODO: Get userId with session / cookies / token / whatever
-        let userId = 1;
+    async deleteChannel(@Param() dto: ChannelDto, @Req() req) {
+        let userId = req.user['id'];
         await this.channelService.deleteChannel(dto.channel_id, userId);
         this.chatGateway.server.emit('deleteChannel', dto.channel_id);
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Patch(':channel_id')
-    async updateChannel(@Param() dto: ChannelDto, @Body() body: ChannelUpdateDto) {
-        // TODO: Get userId with session / cookies / token / whatever (check if owner)
-        let userId = 1;
+    async updateChannel(@Param() dto: ChannelDto, @Body() body: ChannelUpdateDto, @Req() req) {
+        let userId = req.user['id'];
 
         let channel: any = await this.channelService.getChannel(dto.channel_id);
         if (!channel) { throw new HttpException('Channel not found', 404); }
