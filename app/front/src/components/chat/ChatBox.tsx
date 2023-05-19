@@ -12,11 +12,11 @@ interface ChatBoxProps {
     socket: Socket;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState<Channel>();
+    const [selectedChannel, setSelectedChannel] = useState<Channel>(0);
     const [user, setUser] = useState<any>();
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
@@ -39,30 +39,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
                 setSelectedChannel(data[0]);
                 setLoading(false);
             });
+    }, []);
 
+    useEffect(() => {
         // Listen for new messages
-        socket.on('message', (payload: Message) => {
-            setMessages((messages) => [payload, ...messages]);
-        });
-        socket.on('newChannel', (payload: Channel) => {
-            setChannels((channels) => [...channels, payload]);
-        });
-        socket.on('deleteChannel', (payload: number) => {
-            setChannels((channels) => channels.filter((c) => c.id !== payload));
-            if (selectedChannel?.id === payload) {
-                setSelectedChannel(channels[0]);
-            }
-        });
-        socket.on('editChannel', (payload: Channel) => {
-            setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
-        });
-
-        return () => {
-            socket.off('message');
-            socket.off('newChannel');
-            socket.off('deleteChannel');
-            socket.off('editChannel');
-        };
+        if (socket) {
+            socket.on('message', (payload: any) => {
+                setMessages((messages) => [payload.message, ...messages]);
+            });
+            socket.on('newChannel', (payload: any) => {
+                setChannels((channels) => [...channels, payload.channel]);
+            });
+            socket.on('deleteChannel', (payload: any) => {
+                setChannels((channels) => channels.filter((c) => c.id !== payload.channel.id));
+                if (selectedChannel?.id === payload.channel.id) {
+                    setSelectedChannel(channels[0]);
+                }
+            });
+            socket.on('editChannel', (payload: any) => {
+                setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
+            });
+        }
     }, [socket]);
 
     useEffect(() => {
@@ -90,6 +87,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }) => {
 
     const handleChannelChange = useCallback((channel: Channel) => {
         setSelectedChannel(channel);
+        socket.emit('join', {
+            channel: selectedChannel.id,
+        });
     }, []);
 
     const memoizedMessages = useMemo(() => messages, [messages]);

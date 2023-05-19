@@ -58,6 +58,7 @@ export class ChannelController {
         // TODO: Check that the user is in the channel
         let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
+        // TODO: Emit to room
         for (const [id, channel] of Object.entries(usersChannels)) {
             if (channel === dto.channel_id) {
                 this.chatGateway.server.to(id).emit('message', message);

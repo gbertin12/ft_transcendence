@@ -14,8 +14,6 @@ import { Message } from '../interfaces/chat.interfaces';
 // Map of user id to channel id
 export let usersChannels: Record<number, number> = {};
 
-// FIXME: Make sure to not completely trust the client
-
 @WebSocketGateway(8001, { cors: '*' })
 export class ChatGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -32,20 +30,6 @@ export class ChatGateway
     }
     
     handleDisconnect(client: Socket) {
-        console.log('Client disconnected');
-        delete usersChannels[client.id];
-    }
-    
-    @SubscribeMessage('message') // Message received from client
-    handleMessage(client: Socket, payload: any) {
-        // this.server.emit('message', payload);
-        // send message to all users in the same channel
-        const channelId = payload.message.channel_id;
-        for (const [id, channel] of Object.entries(usersChannels)) {
-            if (channel === channelId) {
-                this.server.to(id).emit('message', payload);
-            }
-        }
     }
 
     @SubscribeMessage('join') // Message received from client

@@ -14,8 +14,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
 
-@Injectable()
-@WebSocketGateway(8001, { cors: { origin: process.env.FRONT_URL, credentials: true }})
+@WebSocketGateway(8002, {
+    cors: {
+        origin: process.env.FRONT_URL,
+        credentials: true,
+    },
+})
 export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private jwtService: JwtService,

@@ -1,10 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ChatBox from "../../components/chat/ChatBox";
 import { Loading, Spinner } from "@nextui-org/react";
 import io from 'socket.io-client';
 
+function useSocket(url: string) {
+    const [socket, setSocket] = useState<any>();
+    useEffect(() => {
+        const socketIo = io(url);
+        setSocket(socketIo);
+        function cleanup() {
+            socketIo.disconnect()
+        }
+        return cleanup
+    }, [])
+    return socket
+}
+
 const Chat: React.FC = () => {
-	const socket = io('http://localhost:8001');
+	const socket = useSocket('http://localhost:8001');
 
 	return (
 		<ChatBox socket={socket} />

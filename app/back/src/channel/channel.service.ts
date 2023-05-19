@@ -1,11 +1,15 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import { sha512 } from 'sha512-crypt-ts';
-import { Channel } from '@prisma/client';
+import { Channel, Message } from '@prisma/client';
+import ChatGateway from '../gateway/chat.gateway';
 
 @Injectable()
 export class ChannelService {
-    constructor(private db: DbService) { }
+    constructor(
+        private db: DbService,
+        private gateway: ChatGateway
+    ) { }
 
     async allChannels() {
         // return whether the password is set or not
@@ -35,7 +39,7 @@ export class ChannelService {
         });
     }
 
-    async createMessage(senderId: number, id: number, content: string) {
+    async createMessage(senderId: number, id: number, content: string): Promise<Message> {
         return await this.db.message.create({
             data: {
                 sender_id: senderId,
