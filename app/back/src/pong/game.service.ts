@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { handleColisionWithObstacle,  } from './obstacles';
+import { handleColisionWithObstacle, } from './obstacles';
 import { handleNewPower, handleColisionWithPower } from './power';
-import { UserService } from '../../src/user/user.service';
-import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables } from '../../src/interfaces/pong.interface';
+import { UserService } from '../user/user.service';
+import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables } from '../interfaces/pong.interface';
 
 // set playground value
 const canvasHeight = 300;
@@ -152,28 +152,28 @@ const handleResetPlayerPosition = (
 
 @Injectable()
 export class GameService {
-    constructor(
-        private userService: UserService,
-    ) { }
+	constructor(
+		private userService: UserService,
+	) { }
 
-    handleGame(room: roomInterface, server: Server) {
-        // set ball position
-        room.pongState.ball.x = convertToPixel(50, canvasWidth);
-        room.pongState.ball.y = convertToPixel(50, canvasHeight);
-        room.pongState.player1.y = canvasHeight / 3;
-        room.pongState.player2.y = canvasHeight / 3;
-        let timeToNewPower = 0;
-        let idPower = 0;
-        let initPlayer = true;
-        const obstacles: obstaclesInterface[] = [];
-        const powersAvailables: powerAvailables[] = [
-            { id: 0, isActive: false, type: -1, x: 66, y:33 },
-            { id: 1, isActive: false, type: -1, x: 33, y:66 },
-            { id: 2, isActive: false, type: -1, x: 50, y:50 },
-            { id: 3, isActive: false, type: -1, x: 75, y:25 },
-            { id: 4, isActive: false, type: -1, x: 75, y:50 },
-            { id: 5, isActive: false, type: -1, x: 80, y:80 },
-        ]
+	handleGame(room: roomInterface, server: Server) {
+		// set ball position
+		room.pongState.ball.x = convertToPixel(50, canvasWidth);
+		room.pongState.ball.y = convertToPixel(50, canvasHeight);
+		room.pongState.player1.y = canvasHeight / 3;
+		room.pongState.player2.y = canvasHeight / 3;
+		let timeToNewPower = 0;
+		let idPower = 0;
+		let initPlayer = true;
+		const obstacles: obstaclesInterface[] = [];
+		const powersAvailables: powerAvailables[] = [
+			{ id: 0, isActive: false, type: -1, x: 20, y: 20 },
+			{ id: 1, isActive: false, type: -1, x: 25, y: 50 },
+			{ id: 2, isActive: false, type: -1, x: 50, y: 25 },
+			{ id: 3, isActive: false, type: -1, x: 75, y: 25 },
+			{ id: 4, isActive: false, type: -1, x: 75, y: 50 },
+			{ id: 5, isActive: false, type: -1, x: 80, y: 80 },
+		]
 
         const interval = setInterval(() => {
             if (initPlayer && room.pongState.player1.score == 0 && room.pongState.player2.score == 0) {
@@ -257,8 +257,8 @@ export class GameService {
         const k = 42 * (winner.score - looser.score);
         console.log(`K = ${k}`);
 
-        eloWinner = eloWinner + k * (1 - p1);
-        eloLooser = eloLooser + k * (0 - p2);
+		eloWinner = eloWinner + k * (1 - p1);
+		eloLooser = eloLooser + k * (0 - p2);
 
         // prevent elo from reaching 0 or less
         if (eloLooser <= 0) eloLooser = 1;
