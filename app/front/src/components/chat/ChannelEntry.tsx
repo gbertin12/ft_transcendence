@@ -1,9 +1,8 @@
-import { Badge, Button, Grid, Popover, Text } from '@nextui-org/react';
+import { Badge, Grid, Text } from '@nextui-org/react';
 import React from 'react';
-import { FaLock, FaTrash } from 'react-icons/fa';
-// import ChannelDeleteIcon from './icons/ChannelDeleteIcon';
 import { Channel, User } from '@/interfaces/chat.interfaces';
-import ChannelEditIcon from './icons/ChannelEditIcon';
+import { ChannelEditIcon } from './icons/ChannelEditIcon';
+import { IconLock } from '@tabler/icons-react';
 
 interface ChannelEntryProps {
     isSelected: boolean;
@@ -80,7 +79,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, user, 
                 )}
             {channel.password !== null && ( // TODO: Handle properly passwords (send a boolean rather than a string?)
                 <Grid xs={1} css={{ my: "auto" }}>
-                    <FaLock />
+                    <IconLock />
                 </Grid>
             ) || (
                     // empty grid to keep the icon in the same place

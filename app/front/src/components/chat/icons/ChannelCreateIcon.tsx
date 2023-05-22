@@ -1,7 +1,6 @@
-import { Channel } from '@/interfaces/chat.interfaces';
 import { Button, Container, Grid, Input, Loading, Popover, Switch } from '@nextui-org/react';
+import { IconLock, IconLockOpen, IconPlus } from '@tabler/icons-react';
 import React from 'react';
-import { FaLock, FaLockOpen, FaPlus } from 'react-icons/fa';
 
 function respectCriteria(name: string): string {
     if (name.length === 0) return "Name cannot be empty";
@@ -40,8 +39,8 @@ export const ChannelPrivateSwitch: React.FC<any> = ({ error, isPrivate, setPriva
     return (
         <Switch
             color={(error === "" ? "success" : "error")}
-            iconOn={<FaLock />}
-            iconOff={<FaLockOpen />}
+            iconOn={<IconLock />}
+            iconOff={<IconLockOpen />}
             checked={isPrivate}
             onChange={(e) => {
                 setPrivate(e.target.checked);
@@ -71,7 +70,7 @@ const ChannelCreateIcon: React.FC = () => {
         }}>
             <Popover.Trigger>
                 <Grid xs={2} justify="flex-end" css={{ my: "auto" }} as="a">
-                    <FaPlus />
+                    <IconPlus />
                 </Grid>
             </Popover.Trigger>
             <Popover.Content>
@@ -100,7 +99,7 @@ const ChannelCreateIcon: React.FC = () => {
                                     underlined
                                     clearable
                                     placeholder="Password (optional)"
-                                    labelLeft=<FaLock />
+                                    labelLeft=<IconLock />
                                     css={{ w: "stretch" }}
                                     onChange={(e) => {
                                         setPassword(e.target.value);

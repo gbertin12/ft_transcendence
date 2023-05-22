@@ -1,15 +1,14 @@
 import { Button, Container, Grid, Input, Loading, Popover, Text } from '@nextui-org/react';
 import React from 'react';
-import { FaLock, FaPen } from 'react-icons/fa';
 import { ChannelNameInput, ChannelPrivateSwitch } from './ChannelCreateIcon';
 import { Channel } from '@/interfaces/chat.interfaces';
-// import ChannelDeleteIcon from './ChannelDeleteIcon';
+import { IconLock, IconPencil } from '@tabler/icons-react';
 
 interface ChannelEditIconProps {
     channel: Channel;
 }
 
-const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onClick: () => void, channel: Channel }) => {
+export const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onClick: () => void, channel: Channel }) => {
     const [deleting, setDeleting] = React.useState(false);
 
     if (deleting) {
@@ -53,7 +52,7 @@ const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onClick: () 
     );
 }
 
-const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, onClick: () => void }) => {
+export const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, onClick: () => void }) => {
     const [saving, setSaving] = React.useState(false);
 
     if (saving) {
@@ -89,7 +88,7 @@ const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, o
     );
 }
 
-const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
+export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
     const [isOpen, setIsOpen] = React.useState<boolean>(false);
     const [isPrivate, setIsPrivate] = React.useState<boolean>(channel.private || channel.password !== null);
     const [error, setError] = React.useState<string>("");
@@ -112,7 +111,7 @@ const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
         }}>
             <Popover.Trigger>
                 <Grid xs={1} css={{ my: "auto" }}>
-                    <FaPen />
+                    <IconPencil />
                 </Grid>
             </Popover.Trigger>
             <Popover.Content>
@@ -141,7 +140,7 @@ const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
                                     underlined
                                     clearable
                                     placeholder={"Password (" + ((channel.password !== null) ? "unchanged" : "optional") + ")"}
-                                    labelLeft=<FaLock />
+                                    labelLeft=<IconLock />
                                     css={{ w: "stretch" }}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
@@ -210,5 +209,3 @@ const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
         </Popover>
     )
 }
-
-export default ChannelEditIcon;
