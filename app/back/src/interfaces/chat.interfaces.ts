@@ -16,3 +16,15 @@ export interface Message {
 	timestamp: Date;
 	content: string;
 }
+
+export interface User {
+    id:        number;
+    name:      string;
+    avatar:    string;
+    wins:      number;
+    losses:    number;
+    elo:       number;
+    otp:       boolean;
+    password:  string;
+    otpSecret?: string;
+}
