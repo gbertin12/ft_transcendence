@@ -88,7 +88,6 @@ export class ChannelController {
     @Patch(':channel_id')
     async updateChannel(@Param() dto: ChannelDto, @Body() body: ChannelUpdateDto, @Req() req) {
         let userId = req.user['id'];
-
         let channel: any = await this.channelService.getChannel(dto.channel_id);
         if (!channel) { throw new HttpException('Channel not found', 404); }
         if (channel.owner_id !== userId) { throw new HttpException('You are not the owner of this channel', 403); }

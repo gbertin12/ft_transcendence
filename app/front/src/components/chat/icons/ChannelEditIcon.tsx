@@ -9,7 +9,7 @@ interface ChannelEditIconProps {
     channel: Channel;
 }
 
-const ChannelDeleteButton: React.FC<any> = ({ onClick }: { onClick: () => void }) => {
+const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onClick: () => void, channel: Channel }) => {
     const [deleting, setDeleting] = React.useState(false);
 
     if (deleting) {
@@ -36,7 +36,16 @@ const ChannelDeleteButton: React.FC<any> = ({ onClick }: { onClick: () => void }
             color="error"
             onClick={() => {
                 setDeleting(true);
-                onClick();
+                fetch(`http://localhost:3000/channel/${channel.id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then((res) => {
+                        onClick();
+                    });
             }}
         >
             Delete channel
@@ -80,107 +89,126 @@ const ChannelSaveButton: React.FC<any> = ({ error, onClick }: { error: string, o
     );
 }
 
-    const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
-        const [isOpen, setIsOpen] = React.useState<boolean>(false);
-        const [isPrivate, setIsPrivate] = React.useState<boolean>(channel.private || channel.password !== null);
-        const [error, setError] = React.useState<string>("");
-        const [name, setName] = React.useState<string>("");
-        const [password, setPassword] = React.useState<string | null>("");
+const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => {
+    const [isOpen, setIsOpen] = React.useState<boolean>(false);
+    const [isPrivate, setIsPrivate] = React.useState<boolean>(channel.private || channel.password !== null);
+    const [error, setError] = React.useState<string>("");
+    const [name, setName] = React.useState<string>("");
+    const [password, setPassword] = React.useState<string | null>("");
 
-        React.useEffect(() => {
-            if (!isPrivate) {
-                setPassword(null);
+    React.useEffect(() => {
+        if (!isPrivate) {
+            setPassword(null);
+        }
+    }, [isPrivate]);
+
+    return (
+        <Popover isOpen={isOpen} onOpenChange={(open: boolean) => {
+            setIsOpen(open);
+            if (open) {
+                setName(channel.name);
+                setIsPrivate(channel.private || channel.password !== null);
             }
-        }, [isPrivate]);
-
-        return (
-            <Popover isOpen={isOpen} onOpenChange={(open: boolean) => {
-                setIsOpen(open);
-                if (open) {
-                    setName(channel.name);
-                    setIsPrivate(channel.private || channel.password !== null);
-                }
-            }}>
-                <Popover.Trigger>
-                    <Grid xs={1} css={{ my: "auto" }}>
-                        <FaPen />
-                    </Grid>
-                </Popover.Trigger>
-                <Popover.Content>
-                    <Container css={{ py: "$6", px: "$16" }}>
-                        <Grid.Container gap={1}>
-                            <Grid xs={10}>
-                                <ChannelNameInput
-                                    setName={setName}
-                                    error={error}
-                                    setError={setError}
-                                    name={name}
-                                />
-                            </Grid>
-                            <Grid xs={2} css={{ my: "auto" }}>
-                                <ChannelPrivateSwitch
-                                    error={error}
-                                    setPrivate={setIsPrivate}
-                                    isPrivate={isPrivate}
+        }}>
+            <Popover.Trigger>
+                <Grid xs={1} css={{ my: "auto" }}>
+                    <FaPen />
+                </Grid>
+            </Popover.Trigger>
+            <Popover.Content>
+                <Container css={{ py: "$6", px: "$16" }}>
+                    <Grid.Container gap={1}>
+                        <Grid xs={10}>
+                            <ChannelNameInput
+                                setName={setName}
+                                error={error}
+                                setError={setError}
+                                name={name}
+                            />
+                        </Grid>
+                        <Grid xs={2} css={{ my: "auto" }}>
+                            <ChannelPrivateSwitch
+                                error={error}
+                                setPrivate={setIsPrivate}
+                                isPrivate={isPrivate}
+                            />
+                        </Grid>
+                    </Grid.Container>
+                    {(isPrivate) && (
+                        <Grid.Container>
+                            <Grid>
+                                <Input.Password
+                                    underlined
+                                    clearable
+                                    placeholder={"Password (" + ((channel.password !== null) ? "unchanged" : "optional") + ")"}
+                                    labelLeft=<FaLock />
+                                    css={{ w: "stretch" }}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                    }}
                                 />
                             </Grid>
                         </Grid.Container>
-                        {(isPrivate) && (
-                            <Grid.Container>
-                                <Grid>
-                                    <Input.Password
-                                        underlined
-                                        clearable
-                                        placeholder={"Password (" + ((channel.password !== null) ? "unchanged" : "optional") + ")"}
-                                        labelLeft=<FaLock />
-                                        css={{ w: "stretch" }}
-                                        onChange={(e) => {
-                                            setPassword(e.target.value);
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid.Container>
-                        )}
-                        <Grid.Container css={{ mt: "$8" }}>
-                            <Grid xs={(channel.password !== null ? 5 : 6)}>
-                                <ChannelDeleteButton
-                                    // close popover
+                    )}
+                    <Grid.Container css={{ mt: "$8" }}>
+                        <Grid xs={(channel.password !== null ? 5 : 6)}>
+                            <ChannelDeleteButton
+                                // close popover
+                                channel={channel}
+                                onClick={() => {
+                                    setIsOpen(false);
+                                }}
+                            />
+                        </Grid>
+                        <Grid xs={(channel.password !== null ? 3 : 6)}>
+                            <ChannelSaveButton error={error} onClick={() => {
+                                let editedChannel = channel;
+                                editedChannel.name = name;
+                                editedChannel.private = isPrivate;
+                                editedChannel.password = password;
+                                fetch(`http://localhost:3000/channel/${channel.id}`, {
+                                    method: "PATCH",
+                                    credentials: "include",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify(editedChannel),
+                                }).then((res) => {
+                                    setIsOpen(false);
+                                });
+                            }}
+                            />
+                        </Grid>
+                        {/* prompt to remove password */}
+                        {channel.password !== null && (
+                            <Grid xs={3}>
+                                <Button
+                                    auto
+                                    color="warning"
                                     onClick={() => {
-                                        setIsOpen(false);
-                                    }}
-                                />
-                            </Grid>
-                            <Grid xs={(channel.password !== null ? 3 : 6)}>
-                                <ChannelSaveButton error={error} onClick={() => {
                                         let editedChannel = channel;
-                                        editedChannel.name = name;
-                                        editedChannel.private = isPrivate;
-                                        editedChannel.password = password;
-                                        setIsOpen(false);
-                                    }}
-                                />
-                            </Grid>
-                            {/* prompt to remove password */}
-                            {channel.password !== null && (
-                                <Grid xs={3}>
-                                    <Button
-                                        auto
-                                        color="warning"
-                                        onClick={() => {
-                                            let editedChannel = channel;
-                                            editedChannel.password = null;
+                                        editedChannel.password = null;
+                                        fetch(`http://localhost:3000/channel/${channel.id}`, {
+                                            method: "PATCH",
+                                            credentials: "include",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify(editedChannel),
+                                        }).then((res) => {
                                             setIsOpen(false);
-                                        }}
-                                    >
-                                        Remove password
-                                    </Button>
-                                </Grid>
-                            )}
-                        </Grid.Container>
-                    </Container>
-                </Popover.Content>
-            </Popover>
-        )
-    }
+                                        });
+                                    }}
+                                >
+                                    Remove password
+                                </Button>
+                            </Grid>
+                        )}
+                    </Grid.Container>
+                </Container>
+            </Popover.Content>
+        </Popover>
+    )
+}
 
 export default ChannelEditIcon;

@@ -34,14 +34,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, channels, user, setChannels }
         socket.on('newChannel', (payload: Channel) => {
             setChannels((channels) => [...channels, payload]);
         });
-        socket.on('deleteChannel', (payload: Channel) => {
-            setChannels((channels) => channels.filter((c) => c.id !== payload.id));
-            if (selectedChannel?.id === payload.id) {
+        socket.on('deleteChannel', (payload: number) => {
+            setChannels((channels) => channels.filter((c) => c.id !== payload));
+            if (selectedChannel?.id === payload) {
                 setSelectedChannel(channels[0]);
             }
         });
         socket.on('editChannel', (payload: any) => {
-            setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
+            setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
         });
         return () => {
             socket.off('message');
