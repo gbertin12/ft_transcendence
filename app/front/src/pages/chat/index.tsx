@@ -12,7 +12,6 @@ const Chat: React.FC = () => {
     const [channels, setChannels] = useState<Channel[]>([]);
 
     useEffect(() => {
-        console.log(user);
         fetch("http://localhost:3000/channel/all", { credentials: "include" })
             .then((res) => {
                 if (res.status === 401) {
