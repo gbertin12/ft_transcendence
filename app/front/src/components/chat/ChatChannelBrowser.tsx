@@ -2,14 +2,15 @@ import { Avatar, Container, Loading, Text } from "@nextui-org/react";
 import React from "react";
 import ChatEntry from "./ChatEntry";
 import ChannelEntry from "./ChannelEntry";
-import { Channel } from "@/interfaces/chat.interfaces";
+import { Channel, User } from "@/interfaces/chat.interfaces";
 
 interface ChatChannelBrowserProps {
     channelChanged: (channel: Channel) => void;
     channels?: Channel[];
+    user: User;
 }
 
-const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels }) => {
+const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels, user }) => {
     const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
 
     if (!channels) {
@@ -32,6 +33,7 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                         channelChanged(channel);
                     }}
                     isSelected={selectedIndex === index}
+                    user={user}
                 />
             ))}
         </Container>
