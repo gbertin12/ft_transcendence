@@ -1,23 +1,22 @@
 import io, { Socket } from 'socket.io-client';
-import React, { Suspense, useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, Message, User } from "@/interfaces/chat.interfaces";
-import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
+import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
-import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
 import FriendList from './FriendList';
 
 interface ChatBoxProps {
     socket: Socket;
+    channels: Channel[];
+    user: User;
+    setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ socket, channels, user, setChannels }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [isLoading, setLoading] = useState(true);
-    const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
-    const [user, setUser] = useState<User>({} as User);
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
         const url = `http://localhost:3000/channel/${channelId}/messages`;
@@ -27,50 +26,28 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:3000/user/me", { credentials: "include" })
-            .then((res) => {
-                if (res.status === 401) {
-                    window.location.href = "/auth";
-                }
-                return res;
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                setUser(data);
-            });
-        fetch("http://localhost:3000/channel/all", { credentials: "include" })
-            .then((res) => {
-                if (res.status === 401) {
-                    window.location.href = "/auth";
-                }
-                return res;
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                setChannels(data);
-                setSelectedChannel(data[0]);
-                setLoading(false);
-            });
-    }, []);
-
-    useEffect(() => {
         // Listen for new messages
-        if (socket) {
-            socket.on('message', (payload: Message) => {
-                setMessages((messages) => [payload, ...messages]);
-            });
-            socket.on('newChannel', (payload: Channel) => {
-                setChannels((channels) => [...channels, payload]);
-            });
-            socket.on('deleteChannel', (payload: Channel) => {
-                setChannels((channels) => channels.filter((c) => c.id !== payload.id));
-                if (selectedChannel?.id === payload.id) {
-                    setSelectedChannel(channels[0]);
-                }
-            });
-            socket.on('editChannel', (payload: any) => {
-                setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
-            });
+        socket.on('message', (payload: Message) => {
+            console.log("Received message", payload);
+            setMessages((messages) => [payload, ...messages]);
+        });
+        socket.on('newChannel', (payload: Channel) => {
+            setChannels((channels) => [...channels, payload]);
+        });
+        socket.on('deleteChannel', (payload: Channel) => {
+            setChannels((channels) => channels.filter((c) => c.id !== payload.id));
+            if (selectedChannel?.id === payload.id) {
+                setSelectedChannel(channels[0]);
+            }
+        });
+        socket.on('editChannel', (payload: any) => {
+            setChannels((channels) => channels.map((c) => c.id === payload.channel.id ? payload.channel : c));
+        });
+        return () => {
+            socket.off('message');
+            socket.off('newChannel');
+            socket.off('deleteChannel');
+            socket.off('editChannel');
         }
     }, [socket]);
 
@@ -84,6 +61,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
             });
         }
     }, [selectedChannel, fetchMessages, socket]);
+
+    useEffect(() => {
+        if (channels.length > 0) {
+            setSelectedChannel(channels[0]);
+        }
+    }, []);
 
     const handleNewMessage = useCallback((message: string) => {
         // POST request to send the message to the server
@@ -105,35 +88,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     }, []);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
-
-    if (isLoading) {
-        return (
-            <Container>
-                <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
-                    <Grid xs={3} direction="column">
-                        <Text h3>Chats</Text>
-                        <hr />
-                        <Loading size="xl" css={{ mx: "auto" }} />
-                    </Grid>
-                    <Grid xs={6} direction="column">
-                        <Text h3></Text>
-                        <Loading size="xl" css={{ mx: "auto" }} />
-                    </Grid>
-                    <Grid xs={3} direction="column">
-                        <Grid>
-                            <Text h3 css={{ mx: "auto" }}>Friends</Text>
-                            <Loading size="xl" css={{ mx: "auto" }} />
-                        </Grid>
-                    </Grid>
-                </Grid.Container>
-            </Container>
-        );
-    }
-
-    console.log(user, channels);
-    if (!user || !channels) {
-        window.location.href = "/auth";
-    }
 
     return (
         <Container>
@@ -157,7 +111,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
                 </Grid>
                 <Grid xs={6}>
                     <Grid.Container>
-                        <Grid>
+                        <Grid css={{w: "stretch"}}>
                             <Text h3>{selectedChannel?.name.replace(/^/, '# ')}</Text>
                             <ul
                                 style={{
