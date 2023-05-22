@@ -28,3 +28,11 @@ export interface User {
     password:  string;
     otpSecret?: string;
 }
+
+export interface FriendRequest {
+	request_id: number;
+	sender_id: number;
+	receiver_id: number;
+	timestamp: Date;
+	sender: User;
+}
