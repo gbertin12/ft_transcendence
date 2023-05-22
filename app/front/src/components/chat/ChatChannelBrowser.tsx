@@ -3,15 +3,16 @@ import React from "react";
 import ChatEntry from "./ChatEntry";
 import ChannelEntry from "./ChannelEntry";
 import { Channel, User } from "@/interfaces/chat.interfaces";
+import { useUser } from "@/contexts/user.context";
 
 interface ChatChannelBrowserProps {
     channelChanged: (channel: Channel) => void;
     channels?: Channel[];
-    user: User;
 }
 
-const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels, user }) => {
+const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged, channels }) => {
     const [selectedIndex, setSelectedIndex] = React.useState<number>(0);
+    const { user } = useUser();
 
     if (!channels) {
         return (

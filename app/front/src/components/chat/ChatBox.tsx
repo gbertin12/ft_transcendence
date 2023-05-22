@@ -1,4 +1,3 @@
-import io, { Socket } from 'socket.io-client';
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, Message, User } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Text, Textarea } from "@nextui-org/react";
@@ -6,17 +5,19 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
 import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
 import FriendList from './FriendList';
+import { useSocket } from '@/contexts/socket.context';
+import { useUser } from '@/contexts/user.context';
 
 interface ChatBoxProps {
-    socket: Socket;
     channels: Channel[];
-    user: User;
     setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
 }
 
-const ChatBox: React.FC<ChatBoxProps> = ({ socket, channels, user, setChannels }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
+    const { socket } = useSocket();
+    const { user } = useUser();
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
         const url = `http://localhost:3000/channel/${channelId}/messages`;
@@ -106,7 +107,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, channels, user, setChannels }
                     <ChatChannelBrowser
                         channels={channels}
                         channelChanged={handleChannelChange}
-                        user={user}
                     />
                 </Grid>
                 <Grid xs={6}>
@@ -128,7 +128,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, channels, user, setChannels }
                                         <ChatMessage
                                             content={message.content}
                                             senderId={message.sender_id}
-                                            userId={user?.id}
                                         />
                                     </li>
                                 ))}

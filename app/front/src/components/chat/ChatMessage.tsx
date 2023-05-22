@@ -1,14 +1,17 @@
+import { useUser } from '@/contexts/user.context';
 import { Avatar, Grid, Text } from '@nextui-org/react';
 import React from 'react';
 
 interface ChatMessageProps {
     content: string;
     senderId: number;
-    userId: number;
     ghost?: boolean;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ content, senderId, userId }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ content, senderId }) => {
+    const { user } = useUser();
+    const userId = user.id;
+
     return (
         <Grid.Container>
             <Grid xs={1}>
@@ -21,9 +24,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content, senderId, userId }) 
                     span
                     css={{
                         backgroundColor: senderId === userId ? "$success" : "$gray200",
-                        textAlign: senderId === userId ? "right" : "left",
                         borderRadius: "$2xl",
                         padding: "$xs",
+                        px: "$lg",
                         color: senderId === userId ? "$white" : "default",
                     }}
                 >
