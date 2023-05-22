@@ -16,7 +16,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState<Channel>(0);
+    const [selectedChannel, setSelectedChannel] = useState<Channel>();
     const [user, setUser] = useState<any>();
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
@@ -45,7 +45,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
         // Listen for new messages
         if (socket) {
             socket.on('message', (payload: any) => {
-                setMessages((messages) => [payload.message, ...messages]);
+                setMessages((messages) => [payload, ...messages]);
             });
             socket.on('newChannel', (payload: any) => {
                 setChannels((channels) => [...channels, payload.channel]);
