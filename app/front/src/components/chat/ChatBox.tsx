@@ -1,6 +1,6 @@
 import io, { Socket } from 'socket.io-client';
 import React, { Suspense, useEffect, useMemo, useState, useCallback } from "react";
-import { Channel, Message } from "@/interfaces/chat.interfaces";
+import { Channel, Message, User } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import ChatFriendBrowser from "@/components/chat/ChatFriendBrowser";
@@ -17,7 +17,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     const [isLoading, setLoading] = useState(true);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
-    const [user, setUser] = useState<any>();
+    const [user, setUser] = useState<User>({} as User);
 
     const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
         const url = `http://localhost:3000/channel/${channelId}/messages`;
@@ -28,11 +28,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
 
     useEffect(() => {
         fetch("http://localhost:3000/user/me", { credentials: "include" })
+            .then((res) => {
+                if (res.status === 401) {
+                    window.location.href = "/auth";
+                }
+                return res;
+            })
             .then((res) => res.json())
             .then((data) => {
                 setUser(data);
             });
         fetch("http://localhost:3000/channel/all", { credentials: "include" })
+            .then((res) => {
+                if (res.status === 401) {
+                    window.location.href = "/auth";
+                }
+                return res;
+            })
             .then((res) => res.json())
             .then((data) => {
                 setChannels(data);
@@ -44,15 +56,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     useEffect(() => {
         // Listen for new messages
         if (socket) {
-            socket.on('message', (payload: any) => {
+            socket.on('message', (payload: Message) => {
                 setMessages((messages) => [payload, ...messages]);
             });
-            socket.on('newChannel', (payload: any) => {
-                setChannels((channels) => [...channels, payload.channel]);
+            socket.on('newChannel', (payload: Channel) => {
+                setChannels((channels) => [...channels, payload]);
             });
-            socket.on('deleteChannel', (payload: any) => {
-                setChannels((channels) => channels.filter((c) => c.id !== payload.channel.id));
-                if (selectedChannel?.id === payload.channel.id) {
+            socket.on('deleteChannel', (payload: Channel) => {
+                setChannels((channels) => channels.filter((c) => c.id !== payload.id));
+                if (selectedChannel?.id === payload.id) {
                     setSelectedChannel(channels[0]);
                 }
             });
@@ -88,7 +100,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
     const handleChannelChange = useCallback((channel: Channel) => {
         setSelectedChannel(channel);
         socket.emit('join', {
-            channel: selectedChannel.id,
+            channel: selectedChannel?.id,
         });
     }, []);
 
@@ -118,6 +130,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
         );
     }
 
+    console.log(user, channels);
+    if (!user || !channels) {
+        window.location.href = "/auth";
+    }
+
     return (
         <Container>
             <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
@@ -135,6 +152,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket }: {socket: Socket} ) => {
                     <ChatChannelBrowser
                         channels={channels}
                         channelChanged={handleChannelChange}
+                        user={user}
                     />
                 </Grid>
                 <Grid xs={6}>
