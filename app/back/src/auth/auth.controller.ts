@@ -32,7 +32,7 @@ export class AuthController {
         const state_cookie = req.cookies['state'];
         const user = await this.authService.ftCallback(auth_code, state_param, state_cookie);
         const token = await this.authService.generateJWT(user.id);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
@@ -44,7 +44,7 @@ export class AuthController {
     ) {
         const user = await this.userService.createUser(req.user.toString());
         const token = await this.authService.generateJWT(user.id);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
@@ -56,7 +56,7 @@ export class AuthController {
     ) {
         const user = await this.userService.createUser(req.user.toString());
         const token = await this.authService.generateJWT(user.id);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
@@ -77,7 +77,7 @@ export class AuthController {
         @Res() res: Response,
     ) {
         const token = await this.authService.generateJWT(req.user['id']);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
@@ -86,7 +86,7 @@ export class AuthController {
     @Get('42/state')
     async generateStateToken(@Res() res: Response) {
         const { state, state_token } = await this.authService.generateStateToken();
-        res.cookie('state', state_token, { httpOnly: true, sameSite: 'lax' });
+        res.cookie('state', state_token, { httpOnly: false, sameSite: 'lax' });
         res.send(state);
     }
 
@@ -108,7 +108,7 @@ export class AuthController {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.end();
     }
 
@@ -118,7 +118,7 @@ export class AuthController {
     ) {
         const user = await this.userService.createDummyUser();
         const token = await this.authService.generateJWT(user.id);
-        res.cookie('session', token, { httpOnly: true, sameSite: 'strict' });
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 }

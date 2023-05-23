@@ -24,12 +24,12 @@ export default function Profile(): JSX.Element {
                 const profile = await res.json();
                 setProfile(profile);
             } else {
-                window.location.href = '/login';
+                window.location.href = '/auth';
             }
         })();
     }, []);
 
-    //if (error) window.location.href = '/login';
+    //if (error) window.location.href = '/auth';
     if (!profile) return <div>loading...</div>
 
     return (

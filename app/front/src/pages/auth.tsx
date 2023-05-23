@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 // 		   88                        		 88
 // 	       88                   	  	     88
 // 		   88                        	     88
@@ -9,11 +7,6 @@
 // "8a,   ,d88 "8b,   ,aa 88,    ,88 "8a,   ,d88
 // `"8bbdP"Y8  `"Ybbd8"' `"8bbdP"Y8  `"8bbdP"Y8
 
-import Layout from '@/components/layout'
-//import jwtDecode, { JwtPayload } from 'jwt-decode';
-
-=======
->>>>>>> e2a5e874c8e70a67468fd505368bf1145586c3e7
 async function login() {
     const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
     const state_token = await res.text();

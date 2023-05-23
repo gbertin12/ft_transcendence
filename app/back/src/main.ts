@@ -13,13 +13,12 @@ async function bootstrap() {
     app.useStaticAssets('/app/files');
     app.use(compression());
 
-    app.useGlobalPipes(new ValidationPipe(
-		{
-			exceptionFactory: (validationErrors: ValidationError[] = []) => {
-				return new BadRequestException(validationErrors);
-			},
-		}
-	)); // Use class-validator
+    app.useGlobalPipes(new ValidationPipe({
+        exceptionFactory: (validationErrors: ValidationError[] = []) => {
+            return new BadRequestException(validationErrors);
+        },
+    }
+    )); // Use class-validator
 
     await app.listen(3000);
 }
