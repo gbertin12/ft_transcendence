@@ -139,6 +139,7 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                 <Input.Password
                                     underlined
                                     clearable
+                                    aria-label="New password (optional)"
                                     placeholder={"Password (" + ((channel.password !== null) ? "unchanged" : "optional") + ")"}
                                     labelLeft=<IconLock />
                                     css={{ w: "stretch" }}

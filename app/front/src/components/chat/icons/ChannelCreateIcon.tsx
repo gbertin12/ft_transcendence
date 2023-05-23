@@ -22,6 +22,7 @@ export const ChannelNameInput: React.FC<any> = ({ setName, error, setError, name
             clearable
             value={name || ""}
             placeholder="channel-name"
+            aria-label="Name of the channel"
             labelLeft="#"
             helperText={error}
             helperColor={(error === "" ? "success" : "error")}
@@ -100,6 +101,7 @@ const ChannelCreateIcon: React.FC = () => {
                                     clearable
                                     placeholder="Password (optional)"
                                     labelLeft=<IconLock />
+                                    aria-label="Password of the channel"
                                     css={{ w: "stretch" }}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
