@@ -2,18 +2,11 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, Message, User } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
-import ChatChannelBrowser from "@/components/chat/ChatChannelBrowser";
-import ChannelCreateIcon from "@/components/chat/icons/ChannelCreateIcon";
-import FriendList from './FriendList';
 import { useSocket } from '@/contexts/socket.context';
 import { useUser } from '@/contexts/user.context';
 
-interface ChatBoxProps {
-    channels: Channel[];
-    setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
-}
 
-const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
+const ChatBox: React.FC<any> = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<Channel>();
     const { socket } = useSocket();
@@ -27,32 +20,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
     }, []);
 
     useEffect(() => {
-        // Listen for new messages
-        socket.on('message', (payload: Message) => {
-            console.log("Received message", payload);
-            setMessages((messages) => [payload, ...messages]);
-        });
-        socket.on('newChannel', (payload: Channel) => {
-            setChannels((channels) => [...channels, payload]);
-        });
-        socket.on('deleteChannel', (payload: number) => {
-            setChannels((channels) => channels.filter((c) => c.id !== payload));
-            if (selectedChannel?.id === payload) {
-                setSelectedChannel(channels[0]);
-            }
-        });
-        socket.on('editChannel', (payload: any) => {
-            setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
-        });
-        return () => {
-            socket.off('message');
-            socket.off('newChannel');
-            socket.off('deleteChannel');
-            socket.off('editChannel');
-        }
-    }, [socket]);
-
-    useEffect(() => {
         if (selectedChannel) {
             fetchMessages(selectedChannel.id).then((data) => {
                 setMessages(data);
@@ -62,12 +29,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
             });
         }
     }, [selectedChannel, fetchMessages, socket]);
-
-    useEffect(() => {
-        if (channels.length > 0) {
-            setSelectedChannel(channels[0]);
-        }
-    }, []);
 
     const handleNewMessage = useCallback((message: string) => {
         // POST request to send the message to the server
@@ -81,34 +42,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
         })
     }, [selectedChannel]);
 
-    const handleChannelChange = useCallback((channel: Channel) => {
-        setSelectedChannel(channel);
-        socket.emit('join', {
-            channel: selectedChannel?.id,
-        });
-    }, []);
-
     const memoizedMessages = useMemo(() => messages, [messages]);
 
     return (
         <Container>
             <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
-                <Grid xs={3} direction="column">
-                    <Text h3>Chats</Text>
-                    <hr />
-                    <Grid.Container>
-                        <Grid xs={10}>
-                            <Text h4>Salons</Text>
-                        </Grid>
-                        <ChannelCreateIcon />
-                    </Grid.Container>
-
-                    {/* TODO: Display latest chats with friends */}
-                    <ChatChannelBrowser
-                        channels={channels}
-                        channelChanged={handleChannelChange}
-                    />
-                </Grid>
+                
                 <Grid xs={6}>
                     <Grid.Container>
                         <Grid css={{w: "stretch"}}>
@@ -154,9 +93,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channels, setChannels }) => {
                         </Grid>
                     </Grid.Container>
                 </Grid>
-                <Grid xs={3} direction="column">
-                    <FriendList />
-                </Grid>
+                
             </Grid.Container>
         </Container>
     );

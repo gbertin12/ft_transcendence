@@ -5,34 +5,19 @@ import io from 'socket.io-client';
 import { Channel, User } from "@/interfaces/chat.interfaces";
 import { useUser } from "@/contexts/user.context";
 import { useSocket } from "@/contexts/socket.context";
+import ChatLayout from "./layout";
 
 const Chat: React.FC = () => {
 	const { socket } = useSocket();
     const { user } = useUser();
-    const [channels, setChannels] = useState<Channel[]>([]);
-
-    useEffect(() => {
-        fetch("http://localhost:3000/channel/all", { credentials: "include" })
-            .then((res) => {
-                if (res.status === 401) {
-                    window.location.href = "/auth";
-                }
-                return res;
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                setChannels(data);
-            });
-    }, []);
 
     // Wait for the socket to be initialized
-    if (socket && channels) {
+    if (socket && user) {
         // User cannot be null as we redirect to /auth if not logged in
         return (
-            <ChatBox
-                channels={channels}
-                setChannels={setChannels}
-            />
+            <ChatLayout>
+                <ChatBox />
+            </ChatLayout>
         );
     }
 
