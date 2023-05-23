@@ -5,7 +5,7 @@ interface SocketContextType {
   socket: Socket;
 }
 
-let socket: Socket = io('http://localhost:8001');
+let socket: Socket = io('http://localhost:8001', { withCredentials: true });
 
 const SocketContext = createContext<SocketContextType>({
   socket,
