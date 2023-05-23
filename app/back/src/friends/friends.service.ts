@@ -67,9 +67,9 @@ export class FriendsService {
                 request_id: requestId,
             }
         });
-        // if (request.receiver_id !== receiver_id) {
-        //     throw new Error('Request does not belong to the user');
-        // } 
+        if (request.receiver_id !== receiver_id) {
+            throw new Error('Request does not belong to the user');
+        } 
         // Create a new friend
         return this.dbService.friend.create({
             data: {
@@ -80,6 +80,20 @@ export class FriendsService {
                 user: true,
                 user_id: true,
                 friend_id: true,
+            }
+        });
+    }
+
+    async getFriends(user_id: number): Promise<Friend[]> {
+        return this.dbService.friend.findMany({
+            where: {
+                user_id: user_id,
+                OR: {
+                    friend_id: user_id,
+                }
+            },
+            include: {
+                user: true,
             }
         });
     }

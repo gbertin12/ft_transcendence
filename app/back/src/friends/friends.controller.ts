@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
@@ -48,9 +48,14 @@ export class FriendsController {
     let sender: User = req.user;
     let receiver_id: number = body.to;
     if (sender.id == receiver_id) {
-      throw new Error("You can't add yourself as a friend");
+      throw new ForbiddenException("You can't add yourself as a friend");
     }
-    // TODO: Check that users aren't already friends
+    let senderFriends: Friend[] = await this.friendsService.getUserFriends(sender.id);
+    for (let friend of senderFriends) {
+      if (friend.user_id == receiver_id) {
+        throw new ForbiddenException("You're already friends with this user");
+      }
+    }
     let friendRequest: any = await this.friendsService.addFriend(sender, receiver_id);
     friendRequest.sender = sender;
     this.chatGateway.server.emit("friendRequestAdded", friendRequest);
