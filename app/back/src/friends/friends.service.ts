@@ -9,13 +9,22 @@ export class FriendsService {
     constructor(private dbService: DbService) { }
 
     async getUserFriends(userId: number): Promise<Friend[]> {
+        // return each friend with their user info, where user_id = userId or friend_id = userId, unique results only
         return this.dbService.friend.findMany({
             where: {
-                user_id: userId,
+                OR: [
+                    {
+                        user_id: userId,
+                    },
+                    {
+                        friend_id: userId,
+                    },
+                ],
             },
+            distinct: ['user_id', 'friend_id'],
             include: {
                 user: true,
-            }
+            },
         });
     }
 
