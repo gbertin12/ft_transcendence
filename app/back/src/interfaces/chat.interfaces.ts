@@ -36,3 +36,14 @@ export interface FriendRequest {
 	timestamp: Date;
 	sender: User;
 }
+
+export interface Friend {
+    id: number;
+    name: string;
+    avatar: string;
+    userId: number;
+    isOnline: boolean;
+    isTyping: boolean;
+    isPlaying: boolean;
+    unreadMessages: number;
+}
