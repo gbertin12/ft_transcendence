@@ -28,6 +28,14 @@ const ChatBox: React.FC<any> = () => {
                 channel: selectedChannel.id,
             });
         }
+        socket.on('message', (payload: Message) => {
+            console.log("Received message", payload);
+            setMessages((messages) => [payload, ...messages]);
+        });
+
+        return () => {
+            socket.off('message');
+        }
     }, [selectedChannel, fetchMessages, socket]);
 
     const handleNewMessage = useCallback((message: string) => {
