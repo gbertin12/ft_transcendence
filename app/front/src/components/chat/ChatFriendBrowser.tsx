@@ -4,12 +4,10 @@ import ChatEntry from "./ChatEntry";
 import { IconDeviceGamepad, IconEye, IconMessageCircle } from "@tabler/icons-react";
 import { useSocket } from "@/contexts/socket.context";
 import { Friend } from "@/interfaces/chat.interfaces";
+import { useChat } from "@/contexts/chat.context";
 
-interface ChatFriendBrowserProps {
-    friends: Friend[];
-}
-
-const ChatFriendBrowser: React.FC<ChatFriendBrowserProps> = ({ friends }) => {
+const ChatFriendBrowser: React.FC = () => {
+    const { friends } = useChat();
     return (
         <>
             {friends.map((friend) => (

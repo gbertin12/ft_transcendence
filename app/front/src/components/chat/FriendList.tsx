@@ -4,16 +4,13 @@ import ChatFriendBrowser from "./ChatFriendBrowser";
 import FriendRequests from "./FriendRequests";
 import { Friend } from "@/interfaces/chat.interfaces";
 
-interface FriendListProps {
-    friends: Friend[];
-}
 
-const FriendList: React.FC<FriendListProps> = ({ friends }) => {
+const FriendList: React.FC<any> = () => {
     return (
         <>
             <Text h3>Friends</Text>
             <hr />
-            <ChatFriendBrowser friends={friends} />
+            <ChatFriendBrowser />
             <FriendRequests />
         </>
     );

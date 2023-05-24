@@ -5,13 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
 import { useSocket } from "@/contexts/socket.context";
 import { useRouter } from "next/router";
+import { useChat } from "@/contexts/chat.context";
 
-interface ChannelListProps {
-    channels: Channel[];
-}
 
-const ChannelList: React.FC<ChannelListProps> = ({ channels }) => {
+const ChannelList: React.FC<any> = () => {
     const { socket } = useSocket();
+    const { channels } = useChat();
     const router = useRouter();
 
     const handleChannelChange = useCallback((channel: Channel) => {

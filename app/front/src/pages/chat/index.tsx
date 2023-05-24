@@ -16,7 +16,7 @@ const Chat: React.FC = () => {
         // User cannot be null as we redirect to /auth if not logged in
         return (
             <ChatLayout>
-                <ChatBox />
+                {/* <ChatBox /> */}
             </ChatLayout>
         );
     }

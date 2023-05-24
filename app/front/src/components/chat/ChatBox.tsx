@@ -5,42 +5,40 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import { useSocket } from '@/contexts/socket.context';
 import { useUser } from '@/contexts/user.context';
 
+interface ChatBoxProps {
+    channel: Channel;
+}
 
-const ChatBox: React.FC<any> = () => {
+const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [selectedChannel, setSelectedChannel] = useState<Channel>();
     const { socket } = useSocket();
     const { user } = useUser();
 
-    const fetchMessages = useCallback(async (channelId: number): Promise<Message[]> => {
-        const url = `http://localhost:3000/channel/${channelId}/messages`;
+    const fetchMessages = useCallback(async (channel: Channel): Promise<Message[]> => {
+        const url = `http://localhost:3000/channel/${channel.id}/messages`;
         const res = await fetch(url, { credentials: "include" });
         const data = await res.json();
         return data;
     }, []);
 
     useEffect(() => {
-        if (selectedChannel) {
-            fetchMessages(selectedChannel.id).then((data) => {
-                setMessages(data);
-            });
-            socket.emit('join', {
-                channel: selectedChannel.id,
-            });
-        }
+        socket.emit('join', {
+            channel: channel.id,
+        });
         socket.on('message', (payload: Message) => {
-            console.log("Received message", payload);
             setMessages((messages) => [payload, ...messages]);
         });
-
+        fetchMessages(channel).then((messages) => {
+            setMessages(messages);
+        });
         return () => {
             socket.off('message');
         }
-    }, [selectedChannel, fetchMessages, socket]);
+    }, [socket, channel]);
 
     const handleNewMessage = useCallback((message: string) => {
         // POST request to send the message to the server
-        fetch(`http://localhost:3000/channel/${selectedChannel?.id}/message`, {
+        fetch(`http://localhost:3000/channel/${channel.id}/message`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -48,18 +46,17 @@ const ChatBox: React.FC<any> = () => {
             },
             body: JSON.stringify({ content: message }),
         })
-    }, [selectedChannel]);
+    }, [channel]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
 
     return (
         <Container>
             <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
-                
                 <Grid xs={6}>
                     <Grid.Container>
                         <Grid css={{w: "stretch"}}>
-                            <Text h3>{selectedChannel?.name.replace(/^/, '# ')}</Text>
+                            <Text h3>{channel.name.replace(/^/, '# ')}</Text>
                             <ul
                                 style={{
                                     listStyle: "none",
