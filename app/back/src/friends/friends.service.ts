@@ -8,24 +8,66 @@ import { FriendRequest } from '.prisma/client';
 export class FriendsService {
     constructor(private dbService: DbService) { }
 
-    async getUserFriends(userId: number): Promise<Friend[]> {
+    async getUserFriends(user: User): Promise<Friend[]> {
         // return each friend with their user info, where user_id = userId or friend_id = userId, unique results only
-        return this.dbService.friend.findMany({
+        let relations: any[] = await this.dbService.friend.findMany({
             where: {
                 OR: [
                     {
-                        user_id: userId,
+                        user_id: user.id,
                     },
                     {
-                        friend_id: userId,
+                        friend_id: user.id,
                     },
                 ],
             },
             distinct: ['user_id', 'friend_id'],
-            include: {
-                user: true,
+            select: {
+                user: {
+                    select: { // don't leak any sensitive info
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+                user_id: true,
+                friend_id: true,
             },
         });
+        // for each friend, if friend_id = userId, swap user_id and friend_id and set user to asynchrously get the user info
+        relations = await Promise.all(relations.map(async (relation) => {
+            if (relation.friend_id === user.id) {
+                const friend = relation.user;
+                relation.user = await this.dbService.user.findUnique({
+                    where: {
+                        id: relation.user_id,
+                    },
+                    select: { // don't leak any sensitive info
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                });
+                // swap user_id and friend_id
+                relation.friend_id = relation.user.id;
+                relation.user_id = user.id;
+                relation.user.friend = friend;
+            }
+            return relation;
+        }));
+        return relations;
     }
 
     async getUserFriendRequests(userId: number): Promise<FriendRequest[]> {

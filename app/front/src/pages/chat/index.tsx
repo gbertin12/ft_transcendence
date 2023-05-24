@@ -16,7 +16,10 @@ const Chat: React.FC = () => {
         // User cannot be null as we redirect to /auth if not logged in
         return (
             <ChatLayout>
-                {/* <ChatBox /> */}
+                {/* ¯\_(ツ)_/¯ */}
+                <div className="flex flex-col items-center justify-center h-full">
+                    <h1 className="text-3xl font-bold">Select a channel or click on a user to start chatting !</h1>
+                </div>
             </ChatLayout>
         );
     }

@@ -33,7 +33,7 @@ export class FriendsController {
   @UseGuards(AuthGuard('jwt-2fa'))
   @Get('/')
   async getUserFriends(@Req() req) {
-    return this.friendsService.getUserFriends(req.user['id']);
+    return this.friendsService.getUserFriends(req.user);
   }
 
   @UseGuards(AuthGuard('jwt-2fa'))
@@ -50,7 +50,7 @@ export class FriendsController {
     if (sender.id == receiver_id) {
       throw new ForbiddenException("You can't add yourself as a friend");
     }
-    let senderFriends: Friend[] = await this.friendsService.getUserFriends(sender.id);
+    let senderFriends: Friend[] = await this.friendsService.getUserFriends(sender);
     for (let friend of senderFriends) {
       if (friend.user_id == receiver_id) {
         throw new ForbiddenException("You're already friends with this user");
