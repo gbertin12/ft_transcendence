@@ -50,8 +50,8 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		{isActive: false, x: 0, y: 0, id: 5, type: 0}
 	]); // [{x: 0, y: 0, type: 'speedUp', time: 0}]
 	const [obstacles, setObstacles] = useState([
-		{isActive: false, x: 280, y:0, size: 100, id:0},
-		{isActive: false, x: 420, y:300, size: 100, id: 1}
+		{isActive: false, x: 0, y: 0, size: 0, id:0},
+		{isActive: false, x: 0, y: 0, size: 0, id: 1}
 	])
 	const ref = useRef(null);
 
@@ -164,14 +164,15 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		});
 	}
 
-	const handleAddObstacle = ({x, y, id, percentSize} : {x:number, y: number, id: number, percentSize:number }) => {
-		let size = convertToPixel(percentSize, canvas.height);
-		let xPixels = convertToPixel(x, canvas.height);
-		let yPixels = convertToPixel(y, canvas.width);
+	const handleAddObstacle = ({x, y, id, size} : {x:number, y: number, id: number, size: number }) => {
+		let sizePixels = convertToPixel(size, canvas.height);
+		let xPixels = convertToPixel(x, canvas.width);
+		let yPixels = convertToPixel(y, canvas.height);
+		console.log(x, y, size, xPixels, yPixels, sizePixels)
 		setObstacles(prevObstacles => {
 			return prevObstacles.map((obstacle) => {
 			  if (obstacle.id == id) {
-				return { isActive: true, x: xPixels, y: yPixels, size: size, id: id};
+				return { isActive: true, x: xPixels, y: yPixels, size: sizePixels, id: id};
 			  } else {
 				return obstacle; 
 			  }
@@ -286,6 +287,6 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 					</div>
 				</div>
 			</Col>
-			oo		</>
+		</>
 	);
 }

@@ -28,10 +28,9 @@ export const handleColisionWithObstacle = (room: roomInterface, obstacles: obsta
 		if (room.pongState.ball.x > convertToPixel(obstacles[i].x, canvasWidth) &&
 			room.pongState.ball.x < convertToPixel(obstacles[i].x, canvasWidth) + 12 &&
 			room.pongState.ball.y > convertToPixel(obstacles[i].y, canvasHeight) &&
-			room.pongState.ball.y < convertToPixel(obstacles[i].y, canvasHeight) + obstacles[i].size)
+			room.pongState.ball.y < convertToPixel(obstacles[i].y, canvasHeight) + convertToPixel(obstacles[i].size, canvasHeight))
 		{
 			room.pongState.ball.speedX = -room.pongState.ball.speedX;
-			room.pongState.ball.speedY = -room.pongState.ball.speedY;
 		}
 	}
 }
@@ -52,26 +51,38 @@ export const getType = (obstacles: obstaclesInterface[], powers: powerAvailables
 
 export const createObstacle = (server: Server, room: roomInterface, obstacles: obstaclesInterface[]) => {
 
-	const size = Math.floor(Math.random() * 20) + 10;
-	let newObstacle = obstacle1;
+	const size = Math.floor(Math.random() * 15) + 20;
+	let newObstacle: obstaclesInterface = {
+		x: 33,
+		y: 0,
+		size: size,
+		id: 0
+	};
 	if (obstacles.length > 0)
 	{
-		newObstacle = obstacle2;
-		newObstacle.size = size;
+		newObstacle.x = 66;
 		newObstacle.y = 100 - size;
+		newObstacle.id = 1;
 	}
-	else
-		newObstacle.size = size;
+
 	obstacles.push(newObstacle);
+
+
 	server.to(room.pongState.player1.id).emit('addObstacle', {
 		x: newObstacle.x,
 		y: newObstacle.y,
 		id: newObstacle.id,	
 		size: newObstacle.size
 	});
+	// update y for second player
+	let yP2: number = newObstacle.y;
+	if (yP2 > 0)
+		yP2 = 0;
+	else
+		yP2 = 100 - size;
 	server.to(room.pongState.player2.id).emit('addObstacle', {
 		x: 100 - newObstacle.x,
-		y: newObstacle.y,
+		y: yP2,
 		id: newObstacle.id,	
 		size: newObstacle.size
 	});

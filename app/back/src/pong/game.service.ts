@@ -139,14 +139,12 @@ const handleResetPlayerPosition = (
 		room.pongState.player2.score++;
 		room.pongState.ball.speedX = 1;
 		room.pongState.ball.speedY = 0.8;
-		console.log(room.pongState.ball)
     } 
 	else 
 	{
       	room.pongState.player1.score++;
 		room.pongState.ball.speedX = -1;
 		room.pongState.ball.speedY = -0.8;
-		console.log(room.pongState.ball)
     }
 	initPosition(room, server, obstacles,powerAvailables);
     sendScore(room, server);
@@ -169,9 +167,9 @@ export class GameService {
         let initPlayer = true;
         const obstacles: obstaclesInterface[] = [];
         const powersAvailables: powerAvailables[] = [
-            { id: 0, isActive: false, type: -1, x: 20, y:20 },
-            { id: 1, isActive: false, type: -1, x: 25, y:50 },
-            { id: 2, isActive: false, type: -1, x: 50, y:25 },
+            { id: 0, isActive: false, type: -1, x: 66, y:33 },
+            { id: 1, isActive: false, type: -1, x: 33, y:66 },
+            { id: 2, isActive: false, type: -1, x: 50, y:50 },
             { id: 3, isActive: false, type: -1, x: 75, y:25 },
             { id: 4, isActive: false, type: -1, x: 75, y:50 },
             { id: 5, isActive: false, type: -1, x: 80, y:80 },
