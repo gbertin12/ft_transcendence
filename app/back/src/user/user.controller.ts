@@ -17,6 +17,7 @@ import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { User } from "../interfaces/user.interface"
 
 @Controller('user')
 export class UserController {
@@ -46,6 +47,12 @@ export class UserController {
         } catch (_) {
             throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Get('leaderboard')
+    async getLeaderboard() {
+            return await this.userService.getAllUserOrderedByElo();;
+
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))

@@ -53,6 +53,27 @@ async function seedUsers() {
                 name: "user",
                 password: sha512("user"),
             },
+            {
+                name: "gbertin",
+                password: sha512("user"),
+                elo: 1200,
+                wins: 72,
+                losses: 67
+            },
+            {
+                name: "batiste",
+                password: sha512("user"),
+                elo: 1300,
+                wins: 90,
+                losses: 67
+            },
+            {
+                name: "top1ouRien",
+                password: sha512("user"),
+                elo: 1800,
+                wins: 120,
+                losses: 67
+            },
         ]
     });
 }

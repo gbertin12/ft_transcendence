@@ -46,6 +46,22 @@ export class UserService {
         });
     }
 
+    async getAllUserOrderedByElo() {
+        return await this.db.user.findMany({
+            orderBy: {
+                elo:'asc'
+            },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+            },
+        });
+    }
+
     async getOTPSecretById(id: number): Promise<string> {
         const user = await this.db.user.findUnique({
             where: { id },
