@@ -90,21 +90,17 @@ function setDataRow(users : User[]) {
 		rowsLeaderboard.push(newRow);
 		id++;
 	})
-	console.log(rowsLeaderboard, "false")
 	return (rowsLeaderboard);
 }
 
 export default function Leaderboard() {
 	const [rowsLeaderboard, setRowsLeaderboard] = useState<RowLeaderboard[]>([]);
-	const [loading, setLoading] = useState<Boolean>(true);
 
 	useEffect(() => {
         fetch("http://localhost:3000/user/leaderboard")
             .then((res) => res.json())
             .then((data) => {
 				setRowsLeaderboard(setDataRow(data))
-				console.log(rowsLeaderboard, "good")
-                setLoading(false);
             });
     }, []);
 
