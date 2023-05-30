@@ -49,7 +49,7 @@ export class UserService {
     async getAllUserOrderedByElo() {
         return await this.db.user.findMany({
             orderBy: {
-                elo:'asc'
+                elo:'desc'
             },
             select : {
                 id: true,
