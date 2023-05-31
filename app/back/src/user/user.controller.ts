@@ -17,7 +17,6 @@ import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { User } from "../interfaces/user.interface"
 
 @Controller('user')
 export class UserController {
