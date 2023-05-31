@@ -3,13 +3,13 @@ import ChannelCreateIcon from "./icons/ChannelCreateIcon";
 import ChatChannelBrowser from "./ChatChannelBrowser";
 import { useCallback, useEffect, useState } from "react";
 import { Channel, Message } from "@/interfaces/chat.interfaces";
-import { useSocket } from "@/contexts/socket.context";
 import { useRouter } from "next/router";
 import { useChat } from "@/contexts/chat.context";
+import { useUser } from "@/contexts/user.context";
 
 
 const ChannelList: React.FC<any> = () => {
-    const { socket } = useSocket();
+    const { socket } = useUser();
     const { channels } = useChat();
     const router = useRouter();
 

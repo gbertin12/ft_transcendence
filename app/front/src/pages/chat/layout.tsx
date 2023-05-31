@@ -1,8 +1,15 @@
 import ChanneldGrid from "@/components/chat/grids/ChannelsGrid";
 import FriendGrid from "@/components/chat/grids/FriendGrid";
+import { useUser } from "@/contexts/user.context";
 import { Grid } from "@nextui-org/react";
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
+    const { user, socket } = useUser();
+
+    if (!socket) {
+        return <h1>Pas de socket</h1>;
+    }
+
     return (
         <Grid.Container css={{ "mx": "$4" }}>
             <ChanneldGrid />

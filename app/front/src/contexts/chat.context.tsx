@@ -1,6 +1,7 @@
 import { Channel, Friend } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSocket } from './socket.context';
+import { useUser } from './user.context';
 
 interface ChatContextType {
     channels: Channel[];
@@ -58,7 +59,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     }, []);
 
     // Listen for new friends / channels
-    const { socket } = useSocket();
+    const { socket } = useUser();
     useEffect(() => {
         if (socket) {
             socket.on('newChannel', (payload: Channel) => {

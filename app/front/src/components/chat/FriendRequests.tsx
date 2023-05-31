@@ -4,10 +4,10 @@ import React from "react";
 import ChatEntry from "./ChatEntry";
 import { IconCheck } from "@tabler/icons-react";
 import { IconX } from "@tabler/icons-react";
-import { useSocket } from "@/contexts/socket.context";
+import { useUser } from "@/contexts/user.context";
 const FriendRequests: React.FC = () => {
     const [friendRequests, setFriendRequests] = React.useState<FriendRequest[]>([]);
-    const { socket } = useSocket();
+    const { socket } = useUser();
 
     React.useEffect(() => {
         fetch("http://localhost:3000/friends/requests", {

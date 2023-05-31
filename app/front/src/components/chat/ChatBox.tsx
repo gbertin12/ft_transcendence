@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, Message, User } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
-import { useSocket } from '@/contexts/socket.context';
 import { useUser } from '@/contexts/user.context';
 
 interface ChatBoxProps {
@@ -11,8 +10,7 @@ interface ChatBoxProps {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const { socket } = useSocket();
-    const { user } = useUser();
+    const { socket, user } = useUser();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<Message[]> => {
         const url = `http://localhost:3000/channel/${channel.id}/messages`;
