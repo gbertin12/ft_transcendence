@@ -5,23 +5,44 @@ import { FormEvent, useState } from "react";
 export default function EditPlayerInfo() {
     const { user, setUser } = useUser();
     const [ name, setName ] = useState<string>("");
+    const [ files, setFiles ] = useState<FileList|null>();
 
     function handleOnInput(event: FormEvent<FormElement>) {
-        let target = event.target as HTMLInputElement;
+        const target = event.target as HTMLInputElement;
         setName(target.value);
+    }
+
+    function handleOnChange(event: FormEvent<FormElement>) {
+        const target = event.target as HTMLInputElement;
+        setFiles(target.files);
     }
 
     async function updateProfile() {
         if (name) {
-            const res = await fetch("http://localhost:3000/user/me", {
+            await fetch("http://localhost:3000/user/me", {
                 method: "POST",
                 credentials: "include",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name })
             });
-            if (res?.ok) {
-                setUser({ ...user, name });
-            }
         }
+        if (files) {
+            const formData = new FormData();
+            formData.append("avatar", files[0])
+            await fetch("http://localhost:3000/user/avatar", {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            });
+        }
+
+        const res = await fetch("http://localhost:3000/user/me", {
+            credentials: "include"
+        });
+        const profile = await res.json();
+        setUser(profile)
+        setName("");
+        setFiles(null);
     }
 
     return (
@@ -37,7 +58,7 @@ export default function EditPlayerInfo() {
             <Card.Body>
                 <Input labelLeft="Username" value={name} onInput={handleOnInput}/>
                 <Spacer y={2}/>
-                <input type="file"/>
+                <input type="file" onChange={handleOnChange}/>
             </Card.Body>
 
             <Card.Divider/>
