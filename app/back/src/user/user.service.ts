@@ -17,14 +17,44 @@ function generateRandomString(len: number) {
 export class UserService {
     constructor(private db: DbService) {}
 
-    async getUserById(id: number): Promise<User> {
+    async getUserById(id: number) {
+        const user = await this.db.user.findUnique({
+            where: { id },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+            },
+        });
+        return user;
+    }
+
+    async getUserByName(name: string) {
+        const user = await this.db.user.findUniqueOrThrow({
+            where: { name },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+            },
+        });
+        return user;
+    }
+    
+    async getUserByIdFull(id: number) {
         const user = await this.db.user.findUnique({
             where: { id },
         });
         return user;
     }
-
-    async getUserByName(name: string): Promise<User> {
+    
+    async getUserByNameFull(name: string) {
         const user = await this.db.user.findUniqueOrThrow({
             where: { name },
         });

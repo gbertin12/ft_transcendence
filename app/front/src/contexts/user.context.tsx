@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@/interfaces/chat.interfaces';
+import { User } from '../interfaces/user.interface';
 import { io, Socket } from 'socket.io-client';
 
 interface UserContextType {

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { Text, Avatar, Container, Grid, Row, Card, Spacer, Col } from '@nextui-org/react';
 import Image from 'next/image'
+import { useUser } from '@/contexts/user.context';
 
 
 
@@ -36,7 +37,7 @@ const convertToPixel = (value: number, maxValue: number) => {
 	return (value * maxValue) / 100;
   };
 
-export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socket, roomId: string, handleSetEndGame: (win: boolean, score1: number, score2: number) => void}) {
+export default function Pong({roomId, handleSetEndGame} : {roomId: string, handleSetEndGame: (win: boolean, score1: number, score2: number) => void}) {
 	const [score , setScore] = useState({scorePlayer1: 0, scorePlayer2: 0});
 	const [ball, setBall] = useState({x: 0, y: 0});
 	const [playerPosition, setPlayerPosition] = useState({yPlayerOne: 0, yPlayerTwo: 0});
@@ -54,6 +55,8 @@ export default function Pong({socket, roomId, handleSetEndGame} : {socket: Socke
 		{isActive: false, x: 0, y: 0, size: 0, id: 1}
 	])
 	const ref = useRef(null);
+	const { socket } = useUser();
+
 
 
 	// ==================================================================================================================

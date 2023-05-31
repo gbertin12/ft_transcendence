@@ -3,29 +3,6 @@ import { useEffect, useState, useMemo, Suspense } from "react";
 import  { User, RowLeaderboard }  from "@/interfaces/user.interface"
 
 function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard[]}) {
-	const columns = [
-		{
-		  key: "rank",
-		  label: "RANK",
-		},
-		{
-		  key: "avatar",
-		  label: "AVATAR",
-		},
-		{
-			key: "name",
-			label: "NAME",
-		  },
-		{
-		  key: "winrate",
-		  label: "WIN RATE",
-		},
-		{
-			key: "elo",
-			label: "ELO",
-		},
-	];
-
 	return (
 		<Grid.Container direction="column" justify="center">
 				<Grid>
@@ -40,7 +17,7 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
 							minWidth: "100%",
 						}}
     				>
-    				<Table.Header columns={columns}>
+    				<Table.Header>
         				<Table.Column key={1}>RANK</Table.Column>
         				<Table.Column key={2}>AVATAR</Table.Column>
         				<Table.Column key={3}>NAME</Table.Column>

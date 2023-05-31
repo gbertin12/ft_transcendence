@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import GamePage from '../components/pong/GamePage'
+import GameBody from '../components/pong/GameBody'
 import { Text, Spacer, Container } from '@nextui-org/react'
 
 export default function Game() {
@@ -12,7 +12,7 @@ export default function Game() {
 			<Text h1>Pong Game</Text>
 			<Spacer y={3} />
 			<div style={{width:'80%', maxWidth:'700px'}}>
-				<GamePage />
+				<GameBody />
 			</div>
 		</div>
 	</>
