@@ -8,16 +8,37 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  avatar    String    @default("default.jpg")
-  wins      Int       @default(0)
-  losses    Int       @default(0)
-  elo       Int       @default(1000)
-  otp       Boolean   @default(false)
+  id        Int             @id @default(autoincrement())
+  name      String          @unique
+  avatar    String          @default("default.jpg")
+  wins      Int             @default(0)
+  losses    Int             @default(0)
+  elo       Int             @default(1000)
+  otp       Boolean         @default(false)
   otpSecret String?
   password  String?
-  Channel   Channel[]
+  channels  Channel[]
+  friends   Friend[]
+  requests  FriendRequest[]
+}
+
+model Friend {
+  user_id     Int
+  friend_id   Int
+  friended_at DateTime @default(now()) @db.Timestamp(6)
+  user        User?    @relation(fields: [friend_id], references: [id])
+
+  @@id([user_id, friend_id])
+  @@index([user_id, friend_id], name: "user_id_friend_id")
+  @@index([friend_id, user_id], name: "friend_id_user_id")
+}
+
+model FriendRequest {
+  request_id   Int      @id @default(autoincrement())
+  sender_id    Int
+  receiver_id  Int
+  requested_at DateTime @default(now()) @db.Timestamp(6)
+  sender       User     @relation(fields: [sender_id], references: [id])
 }
 
 model Channel {
