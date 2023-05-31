@@ -16,7 +16,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const [dataEndGame, setDataEndGame] = useState({
 		win: false, score1: 0, score2: 0 
 	})
-	
+
 	const handleGameStart = (roomName: string) => {
 		setPlayGame(true);
 		setRoomId(roomName);
@@ -69,4 +69,6 @@ export default function GameBody({socket} : {socket: Socket}) {
 			<Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
 		</>
 	}
+	else
+		return <></>
 }

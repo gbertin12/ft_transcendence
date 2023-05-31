@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import GameBody from './GameBody';
 import CardEndGame from './CardEndGame';
 import Image from 'next/image';
+import { useUser } from '@/contexts/user.context';
 
 function useSocket(url: string) {
     const [socket, setSocket] = useState<any>();
@@ -24,8 +25,7 @@ function useSocket(url: string) {
 }
 
 export default function GamePage() {
-
-    const socket = useSocket('http://localhost:8001');
+    const { socket } = useUser()
     return (
         <>
             <div>

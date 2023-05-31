@@ -15,7 +15,7 @@ import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
 
 @Injectable()
-@WebSocketGateway(8001, { cors: true })
+@WebSocketGateway(8001, { cors: { origin: process.env.FRONT_URL, credentials: true }})
 export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private jwtService: JwtService,
@@ -33,7 +33,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async handleConnection(client: Socket) 
     {
         // verify user with 'session' cookie
-        const cookies = cookie.parse(client.handshake.auth.cookies || '');
+        const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
             console.log('NO SESSION FOUND');
             //client.disconnect();
@@ -43,7 +43,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
             const user = await this.userService.getUserById(payload.id);
-
+            client['user'] = user;
             // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
             const player: PlayerInterface = {
                 id: client.id,
