@@ -17,6 +17,7 @@ import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
 
 @Controller('user')
 export class UserController {
@@ -66,5 +67,8 @@ export class UserController {
         @Req() req: Request
     ) {
         await this.userService.updateAvatar(req.user['id'], avatar.filename);
+        if (req.user['avatar'] !== 'default.jpg') {
+            fs.unlinkSync(`/app/files/static/avatars/${req.user['avatar']}`);
+        }
     }
 }

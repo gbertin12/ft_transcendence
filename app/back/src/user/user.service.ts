@@ -71,7 +71,6 @@ export class UserService {
     }
 
     async updateAvatar(id: number, filename: string) {
-        // TODO: delete previous avatar (except if default)
         await this.db.user.update({
             data: { avatar: filename },
             where: { id },
@@ -90,6 +89,7 @@ export class UserService {
                 wins: true,
                 losses: true,
                 elo: true,
+                otp: true,
             },
         });
     }

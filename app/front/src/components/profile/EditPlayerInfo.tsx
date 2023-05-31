@@ -41,7 +41,11 @@ export default function EditPlayerInfo() {
         });
         const profile = await res.json();
         setUser(profile)
+
+        // reset input elements to default/none value
         setName("");
+        const fileinput = document.querySelector<HTMLInputElement>("input[type='file']");
+        if (fileinput) fileinput.value = "";
         setFiles(null);
     }
 
