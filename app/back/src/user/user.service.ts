@@ -27,6 +27,7 @@ export class UserService {
                 wins: true,
                 losses: true,
                 elo: true,
+                otp: true,
             },
         });
         return user;
@@ -42,6 +43,7 @@ export class UserService {
                 wins: true,
                 losses: true,
                 elo: true,
+                otp: true,
             },
         });
         return user;
