@@ -32,6 +32,7 @@ const darkTheme = createTheme({
 })
 
 import { NextUIProvider } from '@nextui-org/react';
+import { UserContextProvider } from '@/contexts/user.context';
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
@@ -44,9 +45,11 @@ export default function App({ Component, pageProps }: AppProps) {
 			}}
 		>
 			<NextUIProvider>
-				<Layout>
-					<Component {...pageProps} />
-				</Layout>
+				<UserContextProvider>
+					<Layout>
+						<Component {...pageProps} />
+					</Layout>
+				</UserContextProvider>
 			</NextUIProvider>
 		</NextThemesProvider>
 	);
