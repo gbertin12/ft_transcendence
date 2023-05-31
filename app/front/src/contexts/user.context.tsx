@@ -1,14 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/interfaces/chat.interfaces';
+import { io, Socket } from 'socket.io-client';
 
 interface UserContextType {
   user: User;
   setUser: React.Dispatch<React.SetStateAction<User>>;
+  socket: Socket;
 }
+
+let socket: Socket = io('http://localhost:8001', { withCredentials: true });
 
 const UserContext = createContext<UserContextType>({
   user: {} as User,
   setUser: () => {},
+  socket,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -31,7 +36,7 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, socket }}>
       {children}
     </UserContext.Provider>
   );
