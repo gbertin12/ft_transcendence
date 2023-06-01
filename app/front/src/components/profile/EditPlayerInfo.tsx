@@ -3,7 +3,7 @@ import { useUser } from '@/contexts/user.context';
 import { FormEvent, useState } from "react";
 
 export default function EditPlayerInfo() {
-    const { user, setUser } = useUser();
+    const { setUser } = useUser();
     const [ name, setName ] = useState<string>("");
     const [ files, setFiles ] = useState<FileList|null>();
 
@@ -60,7 +60,7 @@ export default function EditPlayerInfo() {
             <Card.Divider/>
 
             <Card.Body>
-                <Input labelLeft="Username" value={name} onInput={handleOnInput}/>
+                <Input aria-label="edit username" labelLeft="Username" value={name} onInput={handleOnInput}/>
                 <Spacer y={2}/>
                 <input type="file" onChange={handleOnChange}/>
             </Card.Body>

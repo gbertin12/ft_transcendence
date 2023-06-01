@@ -1,5 +1,6 @@
 import { Button, Text, Row, Card, Image, Col } from "@nextui-org/react";
 import { useUser } from '@/contexts/user.context';
+import MFAButton from "./MFAButton";
 
 export default function PlayerInfo() {
     const { user } = useUser();
@@ -23,6 +24,7 @@ export default function PlayerInfo() {
                         showSkeleton>
                     </Image>
                     <Text h4>{user.name}</Text>
+                    <MFAButton/>
                 </Col>
             </Card.Body>
         </Card>

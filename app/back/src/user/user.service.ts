@@ -104,10 +104,17 @@ export class UserService {
 
     async updateOTPSecret(id: number, otpSecret: string) {
         // can't use update because it only wants unique fields on the 'where'
-        await this.db.user.updateMany({
-            data: { otp: true, otpSecret },
-            where: { id, otp: false },
-        });
+        if (otpSecret) {
+            await this.db.user.updateMany({
+                data: { otp: true, otpSecret },
+                where: { id, otp: false },
+            });
+        } else {
+            await this.db.user.updateMany({
+                data: { otp: false, otpSecret: null },
+                where: { id, otp: true },
+            });
+        }
     }
 
     // create a new user if it doesn't already exist
