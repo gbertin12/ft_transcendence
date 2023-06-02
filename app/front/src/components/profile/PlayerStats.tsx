@@ -1,6 +1,6 @@
-import { Text, Card } from "@nextui-org/react";
-import { useUser } from '@/contexts/user.context';
+import { Text, Card, Row } from "@nextui-org/react";
 import { useEffect, useState } from "react";
+import { User } from "@/interfaces/user.interface";
 
 function EloLabel({ elo }: { elo: number }) {
     const [ color, setColor ] = useState<string>("primary");
@@ -11,12 +11,11 @@ function EloLabel({ elo }: { elo: number }) {
     }, [color]);
 
     return (
-        <Text h4 color={color}>Elo: {elo}</Text>
+        <Text h4 color={color}>{elo}</Text>
     );
 }
 
-export default function PlayerStats() {
-    const { user } = useUser();
+export default function PlayerStats({ user }: { user: User }) {
 
     return (
         <Card>
@@ -27,9 +26,20 @@ export default function PlayerStats() {
             <Card.Divider/>
 
             <Card.Body>
-                <Text h4>Wins: {user.wins}</Text>
-                <Text h4>Losses: {user.losses}</Text>
-                <EloLabel elo={user.elo}/>
+                <Row justify="space-between" align="center">
+                    <Text h4>Wins</Text>
+                    <Text h4>{user.wins}</Text>
+                </Row>
+
+                <Row justify="space-between" align="center">
+                    <Text h4>Losses</Text>
+                    <Text h4>{user.losses}</Text>
+                </Row>
+
+                <Row justify="space-between" align="center">
+                    <Text h4>Elo</Text>
+                    <EloLabel elo={user.elo}/>
+                </Row>
             </Card.Body>
         </Card>
     );

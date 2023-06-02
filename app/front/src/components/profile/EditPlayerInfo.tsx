@@ -1,6 +1,7 @@
 import { Button, Text, Row, Card, Input, Spacer, FormElement } from "@nextui-org/react";
 import { useUser } from '@/contexts/user.context';
 import { FormEvent, useState } from "react";
+import MFAButton from "./MFAButton";
 
 export default function EditPlayerInfo() {
     const { setUser } = useUser();
@@ -63,6 +64,8 @@ export default function EditPlayerInfo() {
                 <Input aria-label="edit username" labelLeft="Username" value={name} onInput={handleOnInput}/>
                 <Spacer y={2}/>
                 <input type="file" onChange={handleOnChange}/>
+                <Spacer y={2}/>
+                <MFAButton/>
             </Card.Body>
 
             <Card.Divider/>

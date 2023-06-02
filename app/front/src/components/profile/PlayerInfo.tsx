@@ -1,19 +1,16 @@
-import { Button, Text, Row, Card, Image, Col } from "@nextui-org/react";
-import { useUser } from '@/contexts/user.context';
-import MFAButton from "./MFAButton";
+import { Text, Card, Image, Col } from "@nextui-org/react";
+import { User } from "@/interfaces/user.interface";
 
-export default function PlayerInfo() {
-    const { user } = useUser();
+export default function PlayerInfo({ user }: { user: User }) {
 
     return (
         <Card>
             <Card.Header>
-                <Row wrap="wrap" justify="space-between" align="center">
-                    <Text h2>Player Info</Text>
-                    <Button>edit</Button>
-                </Row>
+                <Text h2>Player Info</Text>
             </Card.Header>
+
             <Card.Divider/>
+
             <Card.Body>
                 <Col align="center">
                     <Image
@@ -24,7 +21,6 @@ export default function PlayerInfo() {
                         showSkeleton>
                     </Image>
                     <Text h4>{user.name}</Text>
-                    <MFAButton/>
                 </Col>
             </Card.Body>
         </Card>

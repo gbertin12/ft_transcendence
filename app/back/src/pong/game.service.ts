@@ -241,6 +241,7 @@ export class GameService {
         const user2 = await this.userService.getUserByName(looser.name);
         let eloWinner = user1.elo;
         let eloLooser = user2.elo;
+        // TODO: prevent elo from reaching 0 or less
         const p1 = eloWinner / (eloWinner + eloLooser);
         const p2 = eloLooser / (eloWinner + eloLooser);
         const k = 42 * (winner.score - looser.score);
