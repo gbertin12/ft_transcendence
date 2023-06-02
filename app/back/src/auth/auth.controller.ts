@@ -102,14 +102,14 @@ export class AuthController {
         res.send(uri);
     }
 
-    @UseGuards(AuthGuard('jwt-2fa'))
+    @UseGuards(AuthGuard('jwt'))
     @Get('2fa/disable')
     async unsetOTP(
         @Req() req: Request,
         @Res() res: Response
     ) {
         await this.authService.unsetOTP(req.user['id']);
-        const token = await this.authService.generateJWT(req.user['id'], false);
+        const token = await this.authService.generateJWT(req.user['id']);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.end();
     }
@@ -119,7 +119,7 @@ export class AuthController {
     async verifyOTP(
         @Req() req: Request,
         @Res() res: Response,
-        @Body('otp') otp: string,
+        @Body('code') otp: string,
     ) {
         if (!await this.authService.verifyOTP(req.user['id'], otp)) {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
