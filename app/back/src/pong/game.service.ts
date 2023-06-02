@@ -263,6 +263,6 @@ export class GameService {
         // prevent elo from reaching 0 or less
         if (eloLooser <= 0) eloLooser = 1;
 
-        return [ Math.round(eloWinner), Math.round(eloLooser) ];
+        return [ Math.round(eloWinner), Math.round(eloLooser)];
     }
 }
