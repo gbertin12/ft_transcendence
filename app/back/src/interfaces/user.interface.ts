@@ -14,12 +14,3 @@ export interface RowLeaderboard {
 	winrate: number;
 	elo: number;
 }
-
-export interface User {
-    id:        number;
-    name:      string;
-    avatar:    string;
-    wins:      number;
-    losses:    number;
-    elo:       number;
-}

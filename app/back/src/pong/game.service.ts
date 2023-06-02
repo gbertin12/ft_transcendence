@@ -218,29 +218,29 @@ export class GameService {
         const loose = { win: false, score1, score2 };
 
         if (score1 == 10) {
-            server.to(room.pongState.player1.id).emit('endGame', win);
-            server.to(room.pongState.player2.id).emit('endGame', loose);
+
+            server.to(room.pongState.player1.id).emit('endGame', win, score1, score2, room.pongState.player2.userInfos);
+            server.to(room.pongState.player2.id).emit('endGame', loose, score2, score1, room.pongState.player1.userInfos);
             await this.userService.incrementWin(player1Name);
             await this.userService.incrementLoose(player2Name);
-            const [ eloWinner, eloLooser ] = await this.calcElo(room.pongState.player1, room.pongState.player2);
+            const [ eloWinner, eloLooser ] = this.calcElo(room.pongState.player1, room.pongState.player2);
             await this.userService.updateElo(player1Name, eloWinner);
             await this.userService.updateElo(player2Name, eloLooser);
         } else {
-            server.to(room.pongState.player1.id).emit('endGame', loose);
-            server.to(room.pongState.player2.id).emit('endGame', win);
+            server.to(room.pongState.player1.id).emit('endGame', loose, score1, score2, room.pongState.player2.userInfos);
+            server.to(room.pongState.player2.id).emit('endGame', win, score2, score1, room.pongState.player1.userInfos);
             await this.userService.incrementWin(player2Name);
             await this.userService.incrementLoose(player1Name);
-            const [ eloWinner, eloLooser ] = await this.calcElo(room.pongState.player2, room.pongState.player1);
+            const [ eloWinner, eloLooser ] = this.calcElo(room.pongState.player2, room.pongState.player1);
             await this.userService.updateElo(player2Name, eloWinner);
             await this.userService.updateElo(player1Name, eloLooser);
         }
     }
 
-    async calcElo(winner: PlayerInterface, looser: PlayerInterface): Promise<number[]> {
-        const user1 = await this.userService.getUserByName(winner.name);
-        const user2 = await this.userService.getUserByName(looser.name);
-        let eloWinner = user1.elo;
-        let eloLooser = user2.elo;
+    calcElo(winner: PlayerInterface, looser: PlayerInterface): number[] {
+        
+        let eloWinner = winner.userInfos.elo;
+        let eloLooser = looser.userInfos.elo;
         const p1 = eloWinner / (eloWinner + eloLooser);
         const p2 = eloLooser / (eloWinner + eloLooser);
         const k = 42 * (winner.score - looser.score);
@@ -249,6 +249,6 @@ export class GameService {
         eloWinner = eloWinner + k * (1 - p1);
         eloLooser = eloLooser + k * (0 - p2);
 
-        return [ Math.round(eloWinner), Math.round(eloLooser) ];
+        return [ Math.round(eloWinner), Math.round(eloLooser)];
     }
 }

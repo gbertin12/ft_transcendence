@@ -6,6 +6,7 @@ import CardPlayerInformation from './CardPlayerInformation';
 import ButtonStart  from './ButtonStart'
 import CardEndGame from './CardEndGame';
 import { useUser } from '@/contexts/user.context';
+import { User } from '../../interfaces/user.interface'
 
 
 export default function GameBody() {
@@ -17,6 +18,9 @@ export default function GameBody() {
 	const [dataEndGame, setDataEndGame] = useState({
 		win: false, score1: 0, score2: 0 
 	})
+	const [adversary, setAdversary] = useState<User>();
+
+	const { user } = useUser();
 
 	const handleGameStart = (roomName: string) => {
 		setPlayGame(true);
@@ -28,18 +32,21 @@ export default function GameBody() {
 			setSearchGame(value);
 	}
 
-	const handleSetEndGame = (win: boolean, score1: number, score2: number)  => {
+	const handleSetEndGame = (win: boolean, score1: number, score2: number, adversary: User)  => {
 		setDataEndGame({win, score1, score2});
 		setRoomId('');
 		setPlayGame(false);
 		setEndGame(true);
+		setAdversary(adversary);
 	}
 
 	const handleCloseCardEndGame = () => {
 		setEndGame(false);
+		setSearchGame(false);
 	}
 	//return <Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
 	//return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
+	const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
 	if (!playGame && !endGame)
 	{
 		return <>
@@ -48,7 +55,7 @@ export default function GameBody() {
 			</div>
 			<Container>
 				<Row justify='center'>
-					<CardPlayerInformation searchGame={false} username={"gbertin"} avatar="https://i.imgur.com/fjZQLH6.png" elo={1200} nbWin={8} nbLoose={3} />
+					<CardPlayerInformation searchGame={false} username={user.name} avatar={pathAvatar} elo={user.elo} nbWin={user.wins} nbLoose={user.losses} />
 					<Spacer x={2} />
 					<Text css={{ my:'auto' }} h1>VS</Text>
 					<Spacer x={2} />
@@ -59,10 +66,10 @@ export default function GameBody() {
 			<ButtonStart searchGame={searchGame} modes={modes} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
 		</>
 	}
-	else if (!playGame && endGame)
+	else if (!playGame && endGame && adversary)
 	{
 		return <>
-			<CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} handleCloseCardEndGame={handleCloseCardEndGame} />
+			<CardEndGame win={dataEndGame['win']} score1={dataEndGame['score1']} score2={dataEndGame['score2']} adversary={adversary} handleCloseCardEndGame={handleCloseCardEndGame} />
 		</>
 	}
 	else if (playGame) {

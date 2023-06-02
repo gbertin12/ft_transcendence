@@ -4,6 +4,7 @@ import io, { Socket } from 'socket.io-client';
 import { Text, Avatar, Container, Grid, Row, Card, Spacer, Col } from '@nextui-org/react';
 import Image from 'next/image'
 import { useUser } from '@/contexts/user.context';
+import { User } from '../../interfaces/user.interface'
 
 
 
@@ -37,7 +38,7 @@ const convertToPixel = (value: number, maxValue: number) => {
 	return (value * maxValue) / 100;
   };
 
-export default function Pong({roomId, handleSetEndGame} : {roomId: string, handleSetEndGame: (win: boolean, score1: number, score2: number) => void}) {
+export default function Pong({roomId, handleSetEndGame} : {roomId: string, handleSetEndGame: (win: boolean, score1: number, score2: number, adversary: User) => void}) {
 	const [score , setScore] = useState({scorePlayer1: 0, scorePlayer2: 0});
 	const [ball, setBall] = useState({x: 0, y: 0});
 	const [playerPosition, setPlayerPosition] = useState({yPlayerOne: 0, yPlayerTwo: 0});
@@ -190,8 +191,8 @@ export default function Pong({roomId, handleSetEndGame} : {roomId: string, handl
 		setPlayerPosition({yPlayerOne: newYP1, yPlayerTwo:newYP2});
 	}
 
-	const handleEndGame = ({win, score1, score2} : {win: boolean, score1: number, score2: number}) => {
-		handleSetEndGame(win, score1, score2);
+	const handleEndGame = ({win, score1, score2, adversary} : {win: boolean, score1: number, score2: number, adversary : User}) => {
+		handleSetEndGame(win, score1, score2, adversary);
 		console.log(win, score1, score2);
 	}
 

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { User } from "../interfaces/user.interface"
 // interface de la ball
 
 export interface BallData {
@@ -17,6 +18,7 @@ export interface PlayerInterface {
     y: number;
     score: number;
 	modes: boolean;
+	userInfos : User;
 }
 
 // interface du state
