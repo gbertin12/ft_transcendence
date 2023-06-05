@@ -4,9 +4,10 @@ import { FormEvent, useState } from "react";
 import MFAButton from "./MFAButton";
 
 export default function EditPlayerInfo() {
-    const { setUser } = useUser();
+    const { user, setUser } = useUser();
     const [ name, setName ] = useState<string>("");
     const [ files, setFiles ] = useState<FileList|null>();
+    const [ error, setError ] = useState<string>("");
 
     function handleOnInput(event: FormEvent<FormElement>) {
         const target = event.target as HTMLInputElement;
@@ -19,35 +20,42 @@ export default function EditPlayerInfo() {
     }
 
     async function updateProfile() {
+        const formData = new FormData();
+
         if (name) {
-            await fetch("http://localhost:3000/user/me", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name })
-            });
+            formData.append("name", name);
         }
         if (files) {
-            const formData = new FormData();
-            formData.append("avatar", files[0])
-            await fetch("http://localhost:3000/user/avatar", {
-                method: "POST",
-                credentials: "include",
-                body: formData
-            });
+            formData.append("avatar", files[0]);
         }
 
-        const res = await fetch("http://localhost:3000/user/me", {
-            credentials: "include"
-        });
-        const profile = await res.json();
-        setUser(profile)
+        if (name || files) {
+            const res = await fetch("http://localhost:3000/user/me", {
+                credentials: "include",
+                method: "POST",
+                body: formData,
+            });
+            if (res?.ok) {
+                const avatar = await res.text();
+                if (name && avatar) {
+                    setUser({  ...user, avatar, name });
+                } else if (name) {
+                    setUser({  ...user, name });
+                } else {
+                    setUser({  ...user, avatar });
+                }
+                setError("");
+            } else {
+                const data = await res.json();
+                setError(data.message);
+            }
 
-        // reset input elements to default/none value
-        setName("");
-        const fileinput = document.querySelector<HTMLInputElement>("input[type='file']");
-        if (fileinput) fileinput.value = "";
-        setFiles(null);
+            // reset input elements to default/none value
+            setName("");
+            const fileinput = document.querySelector<HTMLInputElement>("input[type='file']");
+            if (fileinput) fileinput.value = "";
+            setFiles(null);
+        }
     }
 
     return (
@@ -65,6 +73,8 @@ export default function EditPlayerInfo() {
                 <Spacer y={2}/>
                 <input type="file" onChange={handleOnChange}/>
                 <Spacer y={2}/>
+                <Text h4 color="error">{error}</Text>
+                <Spacer y={1}/>
                 <MFAButton/>
             </Card.Body>
 

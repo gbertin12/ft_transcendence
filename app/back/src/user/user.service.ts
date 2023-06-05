@@ -162,4 +162,24 @@ export class UserService {
             where: { name },
         });
     }
+
+    async getHistory() {
+        return await this.db.matchHistory.findMany();
+    }
+
+    async addGame(winnerName: string, looserName: string) {
+        const winner = await this.getUserByName(winnerName);
+        const looser = await this.getUserByName(looserName);
+
+        const winnerId = winner.id;
+        const looserId = looser.id;
+
+        await this.db.matchHistory.create({
+            data: {
+                winnerId,
+                looserId,
+                eloDiff: 0, 
+            }
+        });
+    }
 }

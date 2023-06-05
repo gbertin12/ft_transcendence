@@ -32,11 +32,33 @@ export class UserController {
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
-    async updateName(
+    @UseInterceptors(FileInterceptor('avatar'))
+    async update(
         @Req() req: Request,
-        @Body('name') new_name: string
+        @Body('name') new_name: string,
+        @UploadedFile(new ParseFilePipe({
+            validators: [
+                new MaxFileSizeValidator({ maxSize: 10000 }),
+            ],
+            fileIsRequired: false
+        })) avatar?: Express.Multer.File,
     ) {
-        await this.userService.updateName(req.user['id'], new_name);
+        try {
+            await this.userService.updateName(req.user['id'], new_name);
+        } catch {
+            throw new HttpException(
+                `Error: Username '${new_name}' already exists`,
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (avatar) {
+            await this.userService.updateAvatar(req.user['id'], avatar.filename);
+            if (req.user['avatar'] !== 'default.jpg') {
+                fs.unlinkSync(`/app/files/static/avatars/${req.user['avatar']}`);
+            }
+            return avatar.filename;
+        }
     }
 
     @Get('profile/:username')
@@ -51,24 +73,11 @@ export class UserController {
 
     @Get('leaderboard')
     async getLeaderboard() {
-            return await this.userService.getAllUserOrderedByElo();;
-
+        return await this.userService.getAllUserOrderedByElo();
     }
 
-    @UseGuards(AuthGuard('jwt-2fa'))
-    @Post('avatar')
-    @UseInterceptors(FileInterceptor('avatar'))
-    async uploadAvatar(
-        @UploadedFile(new ParseFilePipe({
-            validators: [
-                new MaxFileSizeValidator({ maxSize: 10000 }),
-            ],
-        })) avatar: Express.Multer.File,
-        @Req() req: Request
-    ) {
-        await this.userService.updateAvatar(req.user['id'], avatar.filename);
-        if (req.user['avatar'] !== 'default.jpg') {
-            fs.unlinkSync(`/app/files/static/avatars/${req.user['avatar']}`);
-        }
+    @Get('history')
+    async getMatchHistory() {
+        return await this.userService.getHistory();
     }
 }
