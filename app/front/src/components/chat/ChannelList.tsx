@@ -15,9 +15,6 @@ const ChannelList: React.FC<any> = () => {
 
     const handleChannelChange = useCallback((channel: Channel) => {
         router.push(`/chat/channel/${channel.id}`, undefined, { shallow: true });
-        socket.emit('join', {
-            channel: channel.id,
-        });
     }, []);
 
     return (
