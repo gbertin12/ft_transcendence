@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Spinner, Badge } from "@nextui-org/react";
+import { Grid, Spinner, Badge, Button, Text } from "@nextui-org/react";
 import ChatEntry from "./ChatEntry";
 import { IconDeviceGamepad, IconEye, IconMessageCircle } from "@tabler/icons-react";
-import { useSocket } from "@/contexts/socket.context";
 import { Friend } from "@/interfaces/chat.interfaces";
 import { useChat } from "@/contexts/chat.context";
+import { useUser } from "@/contexts/user.context";
 
 const ChatFriendBrowser: React.FC = () => {
     const { friends } = useChat();
+    const { socket } = useUser();
     return (
         <>
             {friends.map((friend) => (
@@ -42,6 +43,35 @@ const ChatFriendBrowser: React.FC = () => {
                     </Grid>
                 </ChatEntry>
             ))}
+            <Text h4>DEBUG MODE</Text>
+            <Button
+                auto
+                color="default"
+                onClick={() => {
+                    socket.emit("updateStatus", { "status": "offline" });
+                }}
+            >
+                Offline
+            </Button>
+            <Button
+                auto
+                color="success"
+                onClick={() => {
+                    socket.emit("updateStatus", { "status": "online" });
+                }}
+            >
+                Online
+            </Button>
+            <Button
+                auto
+                color="error"
+                onClick={() => {
+                    socket.emit("updateStatus", { "status": "playing" });
+                }}
+            >
+                Playing
+            </Button>
+
         </>
     );
 };

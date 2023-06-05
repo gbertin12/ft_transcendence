@@ -49,6 +49,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     };
                 });
                 setFriends(friends);
+                socket.emit("updateStatus", {"status": "online"});
             } else {
                 console.error("Error fetching friends: data is not an array");
             }
@@ -67,10 +68,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             });
             socket.on('deleteChannel', (payload: number) => {
                 setChannels((channels) => channels.filter((c) => c.id !== payload));
-                // TODO: Rethink this vvv, maybe use NextJS router ?
-                // if (selectedChannel?.id === payload) {
-                //     setSelectedChannel(channels[0]);
-                // }
             });
             socket.on('editChannel', (payload: Channel) => {
                 setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
@@ -94,21 +91,34 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 }
                 setFriends((friends) => [...friends, newFriend]);
             });
-            socket.on("online", (payload: any) => {
-                setFriends((friends) => friends.map((f) => f.id === payload.user_id ? { ...f, isOnline: true } : f));
+            socket.on("online", (friend_id: number) => {
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isPlaying: false } : f));
+                socket.emit("onlineAnswer", friend_id);
             });
-            socket.on("offline", (payload: any) => {
-                setFriends((friends) => friends.map((f) => f.id === payload.user_id ? { ...f, isOnline: false } : f));
+            socket.on("typing", (friend_id: number) => {
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isTyping: true } : f));
+            });
+            socket.on("playing", (friend_id: number) => {
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isPlaying: true, isTyping: false, isOnline: true} : f));
+            });
+            socket.on("onlineAnswer", (friend_id: number) => {
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isTyping: false, isPlaying: false } : f));
+            });
+            socket.on("offline", (friend_id: number) => {
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: false, isTyping: false, isPlaying: false } : f));
             });
             return () => {
-                socket.off('newChannel');
-                socket.off('deleteChannel');
-                socket.off('editChannel');
-                socket.off('newFriend');
-                socket.off('deleteFriend');
-                socket.off('friendRequestAccepted');
-                socket.off('online');
-                socket.off('offline');
+                socket.off("newChannel");
+                socket.off("deleteChannel");
+                socket.off("editChannel");
+                socket.off("newFriend");
+                socket.off("deleteFriend");
+                socket.off("friendRequestAccepted");
+                socket.off("online");
+                socket.off("typing");
+                socket.off("playing");
+                socket.off("onlineAnswer");
+                socket.off("offline");
             }
         }
     }, [socket]);

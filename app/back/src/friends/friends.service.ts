@@ -138,14 +138,22 @@ export class FriendsService {
     async getFriends(user_id: number): Promise<Friend[]> {
         return this.dbService.friend.findMany({
             where: {
-                user_id: user_id,
-                OR: {
-                    friend_id: user_id,
-                }
+                OR: [
+                    {
+                        user_id: user_id,
+                    },
+                    {
+                        friend_id: user_id,
+                    },
+                ],
             },
             include: {
-                user: true,
-            }
+                user: {
+                    select: {
+                        id: true,
+                    }
+                }
+            },
         });
     }
 }
