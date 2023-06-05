@@ -46,7 +46,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, user, 
                     content={unreadMessages > 9 ? "9+" : unreadMessages.toString()}
                     placement="bottom-right"
                     color="error"
-                    isInvisible={(unreadMessages === 0)}
+                    css={{ display: (unreadMessages === 0) ? "none" : "block" }}
                 >
                     <Text
                         span

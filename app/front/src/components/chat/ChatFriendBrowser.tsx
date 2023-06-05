@@ -35,7 +35,7 @@ const ChatFriendBrowser: React.FC = () => {
                             content={friend.unreadMessages > 9 ? "9+" : friend.unreadMessages.toString()}
                             placement="bottom-right"
                             color="error"
-                            isInvisible={(friend.unreadMessages === 0)}
+                            css={{ display: (friend.unreadMessages === 0) ? "none" : "block" }}
                         >
                             <IconMessageCircle />
                         </Badge>
