@@ -31,7 +31,7 @@ const ChannelList: React.FC<any> = () => {
                 <ChannelCreateIcon />
             </Grid.Container>
 
-            {/* TODO: Display latest chats with friends */}
+            {/* TODO: Display latest chats with friends and channel invites */}
             <ChatChannelBrowser
                 channels={channels}
                 channelChanged={handleChannelChange}

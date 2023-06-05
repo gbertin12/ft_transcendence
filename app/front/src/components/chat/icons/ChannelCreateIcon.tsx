@@ -1,5 +1,5 @@
-import { Button, Container, Grid, Input, Loading, Popover, Switch } from '@nextui-org/react';
-import { IconLock, IconLockOpen, IconPlus } from '@tabler/icons-react';
+import { Button, Container, Grid, Input, Loading, Popover, Switch, Tooltip } from '@nextui-org/react';
+import { IconEye, IconEyeClosed, IconLock, IconLockOpen, IconPlus } from '@tabler/icons-react';
 import React from 'react';
 
 function respectCriteria(name: string): string {
@@ -40,8 +40,8 @@ export const ChannelPrivateSwitch: React.FC<any> = ({ error, isPrivate, setPriva
     return (
         <Switch
             color={(error === "" ? "success" : "error")}
-            iconOn={<IconLock />}
-            iconOff={<IconLockOpen />}
+            iconOn={<IconEyeClosed />}
+            iconOff={<IconEye />}
             checked={isPrivate}
             onChange={(e) => {
                 setPrivate(e.target.checked);

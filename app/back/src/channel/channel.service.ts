@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
-import { sha512 } from 'sha512-crypt-ts';
-import { Channel, Message } from '@prisma/client';
+import { Channel, Message, User } from '@prisma/client';
 import ChatGateway from '../gateway/chat.gateway';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class ChannelService {
@@ -11,23 +11,79 @@ export class ChannelService {
         private gateway: ChatGateway
     ) { }
 
-    async allChannels() {
+    async allChannels(user: User) {
         // return whether the password is set or not
-        return await this.db.channel.findMany(
+        let channels = await this.db.channel.findMany(
             {
                 select: {
                     id: true,
                     name: true,
                     owner_id: true,
-                    private: true,
                     topic: true,
-                    password: true
-                }
+                    password: true,
+                    private: false,
+                },
+                where: {
+                    // check access if the channel is private
+                    OR: [
+                        {
+                            private: false
+                        },
+                        {
+                            private: true,
+                            channel_access: {
+                                some: {
+                                    user_id: user.id
+                                }
+                            }
+                        }
+                    ]
+                },
             }
         );
+        channels.forEach((channel) => { // remove the (hashed) password from the response
+            channel.password = (channel.password !== null ? '' : null);
+            // if (channel.password !== null && channel)
+        });
+        return channels;
     }
 
-    async getMessages(id: number) {
+    async getMessages(id: number, user: User) {
+        // Check if the user has access to the channel
+        let channel = await this.db.channel.findUnique({
+            where: {
+                id: id
+            },
+            select: {
+                id: true,
+                private: true,
+                password: true
+            }
+        });
+
+        if (!channel) {
+            throw new HttpException('Channel not found', 404);
+        }
+
+        if (channel.private || channel.password !== null) {
+            // Check if the user has access to the channel
+            let channel = await this.db.channelAccess.findUnique({
+                where: {
+                    channel_id_user_id: {
+                        channel_id: id,
+                        user_id: user.id
+                    }
+                },
+                select: {
+                    channel_id: true
+                }
+            });
+
+            if (!channel) {
+                throw new HttpException('You do not have access to this channel', 403);
+            }
+        }
+
         return await this.db.message.findMany({
             where: {
                 channel_id: id
@@ -50,12 +106,12 @@ export class ChannelService {
     }
 
     async createChannel(name: string, ownerId: number, isPrivate: boolean, password: string) {
-        return await this.db.channel.create({
+        let newChannel: Channel = await this.db.channel.create({
             data: {
                 name: name,
                 owner_id: ownerId,
                 private: isPrivate,
-                password: (password !== '' ? sha512.crypt(password, "aaaaaaaa") : null), // TODO: Salt password correctly
+                password: (password !== '' ? await argon2.hash(password) : null),
                 topic: ''
             }
         }).then((channel) => {
@@ -63,6 +119,18 @@ export class ChannelService {
             channel.password = (channel.password !== null ? '' : null);
             return channel;
         });
+
+        if (newChannel.password !== null || newChannel.private) {
+            // add the owner to the channel access list if the channel is private / has a password
+            await this.db.channelAccess.create({
+                data: {
+                    channel_id: newChannel.id,
+                    user_id: ownerId
+                },
+            });
+        }
+
+        return newChannel;
     }
 
     async deleteChannel(channelId: number, userId: number) {
@@ -82,6 +150,12 @@ export class ChannelService {
         if (channel.owner_id !== userId) {
             throw new HttpException('You are not the owner of this channel', 403);
         }
+        // Delete all channel access entries
+        await this.db.channelAccess.deleteMany({
+            where: {
+                channel_id: channelId
+            }
+        });
         await this.db.channel.delete({
             where: {
                 id: channelId
@@ -111,6 +185,15 @@ export class ChannelService {
                 name: editedChannel.name,
                 private: editedChannel.private,
                 password: editedChannel.password // hashed in the controller
+            }
+        });
+    }
+
+    async joinChannel(channelId: number, userId: number) {
+        return await this.db.channelAccess.create({
+            data: {
+                channel_id: channelId,
+                user_id: userId
             }
         });
     }

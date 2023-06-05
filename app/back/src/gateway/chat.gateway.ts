@@ -61,27 +61,27 @@ export class ChatGateway
             const user = await this.userService.getUserById(payload.id);
             users[user.id] = client;
             // only store friends id asynchronously to avoid blocking the connection
-            this.friendService.getUserFriends(user).then(friends => {
-                usersFriends[user.id] = friends.map(friend => friend.user_id === user.id ? friend.friend_id : friend.user_id);
-                // send online status to friends if any
-                if (friends.length > 0) {
-                    for (const friend of friends) {
-                        if (usersFriends.hasOwnProperty(friend.friend_id) && friend.friend_id !== user.id) {
-                            users[friend.friend_id].emit('online', { user_id: user.id });
-                        }
-                    }
-                }
-                // for each friend the user has, check if they're in the users map, if so, send online status
-                if (usersFriends.hasOwnProperty(user.id)) {
-                    for (const friend of usersFriends[user.id]) {
-                        if (users.hasOwnProperty(friend)) {
-                            setTimeout(() => { // FIXME: this is a hack to avoid sending the online status before the client is ready to receive it
-                                client.emit('online', { user_id: friend });
-                            }, 1000);
-                        }
-                    }
-                }
-            });
+            // this.friendService.getUserFriends(user).then(friends => {
+            //     usersFriends[user.id] = friends.map(friend => friend.user_id === user.id ? friend.friend_id : friend.user_id);
+            //     // send online status to friends if any
+            //     if (friends.length > 0) {
+            //         for (const friend of friends) {
+            //             if (usersFriends.hasOwnProperty(friend.friend_id) && friend.friend_id !== user.id) {
+            //                 users[friend.friend_id].emit('online', { user_id: user.id });
+            //             }
+            //         }
+            //     }
+            //     // for each friend the user has, check if they're in the users map, if so, send online status
+            //     if (usersFriends.hasOwnProperty(user.id)) {
+            //         for (const friend of usersFriends[user.id]) {
+            //             if (users.hasOwnProperty(friend)) {
+            //                 setTimeout(() => { // FIXME: this is a hack to avoid sending the online status before the client is ready to receive it
+            //                     client.emit('online', { user_id: friend });
+            //                 }, 1000);
+            //             }
+            //         }
+            //     }
+            // });
         } catch {
             client.disconnect();
             return "UnauthorizedException";

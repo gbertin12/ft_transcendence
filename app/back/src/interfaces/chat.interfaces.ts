@@ -7,6 +7,7 @@ export interface Channel {
 	owner_id: number;
 	password: string | null;
 	owner: any;
+	allowed: boolean; // true when channel is password protected and user has access, false otherwise
 }
 
 export interface Message {
