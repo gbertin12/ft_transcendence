@@ -1,13 +1,19 @@
-import { MessageData } from '@/interfaces/chat.interfaces';
+import { Channel, MessageData, SenderData } from '@/interfaces/chat.interfaces';
 import { Avatar, Text, Tooltip } from '@nextui-org/react';
 import { IconCrown, IconShield } from '@tabler/icons-react';
 import React from 'react';
+import PowerActions from './PowerActions';
 
 interface ChatMessageProps {
     data: MessageData;
     concatenate: boolean;
-    isOwner?: boolean;
-    isAdmin?: boolean;
+    channel: Channel;
+    sender: SenderData;
+    isAuthor?: boolean;
+    senderOwner?: boolean;
+    senderAdmin?: boolean;
+    isOwner?: boolean; // current user
+    isAdmin?: boolean; // current user
     ghost?: boolean;
 }
 
@@ -24,10 +30,31 @@ function formatDate(date: Date): string {
     return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes()}`;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, isOwner, isAdmin }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
+    const [hover, setHover] = React.useState<boolean>(false);
+
+    if (data.sender.id === -1) { // System message
+        return (
+            <Text
+                span
+                color="$accents7"
+                css={{
+                    ta: "center",
+                    display: "block",
+                }}
+            >
+                {data.content}
+            </Text>
+        )
+    }
+
     return (
         <div>
-            <div className='static ml-0 indent-0 pl-[70px]'>
+            <div
+                className='static ml-0 indent-0 pl-[70px]'
+                onMouseEnter={() => setHover(true)}
+                onMouseLeave={() => setHover(false)}
+            >
                 {!concatenate && (
                     <>
                         <Avatar
@@ -43,7 +70,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, isOwner, i
                         <Text className="overflow-hidden block relative">
                             <Text span color="$black" className="mr-1 text-lg font-medium">
                                 {data.sender.name}
-                                {isOwner && (
+                                {senderOwner && (
                                     <Text color="$error" css={{display: "inline-flex"}}>
                                         <Tooltip
                                             rounded
@@ -61,7 +88,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, isOwner, i
                                         </Tooltip>
                                     </Text>
                                 )}
-                                {isAdmin && (
+                                {senderAdmin && (
                                     <Text
                                         color="$warning"
                                         css={{ display: "inline-flex" }}
@@ -87,8 +114,21 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, isOwner, i
                         </Text>
                     </>
                 )}
+                <div className='absolute right-4 top-0'>
+                    {hover && (
+                        <PowerActions
+                            channel={channel}
+                            sender={sender}
+                            message={data}
+                            isAuthor={isAuthor || false}
+                            isOwner={(isOwner || false)}
+                            isAdmin={(isAdmin || false)}
+                        />
+                    )}
+                </div>
                 <div>
-                    <Text span>
+                    {/* wrap the text */}
+                    <Text span css={{ wordWrap: "break-word" }} >
                         {data.content}
                     </Text>
                 </div>

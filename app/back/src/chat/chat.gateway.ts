@@ -9,12 +9,14 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-import { ChannelStaff, Message } from '../interfaces/chat.interfaces';
+import { ChannelStaff, Message, PowerActionData } from '../interfaces/chat.interfaces';
 import * as cookie from 'cookie';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
+
+export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
 // Map of user id to channel id
 // Used to send socket messages to all users watching a channel
@@ -97,6 +99,24 @@ export class ChatGateway
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         // answer with ownerId
         client.emit('staff', staff);
+    }
+
+    @SubscribeMessage('powerAction')
+    async handlePowerAction(client: Socket, payload: PowerActionData) {
+        // TODO: implement and check if user is staff in the channel, otherwise ignore
+        let testPayload = {
+            // custom system message
+            content: "DEBUG: Power action received from " + client['user'].name + " type: " + payload.action,
+            message_id: systemMessageStack--,
+            sender: {
+                avatar: null,
+                id: -1,
+                username: "System",
+            },
+            timestamp: new Date(),
+        };
+        client.to(`channel-${payload.channel}`).emit('message', testPayload);
+        client.emit('message', testPayload);
     }
 
     @SubscribeMessage('updateStatus')

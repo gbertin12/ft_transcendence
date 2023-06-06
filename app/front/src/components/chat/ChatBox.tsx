@@ -105,8 +105,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                 {memoizedMessages.map((message: MessageData, index: number) => (
                                     <li key={message.message_id} className="relative">
                                         <ChatMessage
-                                            isOwner={message.sender.id === ownerId}
-                                            isAdmin={admins.has(message.sender.id)}
+                                            senderOwner={message.sender.id === ownerId}
+                                            senderAdmin={admins.has(message.sender.id)}
+                                            isOwner={user.id === ownerId}
+                                            isAdmin={admins.has(user.id)}
+                                            isAuthor={message.sender.id === user.id}
+                                            sender={message.sender}
+                                            channel={channel}
+                                            key={message.message_id}
                                             data={message}
                                             concatenate={
                                                 index != memoizedMessages.length - 1

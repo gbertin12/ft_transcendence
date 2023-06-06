@@ -66,3 +66,13 @@ export interface ChannelStaff {
 	owner_id: number;
 	administrators: number[];
 }
+
+export type PowerAction = 'block' | 'delete' | 'mute' | 'ban' | 'kick';
+
+export interface PowerActionData {
+	action: PowerAction;
+	channel: number;
+	powerUser: User;
+	targetSender?: number;
+	targetMessage?: MessageData;
+}
