@@ -48,3 +48,16 @@ export interface Friend {
     isPlaying: boolean;
     unreadMessages: number;
 }
+
+export interface SenderData {
+	avatar: string;
+	name: string;
+	id: number;
+}
+
+export interface MessageData {
+	content: string;
+	sender: SenderData;
+	timestamp: Date;
+	message_id: number;
+}

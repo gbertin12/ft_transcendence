@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Channel, Message, User } from "@/interfaces/chat.interfaces";
+import { Channel, Message, MessageData, User } from "@/interfaces/chat.interfaces";
 import { Button, Container, Grid, Input, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
@@ -10,11 +10,11 @@ interface ChatBoxProps {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<MessageData[]>([]);
     const [hasAccess, setHasAccess] = useState<boolean>(true);
     const { socket, user } = useUser();
 
-    const fetchMessages = useCallback(async (channel: Channel): Promise<Message[]> => {
+    const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         const url = `http://localhost:3000/channel/${channel.id}/messages`;
         const res = await fetch(url, { credentials: "include" });
         // if we have a 403, it means we are not allowed to access this channel (password protected)
@@ -24,6 +24,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         }
         setHasAccess(true);
         const data = await res.json();
+        data.forEach((message: Message) => {
+            message.timestamp = new Date(message.timestamp);
+        });
         return data;
     }, []);
 
@@ -31,7 +34,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         socket.emit('join', {
             channel: channel.id,
         });
-        socket.on('message', (payload: Message) => {
+        socket.on('message', (payload: MessageData) => {
+            // parse the timestamp
+            payload.timestamp = new Date(payload.timestamp);
             setMessages((messages) => [payload, ...messages]);
         });
         socket.on('joinChannel', (payload: any) => {
@@ -92,11 +97,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                     flexDirection: "column-reverse",
                                 }}
                             >
-                                {memoizedMessages.map((message) => (
-                                    <li key={message.message_id}>
+                                {memoizedMessages.map((message: MessageData, index: number) => (
+                                    <li key={message.message_id} className="relative">
                                         <ChatMessage
-                                            content={message.content}
-                                            senderId={message.sender_id}
+                                            data={message}
+                                            concatenate={
+                                                index != memoizedMessages.length - 1
+                                                && message.sender.id === memoizedMessages[index + 1].sender.id
+                                                && message.timestamp.getTime() - memoizedMessages[index + 1].timestamp.getTime() < 5 * 60 * 1000
+                                            }
                                         />
                                     </li>
                                 ))}

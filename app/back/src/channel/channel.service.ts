@@ -91,6 +91,18 @@ export class ChannelService {
             orderBy: { // sort from oldest to newest (front-end will reverse it)
                 timestamp: 'desc'
             },
+            select: {
+                sender: {
+                    select: {
+                        avatar: true,
+                        name: true,
+                        id: true
+                    }
+                },
+                message_id: true,
+                content: true,
+                timestamp: true
+            },
             take: 50 // limit to 50 messages
         });
     }

@@ -70,7 +70,6 @@ model Channel {
     owner         User     @relation(fields: [owner_id], references: [id])
 }
 
-
 model ChannelAdmin {
     channel_id Int
     user_id    Int

@@ -2,11 +2,11 @@ import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGu
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
-import { sha512 } from 'sha512-crypt-ts';
 import ChatGateway, { usersChannels } from '../gateway/chat.gateway';
 import { Channel, Message } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
+import { MessageData } from '../interfaces/chat.interfaces';
 
 class ChannelDto {
     @Type(() => Number)
@@ -63,13 +63,22 @@ export class ChannelController {
         // TODO: Check that the user is in the channel
         let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
-        // TODO: Emit to room
+        let data: MessageData = {
+            content: message.content,
+            timestamp: message.timestamp,
+            sender: {
+                avatar: req.user['avatar'],
+                name: req.user['name'],
+                id: req.user['id'],
+            },
+            message_id: message.message_id,
+        }
+        // TODO: Emit to socket.io room
         for (const [id, channel] of Object.entries(usersChannels)) {
             if (channel === dto.channel_id) {
-                this.chatGateway.server.to(id).emit('message', message);
+                this.chatGateway.server.to(id).emit('message', data);
             }
         }
-        return message;
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
