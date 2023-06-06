@@ -1,7 +1,6 @@
-import { useUser } from '@/contexts/user.context';
 import { MessageData } from '@/interfaces/chat.interfaces';
-import { Avatar, Badge, Grid, Text, Tooltip } from '@nextui-org/react';
-import { IconCrown, IconShield, IconShieldCheck, IconShieldFilled } from '@tabler/icons-react';
+import { Avatar, Text, Tooltip } from '@nextui-org/react';
+import { IconCrown, IconShield } from '@tabler/icons-react';
 import React from 'react';
 
 interface ChatMessageProps {
