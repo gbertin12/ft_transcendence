@@ -61,3 +61,8 @@ export interface MessageData {
 	timestamp: Date;
 	message_id: number;
 }
+
+export interface ChannelStaff {
+	owner_id: number;
+	administrators: number[];
+}

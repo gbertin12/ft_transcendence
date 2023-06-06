@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Channel, Message, MessageData, User } from "@/interfaces/chat.interfaces";
+import { Channel, ChannelStaff, Message, MessageData, User } from "@/interfaces/chat.interfaces";
 import { Button, Container, Grid, Input, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
@@ -12,6 +12,8 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [messages, setMessages] = useState<MessageData[]>([]);
     const [hasAccess, setHasAccess] = useState<boolean>(true);
+    const [ownerId, setOwnerId] = useState<number>(-1);
+    const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
@@ -31,9 +33,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, []);
 
     useEffect(() => {
-        socket.emit('join', {
-            channel: channel.id,
-        });
+        socket.emit('join', channel.id);
         socket.on('message', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
@@ -44,12 +44,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 setMessages(messages);
             });
         });
+        socket.on('staff', (staff: ChannelStaff) => {
+            setOwnerId(staff.owner_id);
+            setAdmins(new Set(staff.administrators));
+        });
         fetchMessages(channel).then((messages) => {
             setMessages(messages);
         });
         return () => {
             socket.off('message');
             socket.off('joinChannel');
+            socket.off('staff');
         }
     }, [socket, channel]);
 
@@ -100,6 +105,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                 {memoizedMessages.map((message: MessageData, index: number) => (
                                     <li key={message.message_id} className="relative">
                                         <ChatMessage
+                                            isOwner={message.sender.id === ownerId}
+                                            isAdmin={admins.has(message.sender.id)}
                                             data={message}
                                             concatenate={
                                                 index != memoizedMessages.length - 1

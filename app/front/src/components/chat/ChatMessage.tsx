@@ -1,11 +1,14 @@
 import { useUser } from '@/contexts/user.context';
 import { MessageData } from '@/interfaces/chat.interfaces';
-import { Avatar, Grid, Text } from '@nextui-org/react';
+import { Avatar, Badge, Grid, Text, Tooltip } from '@nextui-org/react';
+import { IconCrown, IconShield, IconShieldCheck, IconShieldFilled } from '@tabler/icons-react';
 import React from 'react';
 
 interface ChatMessageProps {
     data: MessageData;
     concatenate: boolean;
+    isOwner?: boolean;
+    isAdmin?: boolean;
     ghost?: boolean;
 }
 
@@ -22,7 +25,7 @@ function formatDate(date: Date): string {
     return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes()}`;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, isOwner, isAdmin }) => {
     return (
         <div>
             <div className='static ml-0 indent-0 pl-[70px]'>
@@ -39,7 +42,48 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate }) => {
                             }}
                         />
                         <Text className="overflow-hidden block relative">
-                            <Text span color="$black" className="mr-1 text-lg font-medium">{data.sender.name}</Text>
+                            <Text span color="$black" className="mr-1 text-lg font-medium">
+                                {data.sender.name}
+                                {isOwner && (
+                                    <Text color="$error" css={{display: "inline-flex"}}>
+                                        <Tooltip
+                                            rounded
+                                            hideArrow
+                                            color="error"
+                                            content="Owner"
+                                        >
+                                            <IconCrown
+                                                size={20}
+                                                cursor="pointer"
+                                                style={{
+                                                    marginLeft: "0.25rem",
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Text>
+                                )}
+                                {isAdmin && (
+                                    <Text
+                                        color="$warning"
+                                        css={{ display: "inline-flex" }}
+                                    >
+                                        <Tooltip
+                                            rounded
+                                            hideArrow
+                                            color="warning"
+                                            content="Admin"
+                                        >
+                                            <IconShield
+                                                size={20}
+                                                cursor="pointer"
+                                                style={{
+                                                    marginLeft: "0.25rem",
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Text>
+                                )}
+                            </Text>
                             <Text span color="$neutral" className="text-sm">{formatDate(data.timestamp)}</Text>
                         </Text>
                     </>

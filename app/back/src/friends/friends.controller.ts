@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { Friend, FriendRequest, User } from '@prisma/client';
 import { IsNumber, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
-import ChatGateway from '../gateway/chat.gateway';
+import ChatGateway from '../chat/chat.gateway';
 
 class FriendRequestDto {
   @Type(() => Number)
@@ -25,7 +25,6 @@ class FriendReqIdDto {
 export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
-    private readonly userService: UserService,
     private chatGateway: ChatGateway,
     )
     { }

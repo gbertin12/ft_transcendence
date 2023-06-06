@@ -1,14 +1,14 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import { Channel, Message, User } from '@prisma/client';
-import ChatGateway from '../gateway/chat.gateway';
+import ChatGateway from '../chat/chat.gateway';
 import * as argon2 from 'argon2';
+import { ChannelStaff } from '../interfaces/chat.interfaces';
 
 @Injectable()
 export class ChannelService {
     constructor(
         private db: DbService,
-        private gateway: ChatGateway
     ) { }
 
     async allChannels(user: User) {
@@ -208,5 +208,50 @@ export class ChannelService {
                 user_id: userId
             }
         });
+    }
+
+    async getChannelOwner(channelId: number): Promise<any> {
+        return this.db.channel.findUnique({
+            where: {
+                id: channelId
+            },
+            select: {
+                owner_id: true
+            }
+        });
+    }
+
+    async getChannelAdmins(channelId: number): Promise<any> {
+        return this.db.channelAdmin.findMany({
+            where: {
+                channel_id: channelId
+            },
+            select: {
+                user_id: true
+            }
+        }).then((admins) => {
+            // flatten the array
+            return admins.map((admin) => {
+                return admin.user_id;
+            });
+        });
+    }
+
+    async getChannelStaff(channelId: number): Promise<ChannelStaff> {
+        let staff: ChannelStaff = {
+            owner_id: -1,
+            administrators: [],
+        }
+        // Wait for all promises to resolve
+        await Promise.all([
+            this.getChannelOwner(channelId).then((owner) => {
+                staff.owner_id = owner.owner_id;
+            }),
+            this.getChannelAdmins(channelId).then((admins) => {
+                staff.administrators = admins;
+            }),
+        ]);
+
+        return staff;
     }
 }

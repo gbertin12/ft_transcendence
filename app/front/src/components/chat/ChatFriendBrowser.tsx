@@ -43,35 +43,6 @@ const ChatFriendBrowser: React.FC = () => {
                     </Grid>
                 </ChatEntry>
             ))}
-            <Text h4>DEBUG MODE</Text>
-            <Button
-                auto
-                color="default"
-                onClick={() => {
-                    socket.emit("updateStatus", { "status": "offline" });
-                }}
-            >
-                Offline
-            </Button>
-            <Button
-                auto
-                color="success"
-                onClick={() => {
-                    socket.emit("updateStatus", { "status": "online" });
-                }}
-            >
-                Online
-            </Button>
-            <Button
-                auto
-                color="error"
-                onClick={() => {
-                    socket.emit("updateStatus", { "status": "playing" });
-                }}
-            >
-                Playing
-            </Button>
-
         </>
     );
 };
