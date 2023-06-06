@@ -10,15 +10,22 @@ const FriendRequests: React.FC = () => {
     const { socket } = useUser();
 
     React.useEffect(() => {
-        fetch("http://localhost:3000/friends/requests", {
-            method: "GET",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => setFriendRequests(data));
+        const fetchFriendRequests = async () => {
+            const response = await fetch("http://localhost:3000/friends/requests", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setFriendRequests(data);
+            }
+        };
+
+        fetchFriendRequests();
     }, []);
 
     React.useEffect(() => {

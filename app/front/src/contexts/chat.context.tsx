@@ -27,13 +27,16 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         const fetchChannels = async () => {
             const res = await fetch("http://localhost:3000/channel/all", { credentials: "include" });
             if (res.status === 401) {
-                // window.location.href = "/auth";
+                return ;
             }
             const data = await res.json();
             setChannels(data);
         };
         const fetchFriends = async () => {
             const res = await fetch("http://localhost:3000/friends/", { credentials: 'include' });
+            if (res.status === 401) {
+                return ;
+            }
             const data = await res.json();
             if (Array.isArray(data)) {
                 const friends: Friend[] = data.map((friend) => {
