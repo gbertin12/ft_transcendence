@@ -83,7 +83,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     return (
         <Container>
             <Grid.Container gap={2} justify="center" css={{ height: "90vh" }}>
-                <Grid xs={6}>
+                <Grid xs={12}>
                     <Grid.Container>
                         <Grid css={{ w: "stretch" }}>
                             <Text h3>{channel.name.replace(/^/, '# ')}</Text>
