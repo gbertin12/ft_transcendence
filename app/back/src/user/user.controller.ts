@@ -76,8 +76,8 @@ export class UserController {
         return await this.userService.getAllUserOrderedByElo();
     }
 
-    @Get('history')
-    async getMatchHistory() {
-        return await this.userService.getHistory();
+    @Get('history/:username')
+    async getMatchHistory(@Param('username') username: string) {
+        return await this.userService.getMatchHistoryByName(username);
     }
 }

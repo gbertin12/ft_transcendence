@@ -47,6 +47,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
             const player: PlayerInterface = {
                 id: client.id,
+                userId: user.id,
                 name: user.name,
                 state: 0,
                 y: 0,

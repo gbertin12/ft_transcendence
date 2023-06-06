@@ -236,7 +236,13 @@ export class GameService {
         await this.userService.updateElo(winner.name, eloWinner);
         await this.userService.updateElo(looser.name, eloLooser);
 
-        await this.userService.addGame(winner.name, looser.name);
+        await this.userService.addGame(
+            winner.userId,
+            winner.score,
+            looser.userId,
+            looser.score,
+            Math.abs(eloWinner - eloLooser)
+        );
     }
 
     async calcElo(winner: PlayerInterface, looser: PlayerInterface): Promise<number[]> {
@@ -244,7 +250,6 @@ export class GameService {
         const user2 = await this.userService.getUserByName(looser.name);
         let eloWinner = user1.elo;
         let eloLooser = user2.elo;
-        // TODO: prevent elo from reaching 0 or less
         const p1 = eloWinner / (eloWinner + eloLooser);
         const p2 = eloLooser / (eloWinner + eloLooser);
         const k = 42 * (winner.score - looser.score);
@@ -252,6 +257,9 @@ export class GameService {
 
         eloWinner = eloWinner + k * (1 - p1);
         eloLooser = eloLooser + k * (0 - p2);
+
+        // prevent elo from reaching 0 or less
+        if (eloLooser <= 0) eloLooser = 1;
 
         return [ Math.round(eloWinner), Math.round(eloLooser) ];
     }

@@ -48,14 +48,14 @@ export class UserService {
         });
         return user;
     }
-    
+ 
     async getUserByIdFull(id: number) {
         const user = await this.db.user.findUnique({
             where: { id },
         });
         return user;
     }
-    
+
     async getUserByNameFull(name: string) {
         const user = await this.db.user.findUniqueOrThrow({
             where: { name },
@@ -163,22 +163,96 @@ export class UserService {
         });
     }
 
-    async getHistory() {
-        return await this.db.matchHistory.findMany();
+    async getMatchHistoryById(id: number) {
+        const playerMatchHistory = await this.db.user.findUnique({
+            where: { id },
+            include: {
+                gamesWon: {
+                    include: {
+                        looser: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        }
+                    },
+                },
+                gamesLost: {
+                    include: {
+                        winner: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // ugly workaround
+        delete playerMatchHistory.password;
+        delete playerMatchHistory.otpSecret;
+        delete playerMatchHistory.otp;
+        return playerMatchHistory;
     }
 
-    async addGame(winnerName: string, looserName: string) {
-        const winner = await this.getUserByName(winnerName);
-        const looser = await this.getUserByName(looserName);
+    async getMatchHistoryByName(name: string) {
+        const playerMatchHistory = await this.db.user.findUnique({
+            where: { name },
+            include: {
+                gamesWon: {
+                    include: {
+                        looser: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        },
+                    },
+                },
+                gamesLost: {
+                    include: {
+                        winner: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-        const winnerId = winner.id;
-        const looserId = looser.id;
+        // ugly workaround
+        delete playerMatchHistory.password;
+        delete playerMatchHistory.otpSecret;
+        delete playerMatchHistory.otp;
+        return playerMatchHistory;
+    }
 
+    async addGame(
+        winnerId: number,
+        winnerScore: number,
+        looserId: number,
+        looserScore: number,
+        eloDiff: number,
+        winnerElo: number,
+        looserElo: number,
+    ) {
         await this.db.matchHistory.create({
             data: {
                 winnerId,
+                winnerScore,
                 looserId,
-                eloDiff: 0, 
+                looserScore,
+                eloDiff, 
+                winnerElo,
+                looserElo,
             }
         });
     }

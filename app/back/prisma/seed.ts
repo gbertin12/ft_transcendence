@@ -78,6 +78,16 @@ async function seedUsers() {
     });
 }
 
+async function seedMatchHistory() {
+    await prisma.matchHistory.createMany({
+        data: [
+            { winnerId: 1, winnerScore: 10, winnerElo: 1000, looserId: 2, looserScore: 3, looserElo: 1000, eloDiff: 0},            
+            { winnerId: 2, winnerScore: 10, winnerElo: 1020,looserId: 1, looserScore: 1, looserElo: 353, eloDiff: 0},            
+            { winnerId: 4, winnerScore: 10, winnerElo: 1200, looserId: 1, looserScore: 2, looserElo: 999, eloDiff: 0},            
+        ]
+    });
+}
+
 async function seedChannels() {
     await prisma.channel.createMany({
         data: [
@@ -116,6 +126,7 @@ async function main() {
     await seedUsers();
     await seedChannels();
     await seedMessages();
+    await seedMatchHistory();
 
     // update sequences
     await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"User"', 'id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "User"`;
