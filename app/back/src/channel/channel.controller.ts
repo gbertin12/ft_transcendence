@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGu
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
-import ChatGateway, { usersChannels } from '../gateway/chat.gateway';
+import ChatGateway, { usersChannels } from '../chat/chat.gateway';
 import { Channel, Message } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
