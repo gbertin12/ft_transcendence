@@ -9,11 +9,12 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-import { Message } from '../interfaces/chat.interfaces';
+import { ChannelStaff, Message } from '../interfaces/chat.interfaces';
 import * as cookie from 'cookie';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
+import { ChannelService } from '../channel/channel.service';
 
 // Map of user id to channel id
 // Used to send socket messages to all users watching a channel
@@ -34,6 +35,7 @@ export class ChatGateway
         private jwtService: JwtService,
         private userService: UserService,
         private friendService: FriendsService,
+        private channelService: ChannelService,
     ) { }
 
     @WebSocketServer()
@@ -41,7 +43,7 @@ export class ChatGateway
     
     afterInit(server: any) {
         console.log('Init');
-    }
+    }PongModule
     
     async handleConnection(client: Socket) 
     {
@@ -87,14 +89,19 @@ export class ChatGateway
     }
 
     @SubscribeMessage('join')
-    async handleJoin(client: Socket, payload: any) {
-        usersChannels[client.id] = payload.channel;
+    async handleJoin(client: Socket, channelId: number) {
+        usersChannels[client.id] = channelId;
+        client.join(`channel-${channelId}`); // TODO: use socket.io channels
+
+        // TODO: get all staff instead of just the owner
+        let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
+        // answer with ownerId
+        client.emit('staff', staff);
     }
 
     @SubscribeMessage('updateStatus')
     async handleUpdateStatus(client: Socket, payload: any) {
         // loop through all user's friends and send the message to the right user
-        const status = payload.status;
         const friends = client['friends'];
         friends.forEach((id: number) => {
             if (usersClients[id]) {
