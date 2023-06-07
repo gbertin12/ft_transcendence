@@ -72,7 +72,6 @@ export type PowerAction = 'blocked' | 'deleted' | 'muted' | 'banned' | 'kicked';
 export interface PowerActionData {
 	action: PowerAction;
 	channel: number;
-	powerUser: User;
 	targetSender: SenderData;
 	targetMessage: MessageData;
 }
