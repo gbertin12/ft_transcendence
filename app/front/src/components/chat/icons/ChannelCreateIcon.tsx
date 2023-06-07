@@ -1,5 +1,6 @@
 import { Button, Container, Grid, Input, Loading, Popover, Switch, Tooltip } from '@nextui-org/react';
 import { IconEye, IconEyeClosed, IconLock, IconLockOpen, IconPlus } from '@tabler/icons-react';
+import axios from 'axios';
 import React from 'react';
 
 function respectCriteria(name: string): string {
@@ -116,25 +117,23 @@ const ChannelCreateIcon: React.FC = () => {
                             css={{ w: "stretch", mt: "$8" }}
                             onClick={() => {
                                 setCreating(true);
-                                // Send a POST to /channel/create
-                                fetch("http://localhost:3000/channel/create", {
-                                    method: "POST",
-                                    credentials: "include",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                        name: name,
-                                        isPrivate: isPrivate,
-                                        password: password,
-                                    })
+                                axios.post("http://localhost:3000/channel/create", {
+                                    name: name,
+                                    isPrivate: isPrivate,
+                                    password: password,
+                                }, {
+                                    withCredentials: true,
                                 })
-                                    // TODO: Handle errors
-                                    .then((res) => res.json())
-                                    .then((data) => {
-                                        setCreating(false);
-                                        setPopIsOpen(false);
-                                    });
+                                .then((res) => {
+                                    setCreating(false);
+                                    setPopIsOpen(false);
+                                }).catch((err) => {
+                                    setCreating(false);
+                                    setPopIsOpen(false);
+                                    throw Error("UNEXPECTED ERROR: " + err)
+                                });
+
+
                             }}
                         >
                             {error === "" ? "Create" : "Invalid name"}
