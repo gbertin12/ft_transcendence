@@ -23,7 +23,7 @@ const ChannelList: React.FC<any> = () => {
             <hr />
             <Grid.Container>
                 <Grid xs={10}>
-                    <Text h4>Salons</Text>
+                    <Text h4>Channels</Text>
                 </Grid>
                 <ChannelCreateIcon />
             </Grid.Container>
