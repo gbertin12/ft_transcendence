@@ -13,3 +13,4 @@
 **/migrations/
 **/.npm_modules_installed
 **/.pnpm-store
+**/*.pnpm-store
