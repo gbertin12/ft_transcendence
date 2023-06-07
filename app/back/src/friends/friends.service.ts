@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
-import { Friend } from '.prisma/client';
-import { User } from '.prisma/client';
-import { FriendRequest } from '.prisma/client';
+import { Friend } from '@prisma/client';
+import { User } from '@prisma/client';
+import { FriendRequest } from '@prisma/client';
 
 @Injectable()
 export class FriendsService {
