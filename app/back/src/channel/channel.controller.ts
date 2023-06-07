@@ -53,7 +53,7 @@ export class ChannelController {
     @Get(':channel_id/messages')
     async channelMessages(@Param() dto: ChannelDto, @Req() req) {
         // Check if user is banned
-        if (this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
             throw new HttpException('You are banned from this channel', 403);
         }
         return await this.channelService.getMessages(dto.channel_id, req.user);
@@ -145,8 +145,7 @@ export class ChannelController {
         }
 
         // Check if user has been banned
-        let banned = await this.punishmentsService.getActivePunishments(dto.channel_id, req.user['id'], 'banned', 1);
-        if (banned.length > 0) {
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
             throw new HttpException('You are banned from this channel', 403);
         }
 
