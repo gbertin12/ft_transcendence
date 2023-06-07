@@ -69,7 +69,7 @@ export class ChannelController {
         // TODO: Check that the user is in the channel
 
         // Check that the user is not muted
-        if (this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
+        if (await this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
             throw new HttpException('You are muted in this channel', 403);
         }
 
