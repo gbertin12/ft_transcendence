@@ -27,9 +27,10 @@ function generateMutedMessage(talkPowerTimer: number): string {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
+    const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
+    const [banned, setBanned] = useState<boolean>(false);
     const [mutePunishment, setMutePunishment] = useState<MutePunishment>({ active: false, duration: -1, interval: null });
     const [messages, setMessages] = useState<MessageData[]>([]);
-    const [hasAccess, setHasAccess] = useState<boolean>(true);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
@@ -37,12 +38,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         const url = `http://localhost:3000/channel/${channel.id}/messages`;
         const res = await fetch(url, { credentials: "include" });
-        // if we have a 403, it means we are not allowed to access this channel (password protected)
-        if (res.status === 403) {
-            setHasAccess(false);
+        // if we have a 401, it means we are not allowed to access this channel (password protected)
+        if (res.status === 401) {
+            setMissingPermissions(true);
+            return [];
+        } else if (res.status === 403) {
+            // we are banned
+            setBanned(true);
             return [];
         }
-        setHasAccess(true);
+        setMissingPermissions(false);
         const data = await res.json();
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
@@ -95,6 +100,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     });
                     break;
                 case "banned":
+
                     break;
                 case "kicked":
                     break;
@@ -125,15 +131,24 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     const memoizedMessages = useMemo(() => messages, [messages]);
 
+    // The user is banned
+    if (banned) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-3xl font-bold">You are banned from this channel</h1>
+            </div>
+        )
+    }
+
     // The user doesn't have access to this password protected channel, we need to ask for a password
-    if (!hasAccess && channel.password === "") {
+    if (missingPermissions && channel.password === "") {
         return (
             <ChannelPasswordPrompt channel={channel} />
         );
-    } else if (!hasAccess && !channel.password) { // The user doesn't have access to this channel and it's not password protected
+    } else if (missingPermissions && !channel.password) { // The user doesn't have access to this channel and it's not password protected
         return ( // Throw a fake 404 message because it is a hidden channel
             <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-3xl font-bold">Salon inconnu</h1>
+                <h1 className="text-3xl font-bold">Unknown room</h1>
             </div>
         )
     }
@@ -178,7 +193,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                             </ul>
                         </Grid>
                         <Grid xs={12}>
-                            {hasAccess && (
+                            {(!missingPermissions && !banned) && (
                                 <Textarea
                                     fullWidth
                                     disabled={mutePunishment.active}
