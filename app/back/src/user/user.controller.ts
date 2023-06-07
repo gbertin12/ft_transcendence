@@ -40,7 +40,6 @@ export class UserController {
             validators: [
                 new MaxFileSizeValidator({ maxSize: 10000 }),
             ],
-            fileIsRequired: false
         })) avatar?: Express.Multer.File,
     ) {
         try {

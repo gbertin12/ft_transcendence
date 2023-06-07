@@ -33,7 +33,6 @@ const darkTheme = createTheme({
 
 import { NextUIProvider } from '@nextui-org/react';
 import { UserContextProvider } from '@/contexts/user.context';
-import { SocketContextProvider } from '@/contexts/socket.context';
 import { ChatContextProvider } from '@/contexts/chat.context';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -48,9 +47,11 @@ export default function App({ Component, pageProps }: AppProps) {
             >
             <NextUIProvider>
                 <UserContextProvider>
-                    <Layout>
-                        <Component {...pageProps} />
-                    </Layout>
+                    <ChatContextProvider>
+                        <Layout>
+                            <Component {...pageProps} />
+                        </Layout>
+                    </ChatContextProvider>
                 </UserContextProvider>
             </NextUIProvider>
         </NextThemesProvider>
