@@ -7,6 +7,7 @@ import { IconLock } from '@tabler/icons-react';
 interface ChannelEntryProps {
     isSelected: boolean;
     channel: Channel;
+    banned: boolean;
     user: User;
     onClick: () => void;
     unreadMessages?: number;
@@ -22,7 +23,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, user, onClick, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, user, onClick, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -39,6 +40,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, user, 
                 borderRadius: "5px",
                 padding: "5px",
                 transition: "background-color 0.05s ease-in-out",
+                cursor: (banned) ? "not-allowed" : "pointer",
             }}
         >
             <Grid xs={1} css={{ my: "auto" }}>
@@ -63,6 +65,11 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, user, 
                     size="$xl"
                     weight="bold"
                 >
+                    {banned && (
+                        <Badge color="error" css={{"mr": "$2"}}>
+                            BAN
+                        </Badge>
+                    )}
                     {channel.name}
                 </Text>
             </Grid>
