@@ -24,11 +24,14 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
 
 	useEffect(() => {
 		const fetchUser = async () => {
-			axios.get('http://localhost:3000/user/me', { withCredentials: true }).then((response) => {
+			axios.get('http://localhost:3000/user/me',
+			{
+				withCredentials: true,
+				validateStatus: () => true,
+			})
+			.then((response) => {
 				setUser(response.data);
-			}).catch((error) => {
-				throw Error('UNEXPECTED ERROR: ' + error);
-			});
+			})
 		};
 		
 		fetchUser();

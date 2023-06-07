@@ -30,45 +30,51 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchChannels = async () => {
-            try {
-                axios.get("http://localhost:3000/channel/all", { withCredentials: true })
-                .then((res) => {
-                    setChannels(res.data);
-                })
-            } catch (err) {
-                return ;
-            }
+            axios.get("http://localhost:3000/channel/all", 
+            {
+				withCredentials: true,
+				validateStatus: () => true,
+			})
+            .then((res) => {
+                if (res.status !== 200) return ;
+                setChannels(res.data);
+            })
         };
         const fetchFriends = async () => {
-            try {
-                axios.get("http://localhost:3000/friends/", { withCredentials: true })
-                .then((res) => {
-                    if (Array.isArray(res.data)) {
-                        const friends: Friend[] = res.data.map((friend) => {
-                            return {
-                                id: friend.user.id,
-                                name: friend.user.name,
-                                avatar: friend.user.avatar,
-                                userId: friend.user.id,
-                                isOnline: false, // TODO: implement
-                                isTyping: false,
-                                isPlaying: false,
-                                unreadMessages: 0,
-                            };
-                        });
-                        setFriends(friends);
-                        socket.emit("updateStatus", {"status": "online"});
-                    }
-                })
-            } catch (err) {
+            axios.get("http://localhost:3000/friends/", { withCredentials: true })
+            .then((res) => {
+                if (res.status !== 200) return ;
+                if (Array.isArray(res.data)) {
+                    const friends: Friend[] = res.data.map((friend) => {
+                        return {
+                            id: friend.user.id,
+                            name: friend.user.name,
+                            avatar: friend.user.avatar,
+                            userId: friend.user.id,
+                            isOnline: false, // TODO: implement
+                            isTyping: false,
+                            isPlaying: false,
+                            unreadMessages: 0,
+                        };
+                    });
+                    setFriends(friends);
+                    socket.emit("updateStatus", {"status": "online"});
+                }
+            }).catch((err) => {
                 return ;
-            }
+            });
         };
         const fetchBans = async () => {
             try {
-                axios.get("http://localhost:3000/punishments/bans", { withCredentials: true })
+                axios.get("http://localhost:3000/punishments/bans", 
+                {
+                    withCredentials: true,
+                    validateStatus: () => true,
+                })
                 .then((res) => {
-                    setBannedChannels(new Set<number>(res.data));
+                    if (res.status === 200) {
+                        setBannedChannels(new Set<number>(res.data));
+                    }
                 });
             }
             catch (err) {
