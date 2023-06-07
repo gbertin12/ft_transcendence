@@ -4,9 +4,10 @@ import { DbModule } from './db/db.module';
 import { UserModule } from './user/user.module';
 import { PongModule } from './pong/pong.module';
 import { ChatModule } from './chat/chat.module';
+import { PunishmentsModule } from './punishments/punishments.module';
 
 @Module({
-    imports: [AuthModule, DbModule, UserModule, PongModule, ChatModule],
+    imports: [AuthModule, DbModule, UserModule, PongModule, ChatModule, PunishmentsModule],
 })
 
 export class AppModule {}

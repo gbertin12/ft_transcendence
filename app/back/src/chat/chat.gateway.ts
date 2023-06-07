@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
 import { Punishment } from '@prisma/client';
+import { PunishmentsService } from 'punishments/punishments.service';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
@@ -39,6 +40,7 @@ export class ChatGateway
         private userService: UserService,
         private friendService: FriendsService,
         private channelService: ChannelService,
+        private punishmentsService: PunishmentsService,
     ) { }
 
     @WebSocketServer()
@@ -98,7 +100,7 @@ export class ChatGateway
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
         // get active mute
-        let mute: Punishment[] | null = await this.channelService.getActivePunishments(channelId, client['user'].id, 'muted', 1);
+        let mute: Punishment[] | null = await this.punishmentsService.getActivePunishments(channelId, client['user'].id, 'muted', 1);
         if (mute && mute.length > 0) {
             client.emit('punishment', {
                 punishment_type: 'muted',
@@ -125,7 +127,7 @@ export class ChatGateway
             timestamp: new Date(),
         };
         // insert punishment in database (TODO: treat durations / )
-        let punishment: any = await this.channelService.applyPunishment(
+        let punishment: any = await this.punishmentsService.applyPunishment(
             payload.targetSender.id,
             client['user'].id,
             payload.channel,
