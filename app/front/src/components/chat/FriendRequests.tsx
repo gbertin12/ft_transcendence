@@ -5,24 +5,21 @@ import ChatEntry from "./ChatEntry";
 import { IconCheck } from "@tabler/icons-react";
 import { IconX } from "@tabler/icons-react";
 import { useUser } from "@/contexts/user.context";
+import axios from "axios";
 const FriendRequests: React.FC = () => {
     const [friendRequests, setFriendRequests] = React.useState<FriendRequest[]>([]);
     const { socket } = useUser();
 
     React.useEffect(() => {
         const fetchFriendRequests = async () => {
-            const response = await fetch("http://localhost:3000/friends/requests", {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+            axios.get("http://localhost:3000/friends/requests", {
+                withCredentials: true,
+                validateStatus: () => true,
+            }).then((response) => {
+                if (response.status === 200) {
+                    setFriendRequests(response.data);
+                }
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                setFriendRequests(data);
-            }
         };
 
         fetchFriendRequests();
@@ -64,26 +61,25 @@ const FriendRequests: React.FC = () => {
                 >
                     <Grid xs={1}>
                         <IconX onClick={() => {
-                            fetch(`http://localhost:3000/friends/requests/${friendRequest.request_id}`, {
-                                method: "DELETE",
-                                credentials: "include",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
+                            axios.delete(`http://localhost:3000/friends/requests/${friendRequest.request_id}`, {
+                                withCredentials: true,
+                            }).then(() => {
+                                setFriendRequests((requests) => requests.filter((request) => request.request_id !== friendRequest.request_id));
+                            }).catch((error) => {
+                                throw Error("UNEXPECTED ERROR: " + error);
                             });
                         }} />
                     </Grid>
                     <Grid xs={1}>
                         <IconCheck onClick={() => {
-                            fetch(`http://localhost:3000/friends/requests/${friendRequest.request_id}/accept`, {
-                                method: "POST",
-                                credentials: "include",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
+                            axios.post(`http://localhost:3000/friends/requests/${friendRequest.request_id}/accept`, {}, {
+                                withCredentials: true,
                             }).then(() => {
                                 setFriendRequests((requests) => requests.filter((request) => request.request_id !== friendRequest.request_id));
+                            }).catch((error) => {
+                                throw Error("UNEXPECTED ERROR: " + error);
                             });
+
                         }} />
                     </Grid>
                 </ChatEntry>
