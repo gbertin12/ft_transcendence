@@ -79,7 +79,7 @@ export class ChannelService {
             });
 
             if (!channel) {
-                throw new HttpException('You do not have access to this channel', 403);
+                throw new HttpException('You do not have access to this channel', 401);
             }
         }
 
