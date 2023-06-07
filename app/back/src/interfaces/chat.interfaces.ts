@@ -67,12 +67,17 @@ export interface ChannelStaff {
 	administrators: number[];
 }
 
-export type PowerAction = 'block' | 'delete' | 'mute' | 'ban' | 'kick';
+export type PowerAction = 'blocked' | 'deleted' | 'muted' | 'banned' | 'kicked';
 
 export interface PowerActionData {
 	action: PowerAction;
 	channel: number;
 	powerUser: User;
-	targetSender?: number;
-	targetMessage?: MessageData;
+	targetSender: SenderData;
+	targetMessage: MessageData;
+}
+
+export interface PunishmentData {
+	punishment_type: string;
+	duration?: number; // if null, the punishment is permanent, in seconds
 }
