@@ -1,4 +1,4 @@
-import { Text, Card, Row } from "@nextui-org/react";
+import { Text, Row, Grid } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { User } from "@/interfaces/user.interface";
 
@@ -8,7 +8,7 @@ function EloLabel({ elo }: { elo: number }) {
     useEffect(() => {
         if (elo > 1000) setColor("success");
         else if (elo < 1000) setColor("error");
-    }, [color]);
+    }, [elo]);
 
     return (
         <Text h4 color={color}>{elo}</Text>
@@ -18,29 +18,21 @@ function EloLabel({ elo }: { elo: number }) {
 export default function PlayerStats({ user }: { user: User }) {
 
     return (
-        <Card>
-            <Card.Header>
-                <Text h2>Player Stats</Text>
-            </Card.Header>
+        <Grid>
+            <Row justify="space-between" align="center">
+                <Text h4>Wins</Text>
+                <Text h4>{user.wins}</Text>
+            </Row>
 
-            <Card.Divider/>
+            <Row justify="space-between" align="center">
+                <Text h4>Losses</Text>
+                <Text h4>{user.losses}</Text>
+            </Row>
 
-            <Card.Body>
-                <Row justify="space-between" align="center">
-                    <Text h4>Wins</Text>
-                    <Text h4>{user.wins}</Text>
-                </Row>
-
-                <Row justify="space-between" align="center">
-                    <Text h4>Losses</Text>
-                    <Text h4>{user.losses}</Text>
-                </Row>
-
-                <Row justify="space-between" align="center">
-                    <Text h4>Elo</Text>
-                    <EloLabel elo={user.elo}/>
-                </Row>
-            </Card.Body>
-        </Card>
+            <Row justify="space-between" align="center">
+                <Text h4>Elo</Text>
+                <EloLabel elo={user.elo}/>
+            </Row>
+        </Grid>
     );
 }

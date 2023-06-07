@@ -241,7 +241,9 @@ export class GameService {
             winner.score,
             looser.userId,
             looser.score,
-            Math.abs(eloWinner - eloLooser)
+            Math.abs(eloWinner - eloLooser),
+            eloWinner,
+            eloLooser
         );
     }
 

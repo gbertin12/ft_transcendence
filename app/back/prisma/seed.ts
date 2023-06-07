@@ -43,49 +43,79 @@ async function createFakeMessage(size: number, author_id: number, channel_id: nu
 }
 
 async function seedUsers() {
+    const user_count: number = 75;
+    const prefix = "batiste_";
+
+    let users: Prisma.UserCreateManyInput[] = [];
+    for (let i = 0; i < user_count; i++) {
+        users.push({
+            name: prefix + faker.word.adjective() + "_" + faker.word.noun(),
+            password: sha512(faker.internet.password()),
+            elo: Math.floor(Math.random() * 1500) + 500,
+            wins: 0,
+            losses: 0
+        });
+    }
     await prisma.user.createMany({
-        data: [
-            {
-                name: "test",
-                password: sha512("test"),
-            },
-            {
-                name: "user",
-                password: sha512("user"),
-            },
-            {
-                name: "gbertin",
-                password: sha512("user"),
-                elo: 1200,
-                wins: 72,
-                losses: 67
-            },
-            {
-                name: "batiste",
-                password: sha512("user"),
-                elo: 1300,
-                wins: 90,
-                losses: 67
-            },
-            {
-                name: "top1ouRien",
-                password: sha512("user"),
-                elo: 1800,
-                wins: 120,
-                losses: 67
-            },
-        ]
+        data: users
     });
 }
 
 async function seedMatchHistory() {
-    await prisma.matchHistory.createMany({
-        data: [
-            { winnerId: 1, winnerScore: 10, winnerElo: 1000, looserId: 2, looserScore: 3, looserElo: 1000, eloDiff: 0},            
-            { winnerId: 2, winnerScore: 10, winnerElo: 1020,looserId: 1, looserScore: 1, looserElo: 353, eloDiff: 0},            
-            { winnerId: 4, winnerScore: 10, winnerElo: 1200, looserId: 1, looserScore: 2, looserElo: 999, eloDiff: 0},            
-        ]
-    });
+    const users = await prisma.user.findMany();
+    const game_count = 100;
+
+    let games: Prisma.MatchHistoryCreateManyInput[] = [];
+
+    for (let i = 0; i < users.length; i++) {
+        for (let j = 0; j < users.length; j++) {
+            for (let k = 0; k < game_count; k++) {
+                if (i === j) continue; // skip self fights
+                const winner = users[i];
+                const looser = users[j];
+                const winnerScore = 10;
+                const looserScore = Math.floor(Math.random() * 10);
+                const winnerElo = Math.floor(Math.random() * 1500) + 500;
+                const looserElo = Math.floor(Math.random() * 1500) + 500;
+                const eloDiff = Math.floor(Math.random() * 25) + 5;
+                games.push({
+                    winnerId: winner.id,
+                    winnerScore: winnerScore,
+                    winnerElo: winnerElo,
+                    looserId: looser.id,
+                    looserScore: looserScore,
+                    looserElo: looserElo,
+                    eloDiff: eloDiff
+                });
+            }
+            await prisma.matchHistory.createMany({
+                data: games
+            });
+            games = [];
+        }
+    }
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        const wins = await prisma.matchHistory.count({
+            where: {
+                winnerId: user.id
+            }
+        });
+        const losses = await prisma.matchHistory.count({
+            where: {
+                looserId: user.id
+            }
+        });
+        await prisma.user.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                wins: wins,
+                losses: losses
+            }
+        });
+    }
 }
 
 async function seedChannels() {
@@ -121,7 +151,7 @@ async function seedMessages() {
 
 async function main() {
     // reset all tables
-    await prisma.$executeRaw`TRUNCATE TABLE "User", "Channel", "Message" RESTART IDENTITY CASCADE`;
+    await prisma.$executeRaw`TRUNCATE TABLE "User", "Channel", "Message", "MatchHistory" RESTART IDENTITY CASCADE`;
 
     await seedUsers();
     await seedChannels();
@@ -132,6 +162,7 @@ async function main() {
     await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"User"', 'id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "User"`;
     await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Channel"', 'id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "Channel"`;
     await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Message"', 'message_id'), coalesce(max("message_id"), 1), max("message_id") IS NOT null) FROM "Message"`;
+    await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"MatchHistory"', 'id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "MatchHistory"`;
 }
 
 main()

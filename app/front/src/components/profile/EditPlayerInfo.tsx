@@ -2,9 +2,12 @@ import { Button, Text, Row, Card, Input, Spacer, FormElement } from "@nextui-org
 import { useUser } from '@/contexts/user.context';
 import { FormEvent, useState } from "react";
 import MFAButton from "./MFAButton";
+import { User } from "@/interfaces/user.interface";
 
-export default function EditPlayerInfo() {
-    const { user, setUser } = useUser();
+export default function EditPlayerInfo(
+    { user, handleShowEdit }: { user: User, handleShowEdit: () => void }
+) {
+    const { setUser } = useUser();
     const [ name, setName ] = useState<string>("");
     const [ files, setFiles ] = useState<FileList|null>();
     const [ error, setError ] = useState<string>("");
@@ -45,6 +48,9 @@ export default function EditPlayerInfo() {
                     setUser({  ...user, avatar });
                 }
                 setError("");
+
+                // go back to PlayerInfo component
+                handleShowEdit();
             } else {
                 const data = await res.json();
                 setError(data.message);
@@ -82,7 +88,7 @@ export default function EditPlayerInfo() {
 
             <Card.Footer>
                 <Row wrap="wrap" justify="space-evenly" align="center">
-                    <Button bordered>Cancel</Button>
+                    <Button bordered onPress={handleShowEdit}>Cancel</Button>
                     <Button onPress={updateProfile}>Update</Button>
                 </Row>
             </Card.Footer>

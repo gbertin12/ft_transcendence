@@ -1,25 +1,51 @@
-import { Grid } from "@nextui-org/react";
+import { Grid, Loading, Row } from "@nextui-org/react";
 import PlayerInfo from "@/components/profile/PlayerInfo";
-import PlayerStats from "@/components/profile/PlayerStats";
 import EditPlayerInfo from "@/components/profile/EditPlayerInfo";
 import { useUser } from "@/contexts/user.context";
+import MatchHistory from "@/components/profile/MatchHistory";
+import { useState } from "react";
 
 export default function Profile() {
     const { user } = useUser();
+    const [ showEdit, setShowEdit ] = useState<boolean>(false);
 
-    return (
-        <Grid.Container gap={2}>
-            <Grid xs={4}>
-                <PlayerInfo user={user}/>
-            </Grid>
+    function handleShowEdit() {
+        setShowEdit(!showEdit);
+    }
 
-            <Grid xs={2}>
-                <PlayerStats user={user}/>
-            </Grid>
+    if (!user.id) return <Loading/>
 
-            <Grid xs={4}>
-                <EditPlayerInfo/>
-            </Grid>
-        </Grid.Container>
-    );
+    if (!showEdit) {
+        return (
+            <Grid.Container gap={2}>
+                <Row justify='center'>
+                    <Grid xs={4}>
+                        <PlayerInfo user={user} handleShowEdit={handleShowEdit}/>
+                    </Grid>
+                </Row>
+
+                <Row justify='center'>
+                    <Grid xs={8}>
+                        <MatchHistory user={user}/>
+                    </Grid>
+                </Row>
+            </Grid.Container>
+        );
+    } else {
+        return (
+            <Grid.Container gap={2}>
+                <Row justify='center'>
+                    <Grid xs={4}>
+                        <EditPlayerInfo user={user} handleShowEdit={handleShowEdit}/>
+                    </Grid>
+                </Row>
+
+                <Row justify='center'>
+                    <Grid xs={8}>
+                        <MatchHistory user={user}/>
+                    </Grid>
+                </Row>
+            </Grid.Container>
+        );
+    }
 }

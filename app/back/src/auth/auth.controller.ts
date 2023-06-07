@@ -119,9 +119,9 @@ export class AuthController {
     async verifyOTP(
         @Req() req: Request,
         @Res() res: Response,
-        @Body('code') otp: string,
+        @Body('code') code: string,
     ) {
-        if (!await this.authService.verifyOTP(req.user['id'], otp)) {
+        if (!await this.authService.verifyOTP(req.user['id'], code)) {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);
