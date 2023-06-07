@@ -99,12 +99,11 @@ export class ChatGateway
         client.join(`channel-${channelId}`); // TODO: use socket.io channels
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
-        // get active mute
-        let mute: Punishment[] | null = await this.punishmentsService.getActivePunishments(channelId, client['user'].id, 'muted', 1);
-        if (mute && mute.length > 0) {
+        let mute: Punishment | null = await this.punishmentsService.hasActiveMute(client['user'].id, channelId);
+        if (mute) {
             client.emit('punishment', {
                 punishment_type: 'muted',
-                duration: Math.floor((new Date(mute[0].expires_at).getTime() - new Date().getTime()) / 1000),
+                duration: Math.floor((new Date(mute.expires_at).getTime() - new Date().getTime()) / 1000),
             });
         }
     }
