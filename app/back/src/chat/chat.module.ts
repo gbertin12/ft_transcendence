@@ -3,7 +3,7 @@ import { UserModule } from '../../src/user/user.module';
 import { ChatGateway } from './chat.gateway';
 import { FriendsModule } from '../friends/friends.module';
 import { ChannelModule } from '../channel/channel.module';
-import { PunishmentsModule } from 'punishments/punishments.module';
+import { PunishmentsModule } from '../punishments/punishments.module';
 
 @Module({
     providers: [ChatGateway],

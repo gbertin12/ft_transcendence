@@ -16,7 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
 import { Punishment } from '@prisma/client';
-import { PunishmentsService } from 'punishments/punishments.service';
+import { PunishmentsService } from '../punishments/punishments.service';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
