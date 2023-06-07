@@ -5,6 +5,7 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
+import { useChat } from "@/contexts/chat.context";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -29,12 +30,12 @@ function generateMutedMessage(talkPowerTimer: number): string {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
-    const [banned, setBanned] = useState<boolean>(false);
     const [mutePunishment, setMutePunishment] = useState<MutePunishment>({ active: false, duration: -1, interval: null });
     const [messages, setMessages] = useState<MessageData[]>([]);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
+    const { bannedChannels, setBannedChannels } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
@@ -47,7 +48,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 setMissingPermissions(true);
                 return [];
             } else if (res.status === 403) {
-                setBanned(true);
                 return [];
             } else {
                 setMissingPermissions(false);
@@ -107,7 +107,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     });
                     break;
                 case "banned":
-
+                    setBannedChannels((bannedChannels) => {
+                        return new Set(bannedChannels).add(channel.id);
+                    });
                     break;
                 case "kicked":
                     break;
@@ -135,7 +137,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const memoizedMessages = useMemo(() => messages, [messages]);
 
     // The user is banned
-    if (banned) {
+    if (bannedChannels.has(channel.id)) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <h1 className="text-3xl font-bold">You are banned from this channel</h1>
@@ -196,7 +198,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                             </ul>
                         </Grid>
                         <Grid xs={12}>
-                            {(!missingPermissions && !banned) && (
+                            {(!missingPermissions && !bannedChannels.has(channel.id)) && (
                                 <Textarea
                                     fullWidth
                                     disabled={mutePunishment.active}
