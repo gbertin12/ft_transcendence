@@ -2,7 +2,7 @@ import { Channel, MessageData, SenderData } from '@/interfaces/chat.interfaces';
 import { Avatar, Text, Tooltip } from '@nextui-org/react';
 import { IconCrown, IconShield } from '@tabler/icons-react';
 import React from 'react';
-import PowerActions from './PowerActions';
+import PowerActions from './powertools/PowerActions';
 
 interface ChatMessageProps {
     data: MessageData;
