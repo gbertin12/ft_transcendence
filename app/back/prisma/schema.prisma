@@ -68,11 +68,14 @@ model Channel {
     owner_id      Int
     password      String?  @db.VarChar(128)
     owner         User     @relation(fields: [owner_id], references: [id])
+    admins         ChannelAdmin[]
 }
 
 model ChannelAdmin {
     channel_id Int
     user_id    Int
+    Channel    Channel? @relation(fields: [channelId], references: [id])
+    channelId  Int?
 
     @@id([channel_id, user_id])
 }
