@@ -2,6 +2,7 @@ import { Channel, Friend } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSocket } from './socket.context';
 import { useUser } from './user.context';
+import axios from 'axios';
 
 interface ChatContextType {
     channels: Channel[];
@@ -25,36 +26,38 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchChannels = async () => {
-            const res = await fetch("http://localhost:3000/channel/all", { credentials: "include" });
-            if (res.status === 401) {
+            try {
+                axios.get("http://localhost:3000/channel/all", { withCredentials: true })
+                .then((res) => {
+                    setChannels(res.data);
+                })
+            } catch (err) {
                 return ;
             }
-            const data = await res.json();
-            setChannels(data);
         };
         const fetchFriends = async () => {
-            const res = await fetch("http://localhost:3000/friends/", { credentials: 'include' });
-            if (res.status === 401) {
+            try {
+                axios.get("http://localhost:3000/friends/", { withCredentials: true })
+                .then((res) => {
+                    if (Array.isArray(res.data)) {
+                        const friends: Friend[] = res.data.map((friend) => {
+                            return {
+                                id: friend.user.id,
+                                name: friend.user.name,
+                                avatar: friend.user.avatar,
+                                userId: friend.user.id,
+                                isOnline: false, // TODO: implement
+                                isTyping: false,
+                                isPlaying: false,
+                                unreadMessages: 0,
+                            };
+                        });
+                        setFriends(friends);
+                        socket.emit("updateStatus", {"status": "online"});
+                    }
+                })
+            } catch (err) {
                 return ;
-            }
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                const friends: Friend[] = data.map((friend) => {
-                    return {
-                        id: friend.user.id,
-                        name: friend.user.name,
-                        avatar: friend.user.avatar,
-                        userId: friend.user.id,
-                        isOnline: false, // TODO: implement
-                        isTyping: false,
-                        isPlaying: false,
-                        unreadMessages: 0,
-                    };
-                });
-                setFriends(friends);
-                socket.emit("updateStatus", {"status": "online"});
-            } else {
-                console.error("Error fetching friends: data is not an array");
             }
         };
 
