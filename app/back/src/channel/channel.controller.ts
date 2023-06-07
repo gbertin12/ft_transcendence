@@ -133,8 +133,14 @@ export class ChannelController {
             throw new HttpException('Channel has no password', 400);
         }
 
+        // Check if user has been banned
+        let banned = await this.channelService.getActivePunishments(dto.channel_id, req.user['id'], 'banned', 1);
+        if (banned.length > 0) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
+
         if (!await argon2.verify(channelPassword, body.password)) {
-            throw new HttpException('Invalid password', 403);
+            throw new HttpException('Invalid password', 401);
         }
 
         let userId = req.user['id'];
