@@ -1,7 +1,7 @@
 import { useUser } from '@/contexts/user.context';
-import { Channel, MessageData, PowerAction, SenderData, User } from '@/interfaces/chat.interfaces';
-import { Button, Grid, Tooltip } from '@nextui-org/react';
-import { IconVolume3, IconTrash, IconBan, IconDoorExit, IconMessageCircleOff, IconUserX } from '@tabler/icons-react';
+import { Channel, MessageData, PowerAction, SenderData } from '@/interfaces/chat.interfaces';
+import { Grid } from '@nextui-org/react';
+import { IconVolume3, IconTrash, IconBan, IconDoorExit, IconUserX } from '@tabler/icons-react';
 import React from 'react';
 import { Socket } from 'socket.io-client';
 import PowerButton from './PowerButton';
@@ -55,7 +55,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                 <PowerButton
                     tooltip="Block user"
                     ariaLabel="Block the sender of this message"
-                    icon={<IconMessageCircleOff />}
+                    icon={<IconUserX />}
                     color="default"
                     render={true}
                     onPress={() => emitPowerAction(channel, "blocked", socket, sender)}
@@ -76,7 +76,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     tooltip="Mute user"
                     ariaLabel='Mute this user'
                     tooltipColor="error"
-                    icon={<IconUserX />}
+                    icon={<IconVolume3 />}
                     color="error"
                     render={isOwner || isAdmin}
                     onPress={() => emitPowerAction(channel, "muted", socket, sender)}
