@@ -1,15 +1,27 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
-import { Channel, Message, User } from '@prisma/client';
-import ChatGateway from '../chat/chat.gateway';
+import { Channel, Message, Punishment, User } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { ChannelStaff } from '../interfaces/chat.interfaces';
+import { ChannelStaff, PowerAction } from '../interfaces/chat.interfaces';
 
 @Injectable()
 export class ChannelService {
     constructor(
         private db: DbService,
     ) { }
+
+    parseActionType(action: PowerAction): number {
+        switch (action) {
+            case 'banned':
+                return 0;
+            case 'muted':
+                return 1;
+            case 'kicked':
+                return 2;
+            default:
+                return -1;
+        }
+    }
 
     async allChannels(user: User) {
         // return whether the password is set or not
@@ -210,48 +222,73 @@ export class ChannelService {
         });
     }
 
-    async getChannelOwner(channelId: number): Promise<any> {
-        return this.db.channel.findUnique({
-            where: {
-                id: channelId
-            },
-            select: {
-                owner_id: true
-            }
-        });
-    }
-
-    async getChannelAdmins(channelId: number): Promise<any> {
-        return this.db.channelAdmin.findMany({
-            where: {
-                channel_id: channelId
-            },
-            select: {
-                user_id: true
-            }
-        }).then((admins) => {
-            // flatten the array
-            return admins.map((admin) => {
-                return admin.user_id;
-            });
-        });
-    }
-
     async getChannelStaff(channelId: number): Promise<ChannelStaff> {
         let staff: ChannelStaff = {
             owner_id: -1,
             administrators: [],
         }
-        // Wait for all promises to resolve
-        await Promise.all([
-            this.getChannelOwner(channelId).then((owner) => {
-                staff.owner_id = owner.owner_id;
-            }),
-            this.getChannelAdmins(channelId).then((admins) => {
-                staff.administrators = admins;
-            }),
-        ]);
-
+        await this.db.channel.findUnique({
+            where: {
+                id: channelId
+            },
+            select: {
+                owner_id: true,
+                admins: {
+                    select: {
+                        user_id: true
+                    },
+                },
+            },
+        }).then((channel) => {
+            staff.owner_id = channel.owner_id;
+            staff.administrators = channel.admins.map((admin) => {
+                return admin.user_id;
+            });
+        });
         return staff;
+    }
+
+    async applyPunishment(punished: number, punisher: number, channel: number, duration: number, punishment: PowerAction) {
+        let punishment_type: number = this.parseActionType(punishment);
+        if (punishment_type < 0) {
+            throw new HttpException('Invalid punishment type', 400);
+        }
+        let expiration_date: Date = new Date();
+        if (duration > 0) {
+            expiration_date = new Date(Date.now() + duration);
+        } else {
+            expiration_date = new Date(2038, 0, 1, 0, 0, 0, 0);
+        }
+        // TODO: Check if the user already has a punishment of the same type, if so, update it to the new expiration date
+        return await this.db.punishment.create({
+            data: {
+                punished_id: punished,
+                issuer_id: punisher,
+                channel_id: channel,
+                expires_at: expiration_date,
+                type: punishment_type
+            }
+        });
+    }
+
+    async getActivePunishments(channelId: number, userId: number, type: PowerAction, max: number = -1): Promise<Punishment[]> {
+        let punishment_type: number = this.parseActionType(type);
+        if (punishment_type < 0) {
+            throw new HttpException('Invalid punishment type', 400);
+        }
+        return await this.db.punishment.findMany({
+            where: {
+                punished_id: userId,
+                channel_id: channelId,
+                type: punishment_type,
+                expires_at: {
+                    gt: new Date()
+                }
+            },
+            orderBy: {
+                expires_at: 'asc'
+            },
+            take: (max > 0 ? max : null)
+        });
     }
 }

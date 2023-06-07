@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
-import { Button, Container, Grid, Input, Loading, Text, Textarea } from "@nextui-org/react";
+import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
@@ -16,7 +16,7 @@ interface MutePunishment {
 }
 
 function generateMutedMessage(talkPowerTimer: number): string {
-    if (talkPowerTimer < 0) {
+    if (talkPowerTimer < 0 || talkPowerTimer > 31536000 * 5) { // Negative or 5 years
         return "You are permanently muted.";
     } else {
         const hours = Math.floor(talkPowerTimer / 3600);
@@ -71,6 +71,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             switch (punishment.punishment_type) {
                 case "muted":
                     // ugly af but it's worth the effort
+                    // XXX: Next strict mode decrements the timer twice due to the double render, not an issue
                     setMutePunishment({
                         active: true,
                         duration: punishment.duration || -1,

@@ -9,12 +9,13 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-import { ChannelStaff, Message, PowerActionData } from '../interfaces/chat.interfaces';
+import { ChannelStaff, PowerActionData } from '../interfaces/chat.interfaces';
 import * as cookie from 'cookie';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
+import { Punishment } from '@prisma/client';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
@@ -45,7 +46,7 @@ export class ChatGateway
     
     afterInit(server: any) {
         console.log('Init');
-    }PongModule
+    }
     
     async handleConnection(client: Socket) 
     {
@@ -94,29 +95,57 @@ export class ChatGateway
     async handleJoin(client: Socket, channelId: number) {
         usersChannels[client.id] = channelId;
         client.join(`channel-${channelId}`); // TODO: use socket.io channels
-
-        // TODO: get all staff instead of just the owner
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
-        // answer with ownerId
         client.emit('staff', staff);
+        // get active mute
+        let mute: Punishment[] | null = await this.channelService.getActivePunishments(channelId, client['user'].id, 'muted', 1);
+        if (mute && mute.length > 0) {
+            client.emit('punishment', {
+                punishment_type: 'muted',
+                duration: Math.floor((new Date(mute[0].expires_at).getTime() - new Date().getTime()) / 1000),
+            });
+        }
     }
 
     @SubscribeMessage('powerAction')
     async handlePowerAction(client: Socket, payload: PowerActionData) {
+        // Check if channel's owner_id is the user, or if the user's id is in ChannelAdmin
+        let staff: ChannelStaff = await this.channelService.getChannelStaff(payload.channel);
+        let senderRole: number = (staff.owner_id === client['user'].id) ? 2 : (staff.administrators.includes(client['user'].id) ? 1 : 0);
+        let targetRole: number = (staff.owner_id === payload.targetSender.id) ? 2 : (staff.administrators.includes(payload.targetSender.id) ? 1 : 0);
+        if (senderRole == 0 || senderRole < targetRole) { // TODO: Check permissions for ban, mute, kick and delete, not blocking
+            return ;
+        }
         // TODO: implement and check if user is staff in the channel, otherwise ignore
-        let testPayload = {
+        let systemPayload = {
             // custom system message
-            content: "DEBUG: Power action received from " + client['user'].name + " type: " + payload.action,
+            content: client['user'].name + ` ${payload.action} ` + `${payload.targetSender.name}`,
             message_id: systemMessageStack--,
-            sender: {
-                avatar: null,
-                id: -1,
-                username: "System",
-            },
+            sender: { avatar: null, id: -1, username: "System", },
             timestamp: new Date(),
         };
-        client.to(`channel-${payload.channel}`).emit('message', testPayload);
-        client.emit('message', testPayload);
+        // insert punishment in database (TODO: treat durations / )
+        let punishment: any = await this.channelService.applyPunishment(
+            payload.targetSender.id,
+            client['user'].id,
+            payload.channel,
+            -1, // payload.duration || -1,
+            payload.action,
+        );
+
+        if (!punishment) {
+            throw new Error('Failed to apply punishment');
+        }
+
+        client.to(`channel-${payload.channel}`).emit('message', systemPayload);
+        client.emit('message', systemPayload);
+        // send punishment to the target user        // TODO: Fallback if user is not connected
+        if (usersClients[payload.targetSender.id]) { // TODO: Implement duration
+            usersClients[payload.targetSender.id].emit('punishment', {
+                punishment_type: payload.action,
+                // duration: 3, // no duration is permanent
+            });
+        }
     }
 
     @SubscribeMessage('updateStatus')
