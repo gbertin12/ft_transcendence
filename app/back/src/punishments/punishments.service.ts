@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { Punishment } from '@prisma/client';
-import { DbService } from 'db/db.service';
-import { PowerAction } from 'interfaces/chat.interfaces';
+import { Punishment, User } from '@prisma/client';
+import { DbService } from '../db/db.service';
+import { PowerAction } from '../interfaces/chat.interfaces';
 
 export function parseActionType(action: PowerAction): number {
     switch (action) {
@@ -64,6 +64,57 @@ export class PunishmentsService {
                 expires_at: 'asc'
             },
             take: (max > 0 ? max : null)
+        });
+    }
+
+    /**
+     * Returns a list of channel ids in which the user is banned
+     * @param user User to check
+     */
+    async getBans(user: User): Promise<number[]> {
+        return await this.db.punishment.findMany({
+            where: {
+                punished_id: user.id,
+                type: parseActionType('banned'),
+                expires_at: {
+                    gt: new Date()
+                }
+            },
+            select: {
+                channel_id: true
+            }
+        }).then((punishments: Punishment[]) => {
+            return punishments.map((punishment: Punishment) => punishment.channel_id);
+        });
+    }
+
+    async hasActiveBan(channelId: number, userId: number): Promise<boolean> {
+        return await this.db.punishment.findFirst({
+            where: {
+                punished_id: userId,
+                channel_id: channelId,
+                type: parseActionType('banned'),
+                expires_at: {
+                    gt: new Date()
+                }
+            }
+        }).then((punishment: Punishment) => {
+            return punishment !== null;
+        });
+    }
+
+    async hasActiveMute(channelId: number, userId: number): Promise<boolean> {
+        return await this.db.punishment.findFirst({
+            where: {
+                punished_id: userId,
+                channel_id: channelId,
+                type: parseActionType('muted'),
+                expires_at: {
+                    gt: new Date()
+                }
+            }
+        }).then((punishment: Punishment) => {
+            return punishment !== null;
         });
     }
 }
