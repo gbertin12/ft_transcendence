@@ -10,6 +10,8 @@ interface ChatContextType {
     setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
     bannedChannels: Set<number>;
     setBannedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
+    mutedChannels: Set<number>;
+    setMutedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const ChatContext = createContext<ChatContextType>({
@@ -19,6 +21,8 @@ const ChatContext = createContext<ChatContextType>({
     setFriends: () => { },
     bannedChannels: new Set<number>(),
     setBannedChannels: () => { },
+    mutedChannels: new Set<number>(),
+    setMutedChannels: () => { },
 });
 
 export const useChat = () => useContext(ChatContext);
@@ -27,6 +31,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
+    const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -66,14 +71,20 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         };
         const fetchBans = async () => {
             try {
-                axios.get("http://localhost:3000/punishments/bans", 
+                axios.get("http://localhost:3000/punishments/active", 
                 {
                     withCredentials: true,
                     validateStatus: () => true,
                 })
                 .then((res) => {
                     if (res.status === 200) {
-                        setBannedChannels(new Set<number>(res.data));
+                        // TODO: handle durations too
+                        if (res.data.hasOwnProperty("banned")) {
+                            setBannedChannels(new Set<number>(res.data.banned));
+                        }
+                        if (res.data.hasOwnProperty("muted")) {
+                            setMutedChannels(new Set<number>(res.data.muted));
+                        }
                     }
                 });
             }
@@ -142,6 +153,13 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     return newBannedChannels;
                 });
             });
+            socket.on("unmuted", (channel_id: number) => { // TODO: Implement on the server side
+                setMutedChannels((mutedChannels) => {
+                    const newMutedChannels = new Set<number>(mutedChannels);
+                    newMutedChannels.delete(channel_id);
+                    return newMutedChannels;
+                });
+            });
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
@@ -160,7 +178,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     }, [socket]);
 
     return (
-        <ChatContext.Provider value={{ channels, setChannels, friends, setFriends, bannedChannels, setBannedChannels }}>
+        <ChatContext.Provider value={{ channels, setChannels, friends, setFriends, bannedChannels, setBannedChannels, mutedChannels, setMutedChannels }}>
             {children}
         </ChatContext.Provider>
     );

@@ -11,4 +11,10 @@ export class PunishmentsController {
 	async getBans(@Req() req) {
 		return await this.punishmentsService.getBans(req.user);
 	}
+
+	@UseGuards(AuthGuard('jwt-2fa'))
+	@Get('active')
+	async getActivePunishments(@Req() req) {
+		return await this.punishmentsService.getActivePunishments(req.user);
+	}
 }

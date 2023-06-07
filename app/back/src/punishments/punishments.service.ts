@@ -16,6 +16,19 @@ export function parseActionType(action: PowerAction): number {
     }
 }
 
+export function parseActionTypeToString(action: number): PowerAction {
+    switch (action) {
+        case 0:
+            return 'banned';
+        case 1:
+            return 'muted';
+        case 2:
+            return 'kicked';
+        default:
+            throw new HttpException('Invalid action type', 400);
+    }
+}
+
 @Injectable()
 export class PunishmentsService {
     constructor(
@@ -46,16 +59,10 @@ export class PunishmentsService {
         });
     }
 
-    async getActivePunishments(channelId: number, userId: number, type: PowerAction, max: number = -1): Promise<Punishment[]> {
-        let punishment_type: number = parseActionType(type);
-        if (punishment_type < 0) {
-            throw new HttpException('Invalid punishment type', 400);
-        }
+    async getActivePunishments(user: User): Promise<Record<any, any>> {
         return await this.db.punishment.findMany({
             where: {
-                punished_id: userId,
-                channel_id: channelId,
-                type: punishment_type,
+                punished_id: user.id,
                 expires_at: {
                     gt: new Date()
                 }
@@ -63,9 +70,26 @@ export class PunishmentsService {
             orderBy: {
                 expires_at: 'asc'
             },
-            take: (max > 0 ? max : null)
+            select: {
+                type: true,
+                channel_id: true,
+                expires_at: true,
+            }
+        }).then((punishments: Punishment[]) => {
+            let result: Record<any, any> = {};
+            punishments.forEach((punishment: Punishment) => {
+                // key = type
+                // value = channel id
+                let type: string = parseActionTypeToString(punishment.type);
+                if (result[type] === undefined) {
+                    result[type] = [];
+                }
+                result[type].push(punishment.channel_id);
+            });
+            return result;
         });
     }
+
 
     /**
      * Returns a list of channel ids in which the user is banned
@@ -103,7 +127,7 @@ export class PunishmentsService {
         });
     }
 
-    async hasActiveMute(channelId: number, userId: number): Promise<boolean> {
+    async hasActiveMute(channelId: number, userId: number): Promise<Punishment | null> {
         return await this.db.punishment.findFirst({
             where: {
                 punished_id: userId,
@@ -113,8 +137,6 @@ export class PunishmentsService {
                     gt: new Date()
                 }
             }
-        }).then((punishment: Punishment) => {
-            return punishment !== null;
         });
     }
 }
