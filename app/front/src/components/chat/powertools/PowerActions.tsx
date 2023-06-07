@@ -4,6 +4,7 @@ import { Button, Grid, Tooltip } from '@nextui-org/react';
 import { IconVolume3, IconTrash, IconBan, IconDoorExit, IconMessageCircleOff, IconUserX } from '@tabler/icons-react';
 import React from 'react';
 import { Socket } from 'socket.io-client';
+import PowerButton from './PowerButton';
 
 interface PowerActionsProps {
     channel: Channel;
@@ -13,17 +14,6 @@ interface PowerActionsProps {
     isAdmin: boolean;
     isOwner: boolean;
 }
-
-interface PowerButtonProps {
-    icon: React.ReactNode;
-    color: string;
-    ariaLabel: string;
-    onPress?: () => void;
-    render?: boolean;
-    tooltip?: string;
-    tooltipColor?: string;
-}
-
 
 function emitPowerAction(channel: Channel, action: PowerAction, socket: Socket, targetSender?: SenderData, targetMessage?: MessageData) {
     if (!targetSender && !targetMessage || targetSender && targetMessage) {
@@ -42,49 +32,10 @@ function emitPowerAction(channel: Channel, action: PowerAction, socket: Socket, 
         return socket.emit('powerAction', {
             channel: channel.id,
             action: action,
-            targetSender: targetSender.id,
+            targetSender: targetSender,
         });
     }
 
-}
-
-const PowerButton: React.FC<PowerButtonProps> = ({ icon, color, ariaLabel, tooltip, tooltipColor, onPress, render = true }) => {
-    if (!render) {
-        return <></>;
-    }
-    if (tooltip) {
-        return (
-            <Tooltip content={tooltip} placement="top" color={tooltipColor as any}>
-                <Button
-                    light
-                    auto
-                    color={color as any}
-                    aria-label={ariaLabel}
-                    css={{
-                        borderRadius: "$3xl",
-                        padding: "0.25rem",
-                    }}
-                    onPress={onPress}
-                >
-                    {icon}
-                </Button>
-            </Tooltip>
-        );
-    }
-
-    return (
-        <Button
-            light
-            auto
-            color={color as any}
-            css={{
-                borderRadius: "$3xl",
-                padding: "0.25rem",
-            }}
-        >
-            {icon}
-        </Button>
-    );
 }
 
 const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, isAuthor, isAdmin, isOwner }) => {
@@ -107,7 +58,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     icon={<IconMessageCircleOff />}
                     color="default"
                     render={true}
-                    onPress={() => emitPowerAction(channel, "block", socket, sender)}
+                    onPress={() => emitPowerAction(channel, "blocked", socket, sender)}
                 />
             </Grid>
             <Grid>
@@ -117,7 +68,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     icon={<IconTrash />}
                     color="default"
                     render={isAuthor || isAdmin || isOwner}
-                    onPress={() => emitPowerAction(channel, "delete", socket, undefined, message)}
+                    onPress={() => emitPowerAction(channel, "deleted", socket, undefined, message)}
                 />
             </Grid>
             <Grid>
@@ -128,7 +79,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     icon={<IconUserX />}
                     color="error"
                     render={isOwner || isAdmin}
-                    onPress={() => emitPowerAction(channel, "mute", socket, sender)}
+                    onPress={() => emitPowerAction(channel, "muted", socket, sender)}
                 />
             </Grid>
             <Grid>
@@ -139,7 +90,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     icon={<IconBan />}
                     color="error"
                     render={isOwner || isAdmin}
-                    onPress={() => emitPowerAction(channel, "ban", socket, sender)}
+                    onPress={() => emitPowerAction(channel, "banned", socket, sender)}
                 />
             </Grid>
             <Grid>
@@ -150,7 +101,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, sender, message, i
                     icon={<IconDoorExit />}
                     color="error"
                     render={isOwner || isAdmin}
-                    onPress={() => emitPowerAction(channel, "kick", socket, sender)}
+                    onPress={() => emitPowerAction(channel, "kicked", socket, sender)}
                 />
             </Grid>
         </Grid.Container>
