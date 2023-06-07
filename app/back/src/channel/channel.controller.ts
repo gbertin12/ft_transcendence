@@ -7,6 +7,7 @@ import { Channel, Message } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
 import { MessageData } from '../interfaces/chat.interfaces';
+import { PunishmentsService } from '../punishments/punishments.service';
 
 class ChannelDto {
     @Type(() => Number)
@@ -39,6 +40,7 @@ export class ChannelController {
     constructor(
         private channelService: ChannelService,
         private chatGateway: ChatGateway,
+        private punishmentsService: PunishmentsService,
     ) { }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -50,6 +52,10 @@ export class ChannelController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get(':channel_id/messages')
     async channelMessages(@Param() dto: ChannelDto, @Req() req) {
+        // Check if user is banned
+        if (this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
         return await this.channelService.getMessages(dto.channel_id, req.user);
     }
 
@@ -61,7 +67,12 @@ export class ChannelController {
 
         // TODO: Check that the channel exists
         // TODO: Check that the user is in the channel
-        // TODO: Check that the user is not muted
+
+        // Check that the user is not muted
+        if (this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are muted in this channel', 403);
+        }
+
         let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
         let data: MessageData = {
@@ -134,7 +145,7 @@ export class ChannelController {
         }
 
         // Check if user has been banned
-        let banned = await this.channelService.getActivePunishments(dto.channel_id, req.user['id'], 'banned', 1);
+        let banned = await this.punishmentsService.getActivePunishments(dto.channel_id, req.user['id'], 'banned', 1);
         if (banned.length > 0) {
             throw new HttpException('You are banned from this channel', 403);
         }
