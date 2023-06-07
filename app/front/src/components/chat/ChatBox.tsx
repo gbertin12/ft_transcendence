@@ -4,6 +4,7 @@ import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
+import axios from "axios";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -36,19 +37,25 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const { socket, user } = useUser();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
-        const url = `http://localhost:3000/channel/${channel.id}/messages`;
-        const res = await fetch(url, { credentials: "include" });
-        // if we have a 401, it means we are not allowed to access this channel (password protected)
-        if (res.status === 401) {
-            setMissingPermissions(true);
-            return [];
-        } else if (res.status === 403) {
-            // we are banned
-            setBanned(true);
-            return [];
-        }
-        setMissingPermissions(false);
-        const data = await res.json();
+        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
+            {
+                withCredentials: true,
+                validateStatus: () => true,
+            }
+        ).then((res) => {
+            if (res.status === 401) {
+                setMissingPermissions(true);
+                return [];
+            } else if (res.status === 403) {
+                setBanned(true);
+                return [];
+            } else {
+                setMissingPermissions(false);
+            }
+            return res.data;
+        }).catch((err) => {
+            throw Error("UNEXPECTED ERROR: " + err);
+        })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
         });
@@ -118,15 +125,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, [socket, channel]);
 
     const handleNewMessage = useCallback((message: string) => {
-        // POST request to send the message to the server
-        fetch(`http://localhost:3000/channel/${channel.id}/message`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ content: message }),
-        })
+        try {
+            axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
+        } catch (err) {
+            throw Error("UNEXPECTED ERROR: " + err);
+        }
     }, [channel]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
