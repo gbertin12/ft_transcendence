@@ -61,6 +61,7 @@ export class ChannelController {
 
         // TODO: Check that the channel exists
         // TODO: Check that the user is in the channel
+        // TODO: Check that the user is not muted
         let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
         let data: MessageData = {
