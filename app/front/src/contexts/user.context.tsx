@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/interfaces/chat.interfaces';
 import { io, Socket } from 'socket.io-client';
+import axios from 'axios';
 
 interface UserContextType {
 	user: User;
@@ -23,15 +24,13 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
 
 	useEffect(() => {
 		const fetchUser = async () => {
-			try {
-				const response = await fetch('http://localhost:3000/user/me', { credentials: 'include' });
-				const data = await response.json();
-				setUser(data);
-			} catch (error) {
-				console.error(error);
-			}
+			axios.get('http://localhost:3000/user/me', { withCredentials: true }).then((response) => {
+				setUser(response.data);
+			}).catch((error) => {
+				throw Error('UNEXPECTED ERROR: ' + error);
+			});
 		};
-
+		
 		fetchUser();
 	}, []);
 
