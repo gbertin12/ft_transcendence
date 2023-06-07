@@ -8,6 +8,7 @@ interface ChannelEntryProps {
     isSelected: boolean;
     channel: Channel;
     banned: boolean;
+    muted: boolean;
     user: User;
     onClick: () => void;
     unreadMessages?: number;
@@ -23,7 +24,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, user, onClick, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, muted, user, onClick, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -67,7 +68,12 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned
                 >
                     {banned && (
                         <Badge color="error" css={{"mr": "$2"}}>
-                            BAN
+                            BANNED
+                        </Badge>
+                    )}
+                    {muted && (
+                        <Badge color="warning" css={{"mr": "$2"}}>
+                            MUTED
                         </Badge>
                     )}
                     {channel.name}

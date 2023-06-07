@@ -35,7 +35,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
-    const { bannedChannels, setBannedChannels } = useChat();
+    const { bannedChannels, setBannedChannels, mutedChannels, setMutedChannels } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
@@ -104,6 +104,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                 }
                             });
                         }, 1000) : null,
+                    });
+                    setMutedChannels((mutedChannels) => {
+                        return new Set(mutedChannels).add(channel.id);
                     });
                     break;
                 case "banned":
@@ -201,16 +204,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                             {(!missingPermissions && !bannedChannels.has(channel.id)) && (
                                 <Textarea
                                     fullWidth
-                                    disabled={mutePunishment.active}
+                                    disabled={mutedChannels.has(channel.id)}
                                     placeholder={
-                                        !mutePunishment.active ? `Send a message to #${channel.name}`
+                                        !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
                                         :
-                                        generateMutedMessage(mutePunishment.duration)
+                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     aria-label={
-                                        !mutePunishment.active ? `Send a message to the channel : ${channel.name}`
+                                        !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
                                         :
-                                        generateMutedMessage(mutePunishment.duration)
+                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     minLength={1}
                                     maxLength={2000}
