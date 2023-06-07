@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Channel, ChannelStaff, Message, MessageData, User } from "@/interfaces/chat.interfaces";
+import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
 import { Button, Container, Grid, Input, Loading, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
@@ -9,7 +9,25 @@ interface ChatBoxProps {
     channel: Channel;
 }
 
+interface MutePunishment {
+    active: boolean;  // true = muted, false = not muted
+    duration: number; // number of seconds left before we can talk again (negative if we are permanently muted)
+    interval: NodeJS.Timeout | null;
+}
+
+function generateMutedMessage(talkPowerTimer: number): string {
+    if (talkPowerTimer < 0) {
+        return "You are permanently muted.";
+    } else {
+        const hours = Math.floor(talkPowerTimer / 3600);
+        const minutes = Math.floor((talkPowerTimer % 3600) / 60);
+        const seconds = Math.floor(talkPowerTimer % 60);
+        return `You are muted for ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+}
+
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
+    const [mutePunishment, setMutePunishment] = useState<MutePunishment>({ active: false, duration: -1, interval: null });
     const [messages, setMessages] = useState<MessageData[]>([]);
     const [hasAccess, setHasAccess] = useState<boolean>(true);
     const [ownerId, setOwnerId] = useState<number>(-1);
@@ -48,6 +66,39 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             setOwnerId(staff.owner_id);
             setAdmins(new Set(staff.administrators));
         });
+        socket.on("punishment", (punishment: PunishmentData) => {
+            // TODO: handle the punishment
+            switch (punishment.punishment_type) {
+                case "muted":
+                    // ugly af but it's worth the effort
+                    setMutePunishment({
+                        active: true,
+                        duration: punishment.duration || -1,
+                        interval: punishment.duration || -1 > 1 ? setInterval(() => {
+                            setMutePunishment((punishment) => {
+                                if (punishment.duration > 0) {
+                                    return {
+                                        ...punishment,
+                                        duration: punishment.duration - 1,
+                                    }
+                                } else {
+                                    clearInterval(punishment.interval as NodeJS.Timeout);
+                                    return {
+                                        active: false,
+                                        duration: -1,
+                                        interval: null,
+                                    }
+                                }
+                            });
+                        }, 1000) : null,
+                    });
+                    break;
+                case "banned":
+                    break;
+                case "kicked":
+                    break;
+            }
+        });
         fetchMessages(channel).then((messages) => {
             setMessages(messages);
         });
@@ -55,6 +106,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('message');
             socket.off('joinChannel');
             socket.off('staff');
+            socket.off('punishment');
         }
     }, [socket, channel]);
 
@@ -128,8 +180,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                             {hasAccess && (
                                 <Textarea
                                     fullWidth
-                                    placeholder="Entre ton message ici"
-                                    aria-label="Champ de saisie du message"
+                                    disabled={mutePunishment.active}
+                                    placeholder={
+                                        !mutePunishment.active ? `Send a message to #${channel.name}`
+                                        :
+                                        generateMutedMessage(mutePunishment.duration)
+                                    }
+                                    aria-label={
+                                        !mutePunishment.active ? `Send a message to the channel : ${channel.name}`
+                                        :
+                                        generateMutedMessage(mutePunishment.duration)
+                                    }
                                     minLength={1}
                                     maxLength={2000}
                                     onKeyPress={(e: any) => {
