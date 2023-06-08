@@ -16,7 +16,6 @@ const ChatFriendBrowser: React.FC = () => {
                 padding: 0,
                 overflowY: "auto",
                 overflowX: "hidden",
-                height: "85vh",
                 display: "flex",
                 flexDirection: "column",
             }}

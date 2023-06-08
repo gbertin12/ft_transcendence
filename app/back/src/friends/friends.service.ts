@@ -70,21 +70,64 @@ export class FriendsService {
         return relations;
     }
 
-    async getUserFriendRequests(userId: number): Promise<FriendRequest[]> {
+    async getUserFriendRequests(userId: number) {
         return this.dbService.friendRequest.findMany({
             where: {
-                receiver_id: userId,
-                requested_at: {
-                    gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                }
+                OR: [
+                    {
+                        receiver_id: userId,
+                        requested_at: {
+                            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                        }
+                    },
+                    {
+                        sender_id: userId,
+                        requested_at: {
+                            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                        }
+                    },
+                ]
             },
-            include: {
-                sender: true,
+            select: {
+                sender: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    }
+                },
+                receiver: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    }
+                },
+                receiver_id: true,
+                sender_id: true,
             }
         });
     }
 
-    async addFriend(sender: User, user_id: number): Promise<FriendRequest> {
+    async friendRequestExists(sender_id: number, receiver_id: number): Promise<boolean> {
+        const request = await this.dbService.friendRequest.findUnique({
+            where: {
+                sender_id_receiver_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                },
+            },
+        });
+        return !!request;
+    }
+
+    async addFriend(sender: User, user_id: number) {
         return this.dbService.friendRequest.upsert({
             where: {
                 sender_id_receiver_id: {
@@ -97,6 +140,30 @@ export class FriendsService {
                 sender_id: sender.id,
                 receiver_id: user_id,
             },
+            select: {
+                sender_id: true,
+                receiver_id: true,
+                sender: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    },
+                },
+                receiver: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    },
+                },
+            }
         });
     }
 
@@ -135,6 +202,42 @@ export class FriendsService {
                 user: true,
                 user_id: true,
                 friend_id: true,
+            }
+        });
+    }
+
+    async getFriendRequest(sender_id: number, receiver_id: number) {
+        console.log("receiver_id", receiver_id, "sender_id", sender_id);
+        return this.dbService.friendRequest.findUnique({
+            where: {
+                sender_id_receiver_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                },
+            },
+            select: {
+                sender_id: true,
+                receiver_id: true,
+                sender: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    },
+                },
+                receiver: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                    },
+                },
             }
         });
     }

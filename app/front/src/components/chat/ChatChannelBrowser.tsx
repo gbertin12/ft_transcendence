@@ -29,7 +29,6 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
             <ul
                 style={{
                     listStyle: "none",
-                    padding: 0,
                     overflowY: "auto",
                     overflowX: "hidden",
                     height: "85vh",

@@ -34,6 +34,7 @@ export interface FriendRequest {
 	receiver_id: number;
 	requested_at: Date;
 	sender: User;
+	receiver: User;
 	sender_id: number;
 }
 
