@@ -128,11 +128,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             socket.on('editChannel', (payload: Channel) => {
                 setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
             });
-            socket.on('newFriend', (payload: Friend) => {
-                setFriends((friends) => [...friends, payload]);
-            });
-            socket.on('deleteFriend', (payload: number) => { // TODO: Implement on the server side
-                setFriends((friends) => friends.filter((f) => f.id !== payload));
+            socket.on('deleteFriend', (user_id: number) => {
+                setFriends((friends) => friends.filter((f) => f.id !== user_id));
             });
             socket.on("friendRequestAccepted", (payload: any) => {
                 let newFriend: Friend = {
@@ -181,7 +178,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
                 socket.off("editChannel");
-                socket.off("newFriend");
                 socket.off("deleteFriend");
                 socket.off("friendRequestAccepted");
                 socket.off("online");

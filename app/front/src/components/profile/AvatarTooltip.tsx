@@ -86,8 +86,6 @@ function ProfileTooltip({ user }: { user: User }) {
     }, [user.wins, user.losses]);
 
     useEffect(() => {
-        console.log(friends);
-
         if (friends.some((friend) => friend.userId == user.id)) {
             setIsFriend(true);
         } else {
