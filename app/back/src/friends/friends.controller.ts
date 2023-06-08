@@ -55,11 +55,20 @@ export class FriendsController {
                 throw new ForbiddenException("You're already friends with this user");
             }
         }
+        // Check if there is already a friend request
+        if (await this.friendsService.friendRequestExists(sender.id, receiver_id))
+        {
+            throw new ForbiddenException("You already sent a friend request to this user");
+        }
+
         let friendRequest: any = await this.friendsService.addFriend(sender, receiver_id);
         friendRequest.sender = sender;
         // Send friendRequestAdded to receiver
         if (usersClients[receiver_id]) {
             usersClients[receiver_id].emit("friendRequestAdded", friendRequest);
+        }
+        if (usersClients[sender.id]) {
+            usersClients[sender.id].emit("friendRequestAdded", friendRequest);
         }
         return friendRequest;
     }
