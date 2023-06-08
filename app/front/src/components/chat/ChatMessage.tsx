@@ -21,13 +21,15 @@ function formatDate(date: Date): string {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
     if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
-        return `Aujourd'hui à ${date.getHours()}:${date.getMinutes()}`;
+        return `Today ${hours}:${minutes}`;
     }
     if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear()) {
-        return `Hier à ${date.getHours()}:${date.getMinutes()}`;
+        return `Yesterday ${hours}:${minutes}`;
     }
-    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes()}`;
+    return `${date.toLocaleDateString()} at ${hours}:${minutes}`;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
@@ -71,7 +73,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
                             <Text span color="$black" className="mr-1 text-lg font-medium">
                                 {data.sender.name}
                                 {senderOwner && (
-                                    <Text color="$error" css={{display: "inline-flex"}}>
+                                    <Text color="$error" css={{ display: "inline-flex" }}>
                                         <Tooltip
                                             rounded
                                             hideArrow
