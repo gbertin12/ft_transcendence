@@ -140,8 +140,7 @@ export class ChatGateway
             throw new Error('Failed to apply punishment');
         }
 
-        client.to(`channel-${payload.channel}`).emit('message', systemPayload);
-        client.to(`channel-${payload.channel}`).emit('message', systemPayload);
+        this.server.to(`channel-${payload.channel}`).emit('message', systemPayload);
         // send punishment to the target user        // TODO: Fallback if user is not connected
         if (usersClients[payload.targetSender.id]) { // TODO: Implement duration
             usersClients[payload.targetSender.id].emit('punishment', {

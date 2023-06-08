@@ -77,5 +77,6 @@ export interface PowerActionData {
 
 export interface PunishmentData {
 	punishment_type: string;
+	channel_id: number;
 	duration?: number; // if null, the punishment is permanent, in seconds
 }

@@ -30,7 +30,6 @@ function generateMutedMessage(talkPowerTimer: number): string {
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
-    const [mutePunishment, setMutePunishment] = useState<MutePunishment>({ active: false, duration: -1, interval: null });
     const [messages, setMessages] = useState<MessageData[]>([]);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
@@ -82,36 +81,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             // TODO: handle the punishment
             switch (punishment.punishment_type) {
                 case "muted":
-                    // ugly af but it's worth the effort
-                    // XXX: Next strict mode decrements the timer twice due to the double render, not an issue
-                    setMutePunishment({
-                        active: true,
-                        duration: punishment.duration || -1,
-                        interval: punishment.duration || -1 > 1 ? setInterval(() => {
-                            setMutePunishment((punishment) => {
-                                if (punishment.duration > 0) {
-                                    return {
-                                        ...punishment,
-                                        duration: punishment.duration - 1,
-                                    }
-                                } else {
-                                    clearInterval(punishment.interval as NodeJS.Timeout);
-                                    return {
-                                        active: false,
-                                        duration: -1,
-                                        interval: null,
-                                    }
-                                }
-                            });
-                        }, 1000) : null,
-                    });
                     setMutedChannels((mutedChannels) => {
-                        return new Set(mutedChannels).add(channel.id);
+                        return new Set(mutedChannels).add(punishment.channel_id);
                     });
                     break;
                 case "banned":
                     setBannedChannels((bannedChannels) => {
-                        return new Set(bannedChannels).add(channel.id);
+                        return new Set(bannedChannels).add(punishment.channel_id);
                     });
                     break;
                 case "kicked":
