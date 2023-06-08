@@ -1,14 +1,15 @@
-import { Channel, MessageData, SenderData } from '@/interfaces/chat.interfaces';
+import { Channel, MessageData, SenderData, User } from '@/interfaces/chat.interfaces';
 import { Avatar, Text, Tooltip } from '@nextui-org/react';
 import { IconCrown, IconShield } from '@tabler/icons-react';
 import React from 'react';
 import PowerActions from './powertools/PowerActions';
+import AvatarTooltip from '../profile/AvatarTooltip';
 
 interface ChatMessageProps {
     data: MessageData;
     concatenate: boolean;
     channel: Channel;
-    sender: SenderData;
+    sender: User;
     isAuthor?: boolean;
     senderOwner?: boolean;
     senderAdmin?: boolean;
@@ -59,16 +60,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
             >
                 {!concatenate && (
                     <>
-                        <Avatar
-                            src={`http://localhost:3000/static/avatars/${data.sender.avatar}`}
-                            css={{
+                        <div
+                            style={{
                                 position: "absolute",
                                 left: "16px",
-                                w: "40px",
-                                h: "40px",
-                                mt: "calc(4px - 0.125rem)",
+                                width: "40px",
+                                height: "40px",
+                                marginTop: "calc(4px - 0.125rem)",
                             }}
-                        />
+                        >
+                            <AvatarTooltip
+                                user={data.sender}
+                                placement="top"
+                            />
+                        </div>
                         <Text className="overflow-hidden block relative">
                             <Text span color="$black" className="mr-1 text-lg font-medium">
                                 {data.sender.name}
