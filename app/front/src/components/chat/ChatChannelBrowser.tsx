@@ -18,32 +18,51 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
 
     if (!channels) {
         return (
-            <Container css={{p: 0}}>
+            <Container css={{ p: 0 }}>
                 <Loading />
             </Container>
         );
     }
 
     return (
-        <Container css={{p: 0}}>
-            {channels.map((channel, index) => (
-                <ChannelEntry
-                    key={channel.id}
-                    channel={channel}
-                    banned={bannedChannels.has(channel.id)}
-                    muted={mutedChannels.has(channel.id)}
-                    unreadMessages={0}  // todo: return this value with the backend
-                    onClick={() => {
-                        if (bannedChannels.has(channel.id)) {
-                            return ;
-                        }
-                        setSelectedIndex(index);
-                        channelChanged(channel);
-                    }}
-                    isSelected={selectedIndex === index}
-                    user={user}
-                />
-            ))}
+        <Container css={{ p: 0 }}>
+            <ul
+                style={{
+                    listStyle: "none",
+                    padding: 0,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    height: "85vh",
+                    display: "flex",
+                    flexDirection: "column-reverse",
+                }}
+            >
+                {channels.map((channel, index) => (
+                    <li
+                        key={channel.id}
+                        style={{
+                            margin: 0,
+                        }}
+                    >
+                        <ChannelEntry
+                            key={channel.id}
+                            channel={channel}
+                            banned={bannedChannels.has(channel.id)}
+                            muted={mutedChannels.has(channel.id)}
+                            unreadMessages={0}  // todo: return this value with the backend
+                            onClick={() => {
+                                if (bannedChannels.has(channel.id)) {
+                                    return;
+                                }
+                                setSelectedIndex(index);
+                                channelChanged(channel);
+                            }}
+                            isSelected={selectedIndex === index}
+                            user={user}
+                        />
+                    </li>
+                ))}
+            </ul>
         </Container>
     );
 };
