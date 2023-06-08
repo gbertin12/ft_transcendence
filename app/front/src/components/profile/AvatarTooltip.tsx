@@ -1,12 +1,81 @@
 import { User } from "@/interfaces/user.interface";
 import { Avatar, Button, Grid, Row, Tooltip, Text } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
-import { IconUserMinus, IconUserPlus, IconSwords } from '@tabler/icons-react';
+import { IconUserMinus, IconUserPlus, IconSwords, IconX, IconUserOff } from '@tabler/icons-react';
 import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
+import { Friend, FriendRequest } from "@/interfaces/chat.interfaces";
+import { IconUserX } from "@tabler/icons-react";
+
+function handleAddFriend(id: number) {
+    axios.post('http://localhost:3000/friends/add', { to: id }, {
+        withCredentials: true,
+        validateStatus: () => true,
+    });
+}
+
+function handleRemoveFriend(id: number) {
+    axios.delete(`http://localhost:3000/friends/${id}`, {
+        withCredentials: true,
+        validateStatus: () => true,
+    });
+}
+
+function friendInteractionButton(user: User, requests: FriendRequest[], isFriend: boolean): JSX.Element {
+    // Return the remove button if the user is a friend
+    let pendingFriendRequest = requests.find((request) => request.sender_id == user.id);
+
+    if (isFriend) {
+        return (
+            <Button
+                size="sm"
+                auto
+                onPress={() => handleRemoveFriend(user.id)}
+                color="warning">
+                <IconUserMinus/>
+            </Button>
+        );
+    }
+    // Return the cancel button if the user has sent a request and is the sender
+    else if (pendingFriendRequest && pendingFriendRequest.sender_id == user.id) {
+        return (
+            <Button
+                size="sm"
+                auto
+                onPress={() => handleRemoveFriend(user.id)}
+                color="warning">
+                <IconUserX/>
+            </Button>
+        );
+    }
+    // Return a decline button if the user has sent a request and is the receiver
+    else if (pendingFriendRequest && pendingFriendRequest.receiver_id == user.id) {
+        return (
+            <Button
+                size="sm"
+                auto
+                onPress={() => handleRemoveFriend(user.id)}
+                color="error">
+                <IconUserOff />
+            </Button>
+        );
+    }
+    // Return the add button if the user is not a friend and has not sent a request
+    else {
+        return (
+            <Button
+                size="sm"
+                auto
+                onPress={() => handleAddFriend(user.id)}
+                color="success">
+                <IconUserPlus/>
+            </Button>
+        );
+    }
+}
 
 function ProfileTooltip({ user }: { user: User }) {
-    const { friends } = useChat();
+    const { friends, friendRequests } = useChat();
     const [ winrate, setWinrate ] = useState<number>(-1);
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
 
@@ -25,20 +94,6 @@ function ProfileTooltip({ user }: { user: User }) {
             setIsFriend(false);
         }
     }, [friends]);
-
-    function handleAddFriend(id: number) {
-        axios.post('http://localhost:3000/friends/add', { to: id }, {
-            withCredentials: true,
-            validateStatus: () => true,
-        });
-    }
-
-    function handleRemoveFriend(id: number) {
-        axios.delete(`http://localhost:3000/friends/${id}`, {
-            withCredentials: true,
-            validateStatus: () => true,
-        });
-    }
 
     return (
         <Grid.Container
@@ -60,25 +115,9 @@ function ProfileTooltip({ user }: { user: User }) {
             </Row>)}
 
             <Row justify="space-evenly">
-                {(isFriend) ? (<Grid>
-                    <Button
-                        size="sm"
-                        auto
-                        onPress={() => handleRemoveFriend(user.id)}
-                        color="warning">
-                        <IconUserMinus/>
-                    </Button>
-                </Grid>) :
-                (<Grid>
-                    <Button
-                        size="sm"
-                        auto
-                        onPress={() => handleAddFriend(user.id)}
-                        color="success">
-                        <IconUserPlus/>
-                    </Button>
-                </Grid>)}
-
+                <Grid>
+                    {friendInteractionButton(user, friendRequests, isFriend)}
+                </Grid>
                 <Grid>
                     <Button size="sm" color="error" auto><IconSwords/></Button>
                 </Grid>

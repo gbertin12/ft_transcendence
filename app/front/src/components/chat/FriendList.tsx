@@ -11,8 +11,10 @@ const FriendList: React.FC<any> = () => {
         <>
             <Text h3>Friends</Text>
             <hr />
-            <ChatFriendBrowser />
-            <FriendRequests />
+            <div>
+                <ChatFriendBrowser />
+                <FriendRequests />
+            </div>
         </>
     );
 };

@@ -1,4 +1,4 @@
-import { Channel, Friend } from '@/interfaces/chat.interfaces';
+import { Channel, Friend, FriendRequest } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -12,6 +12,8 @@ interface ChatContextType {
     setBannedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
     mutedChannels: Set<number>;
     setMutedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
+    friendRequests: FriendRequest[];
+    setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
 }
 
 const ChatContext = createContext<ChatContextType>({
@@ -23,6 +25,8 @@ const ChatContext = createContext<ChatContextType>({
     setBannedChannels: () => { },
     mutedChannels: new Set<number>(),
     setMutedChannels: () => { },
+    friendRequests: [],
+    setFriendRequests: () => { },
 });
 
 export const useChat = () => useContext(ChatContext);
@@ -32,6 +36,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [friends, setFriends] = useState<Friend[]>([]);
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
+    const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -92,10 +97,22 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 return ;
             }
         }
+        const fetchFriendRequests = async () => {
+            axios.get("http://localhost:3000/friends/requests", {
+                withCredentials: true,
+                validateStatus: () => true,
+            }).then((response) => {
+                if (response.status === 200) {
+                    setFriendRequests(response.data);
+                    console.log(friendRequests)
+                }
+            });
+        };
 
         fetchChannels();
         fetchFriends();
         fetchBans();
+        fetchFriendRequests();
     }, []);
 
     // Listen for new friends / channels
@@ -178,7 +195,18 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     }, [socket]);
 
     return (
-        <ChatContext.Provider value={{ channels, setChannels, friends, setFriends, bannedChannels, setBannedChannels, mutedChannels, setMutedChannels }}>
+        <ChatContext.Provider value={{
+            channels,
+            setChannels,
+            friends,
+            setFriends,
+            bannedChannels,
+            setBannedChannels,
+            mutedChannels,
+            setMutedChannels,
+            friendRequests,
+            setFriendRequests,
+        }}>
             {children}
         </ChatContext.Provider>
     );

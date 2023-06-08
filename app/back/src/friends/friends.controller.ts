@@ -68,6 +68,7 @@ export class FriendsController {
             usersClients[receiver_id].emit("friendRequestAdded", friendRequest);
         }
         if (usersClients[sender.id]) {
+            // patch the friendRequest to add the sender
             usersClients[sender.id].emit("friendRequestAdded", friendRequest);
         }
         return friendRequest;
@@ -77,6 +78,14 @@ export class FriendsController {
     @Post('/requests/:id/accept')
     async acceptFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
         let receiver_id: number = req.user['id'];
+        console.log("receiver_id", receiver_id)
+        
+        let request = await this.friendsService.getFriendRequest(params.id, receiver_id);
+
+        if (!request) {
+            throw new ForbiddenException("You can't accept a friend request that doesn't exist");
+        }
+
         const newFriend: Friend = await this.friendsService.acceptFriendRequest(receiver_id, params.id);
 
         // Sender has to receive the new user, not the new friend (because the new friend is the sender)
@@ -85,11 +94,12 @@ export class FriendsController {
             usersClients[params.id].emit("friendRequestAccepted", {
                 user: receiver
             });
+            usersClients[params.id].emit("friendRequestDeleted", request);
         }
 
         // Send message to receiver
         if (usersClients[receiver_id]) {
-            usersClients[receiver_id].emit("friendRequestDeleted", params.id);
+            usersClients[receiver_id].emit("friendRequestDeleted", request);
             usersClients[receiver_id].emit("friendRequestAccepted", newFriend);
         }
         return newFriend;
@@ -100,7 +110,13 @@ export class FriendsController {
     async deleteFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
         let receiver_id: number = req.user['id'];
         const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(receiver_id, params.id);
-        this.chatGateway.server.emit("friendRequestDeleted", deletedRequest);
+        // send friendRequestDeleted to receiver and sender
+        if (usersClients[receiver_id]) {
+            usersClients[receiver_id].emit("friendRequestDeleted", deletedRequest);
+        }
+        if (usersClients[deletedRequest.sender_id]) {
+            usersClients[deletedRequest.sender_id].emit("friendRequestDeleted", deletedRequest);
+        }
         return deletedRequest;
     }
 
@@ -109,7 +125,12 @@ export class FriendsController {
     async cancelFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
         let sender_id: number = req.user['id'];
         const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(params.id, sender_id);
-        this.chatGateway.server.emit("friendRequestDeleted", deletedRequest);
+        if (usersClients[deletedRequest.receiver_id]) {
+            usersClients[deletedRequest.receiver_id].emit("friendRequestDeleted", deletedRequest);
+        }
+        if (usersClients[sender_id]) {
+            usersClients[sender_id].emit("friendRequestDeleted", deletedRequest);
+        }
         return deletedRequest;
     }
 }
