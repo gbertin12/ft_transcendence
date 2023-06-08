@@ -20,10 +20,6 @@ import { PunishmentsService } from '../punishments/punishments.service';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
-// Map of user id to channel id
-// Used to send socket messages to all users watching a channel
-export let usersChannels: Record<number, number> = {};
-
 // Map of user id -> socket client
 export let usersClients: Record<number, Socket> = {};
 
@@ -95,8 +91,13 @@ export class ChatGateway
 
     @SubscribeMessage('join')
     async handleJoin(client: Socket, channelId: number) {
-        usersChannels[client.id] = channelId;
-        client.join(`channel-${channelId}`); // TODO: use socket.io channels
+        // leave all channels except first one
+        Object.keys(client.rooms).forEach((room) => {
+            if (room !== client.id) {
+                client.leave(room);
+            }
+        });
+        client.join(`channel-${channelId}`);
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
         let mute: Punishment | null = await this.punishmentsService.hasActiveMute(client['user'].id, channelId);
