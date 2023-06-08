@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
-import { Container, Grid, Text, Textarea } from "@nextui-org/react";
+import { Button, Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
+import { IconShieldCog } from "@tabler/icons-react";
+import PowerModal from "./powertools/PowerModal";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -31,6 +33,7 @@ function generateMutedMessage(talkPowerTimer: number): string {
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
     const [messages, setMessages] = useState<MessageData[]>([]);
+    const [powerModalOpen, setPowerModalOpen] = useState<boolean>(false);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
@@ -143,7 +146,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 <Grid xs={12}>
                     <Grid.Container>
                         <Grid css={{ w: "stretch" }}>
-                            <Text h3>{channel.name.replace(/^/, '# ')}</Text>
+                            <Container direction="row" justify="space-between" alignItems="center" display="flex">
+                                <Text h3>{channel.name.replace(/^/, '# ')}</Text>
+                                <Button auto light onPress={() => setPowerModalOpen(true)}>
+                                    <IconShieldCog />
+                                </Button>
+                            </Container>
                             <ul
                                 style={{
                                     listStyle: "none",
@@ -210,8 +218,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                         </Grid>
                     </Grid.Container>
                 </Grid>
-
             </Grid.Container>
+
+            <PowerModal
+                visible={powerModalOpen}
+                setVisible={setPowerModalOpen}
+                channel={channel}
+                user={user}
+                admins={admins}
+                ownerId={ownerId}
+            />
         </Container>
     );
 };
