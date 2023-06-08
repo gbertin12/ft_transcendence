@@ -41,7 +41,7 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
 					</Table.Body>
 					<Table.Pagination
     				    align="center"
-    				    rowsPerPage={5}/>
+    				    rowsPerPage={12}/>
     				</Table>
 				</Grid>
 			</Grid.Container>

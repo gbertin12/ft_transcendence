@@ -1,15 +1,15 @@
 import { Avatar, Badge, Grid, Text } from '@nextui-org/react';
 import React from 'react';
-import { FaComment } from 'react-icons/fa';
-import { FaEye, FaGamepad } from 'react-icons/fa';
 
 interface ChatEntryProps {
     name: string;
+    avatar: string;
     userId: number;
     isOnline: boolean;
     isTyping: boolean;
     isPlaying: boolean;
     unreadMessages?: number;
+    children?: React.ReactNode;
 }
 
 function getStatusColor(isOnline: boolean, isPlaying: boolean) {
@@ -32,7 +32,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping, isPlaying, unreadMessages }) => {
+const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, isTyping, isPlaying, unreadMessages, children }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -59,33 +59,14 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, userId, isOnline, isTyping,
                 >
                     <Avatar
                         size="lg"
+                        src={`http://localhost:3000/static/avatars/${avatar}`}
                     />
                 </Badge>
             </Grid>
             <Grid xs={8} css={{my: "auto"}}>
                 <Text span>{name}</Text>
             </Grid>
-            {/* TODO: Use tabler icons instead */}
-            {(isPlaying ? (
-                <Grid xs={1} css={{my: "auto"}}>
-                    <FaEye />
-                </Grid>
-            ) : (
-                <Grid xs={1} css={{my: "auto"}}>
-                    <FaGamepad />
-                </Grid>
-            ))}
-            <Grid xs={1} css={{my: "auto"}}>
-                <Badge
-                    content={unreadMessages > 9 ? "9+" : unreadMessages.toString()}
-                    placement="bottom-right"
-                    color="error"
-                    isInvisible={(unreadMessages === 0)}
-                >
-                    <FaComment />
-                </Badge>
-            </Grid>
-
+            {children}
         </Grid.Container >
     );
 };

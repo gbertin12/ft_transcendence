@@ -1,42 +1,60 @@
-import LayoutAuth from '@/components/layout-authenticated';
-import { useState, useEffect } from 'react';
-//import useSWR from 'swr';
+import { Grid, Loading, Row } from "@nextui-org/react";
+import PlayerInfo from "@/components/profile/PlayerInfo";
+import EditPlayerInfo from "@/components/profile/EditPlayerInfo";
+import { useUser } from "@/contexts/user.context";
+import MatchHistory from "@/components/profile/MatchHistory";
+import { useState } from "react";
+import EloChart from "@/components/profile/EloChart";
 
-/*async function fetcher(url: string): Promise<any> {
-    // credentials: 'include' <-- needed to send the cookie to the backend
-    const res = await fetch(url, { credentials: 'include' });
-    if (!res?.ok) {
-        throw 'unauthenticated';
+export default function Profile() {
+    const { user } = useUser();
+    const [ showEdit, setShowEdit ] = useState<boolean>(false);
+
+    function handleShowEdit() {
+        setShowEdit(!showEdit);
     }
-    return await res.json();
-}*/
 
-export default function Profile(): JSX.Element {
-    //const { data, error } = useSWR('http://localhost:3000/user/me', fetcher);
-    const [ profile, setProfile ] = useState<any>(null);
+    if (!user.id) return <Loading/>
 
-    useEffect(() => {
-        (async () => {
-            const res = await fetch( 'http://localhost:3000/user/me',
-                { credentials: 'include' }
-            );
-            if (res?.ok) {
-                const profile = await res.json();
-                setProfile(profile);
-            } else {
-                window.location.href = '/auth';
-            }
-        })();
-    }, []);
+    if (!showEdit) {
+        return (
+            <Grid.Container gap={2}>
+                <Row justify='center'>
+                    <Grid xs={4}>
+                        <PlayerInfo user={user} handleShowEdit={handleShowEdit}/>
+                    </Grid>
 
-    //if (error) window.location.href = '/auth';
-    if (!profile) return <div>loading...</div>
+                    <Grid xs={4}>
+                        <EloChart user={user}/>
+                    </Grid>
+                </Row>
 
-    return (
-        <LayoutAuth>
-            <h2>User Profile</h2>
-            <img src={`http://localhost:3000/static/avatars/${profile.avatar}`}/>
-            <pre>{JSON.stringify(profile, null, 2)}</pre>
-        </LayoutAuth>
-    )
+                <Row justify='center'>
+                    <Grid xs={8}>
+                        <MatchHistory user={user}/>
+                    </Grid>
+                </Row>
+            </Grid.Container>
+        );
+    } else {
+        return (
+            <Grid.Container gap={2}>
+                <Row justify='center'>
+                    <Grid xs={4}>
+                        <EditPlayerInfo user={user} handleShowEdit={handleShowEdit}/>
+                    </Grid>
+
+                    <Grid xs={4}>
+                        <EloChart user={user}/>
+                    </Grid>
+                </Row>
+
+                <Row justify='center'>
+                    <Grid xs={8}>
+                        <MatchHistory user={user}/>
+                    </Grid>
+                </Row>
+            </Grid.Container>
+        );
+    }
 }

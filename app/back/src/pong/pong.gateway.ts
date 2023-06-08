@@ -6,7 +6,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
@@ -14,8 +13,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
 
-@Injectable()
-@WebSocketGateway(8001, { cors: { origin: process.env.FRONT_URL, credentials: true }})
+@WebSocketGateway(8001, {
+    cors: {
+        origin: process.env.FRONT_URL,
+        credentials: true,
+    },
+})
 export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private jwtService: JwtService,
@@ -47,6 +50,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
             const player: PlayerInterface = {
                 id: client.id,
+                userId: user.id,
                 name: user.name,
                 state: 0,
                 y: 0,

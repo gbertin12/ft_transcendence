@@ -91,10 +91,27 @@ export class AuthController {
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Get('2fa/activate')
-    async setOTP(@Req() req: Request) {
+    @Get('2fa/enable')
+    async setOTP(
+        @Req() req: Request,
+        @Res() res: Response
+    ) {
         const uri = await this.authService.setOTP(req.user['id']);
-        return uri;
+        //const token = await this.authService.generateJWT(req.user['id'], true);
+        //res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
+        res.send(uri);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('2fa/disable')
+    async unsetOTP(
+        @Req() req: Request,
+        @Res() res: Response
+    ) {
+        await this.authService.unsetOTP(req.user['id']);
+        const token = await this.authService.generateJWT(req.user['id']);
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
+        res.end();
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -102,16 +119,15 @@ export class AuthController {
     async verifyOTP(
         @Req() req: Request,
         @Res() res: Response,
-        @Body('otp') otp: string,
+        @Body('code') code: string,
     ) {
-        if (!await this.authService.verifyOTP(req.user['id'], otp)) {
+        if (!await this.authService.verifyOTP(req.user['id'], code)) {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.end();
     }
-
     @Get('dummy')
     async dummy(
         @Res() res: Response,
