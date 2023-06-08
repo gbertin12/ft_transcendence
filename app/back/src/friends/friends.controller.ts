@@ -133,4 +133,18 @@ export class FriendsController {
         }
         return deletedRequest;
     }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Delete('/:id')
+    async deleteFriend(@Req() req, @Param() params: FriendReqIdDto) {
+        if (!await this.friendsService.deleteFriend(req.user['id'], params.id)) {
+            throw new ForbiddenException("You can't delete a friend that doesn't exist");
+        }
+        if (usersClients[req.user['id']]) {
+            usersClients[req.user['id']].emit("deleteFriend", params.id);
+        }
+        if (usersClients[params.id]) {
+            usersClients[params.id].emit("deleteFriend", req.user['id']);
+        }
+    }
 }

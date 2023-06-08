@@ -263,4 +263,23 @@ export class FriendsService {
             },
         });
     }
+
+    async deleteFriend(user_id: number, friend_id: number): Promise<boolean> {
+        return this.dbService.friend.deleteMany({
+            where: {
+                OR: [
+                    {
+                        user_id: user_id,
+                        friend_id: friend_id,
+                    },
+                    {
+                        user_id: friend_id,
+                        friend_id: user_id,
+                    },
+                ],
+            },
+        }).then((res) => {
+            return res.count > 0;
+        });
+    }
 }
