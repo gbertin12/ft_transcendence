@@ -34,7 +34,7 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                     overflowX: "hidden",
                     height: "85vh",
                     display: "flex",
-                    flexDirection: "column-reverse",
+                    flexDirection: "column",
                 }}
             >
                 {channels.map((channel, index) => (

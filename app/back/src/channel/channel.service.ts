@@ -38,6 +38,9 @@ export class ChannelService {
                         }
                     ]
                 },
+                orderBy: {
+                    creation_date: 'asc',
+                }
             }
         );
         channels.forEach((channel) => { // remove the (hashed) password from the response
