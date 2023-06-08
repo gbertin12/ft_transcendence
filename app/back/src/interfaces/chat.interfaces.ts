@@ -31,11 +31,10 @@ export interface User {
 }
 
 export interface FriendRequest {
-	request_id: number;
-	sender_id: number;
 	receiver_id: number;
-	timestamp: Date;
+	requested_at: Date;
 	sender: User;
+	sender_id: number;
 }
 
 export interface Friend {

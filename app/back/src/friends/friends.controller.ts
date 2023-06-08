@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { Friend, FriendRequest, User } from '@prisma/client';
 import { IsNumber, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
-import ChatGateway from '../chat/chat.gateway';
+import { ChatGateway, usersClients } from '../chat/chat.gateway';
 
 class FriendRequestDto {
 	@Type(() => Number)
@@ -25,6 +25,7 @@ class FriendReqIdDto {
 export class FriendsController {
 	constructor(
 		private readonly friendsService: FriendsService,
+		private readonly userService: UserService,
 		private chatGateway: ChatGateway,
 	) { }
 
@@ -56,7 +57,10 @@ export class FriendsController {
 		}
 		let friendRequest: any = await this.friendsService.addFriend(sender, receiver_id);
 		friendRequest.sender = sender;
-		this.chatGateway.server.emit("friendRequestAdded", friendRequest);
+		// Send friendRequestAdded to receiver
+		if (usersClients[receiver_id]) {
+			usersClients[receiver_id].emit("friendRequestAdded", friendRequest);
+		}
 		return friendRequest;
 	}
 
@@ -65,9 +69,20 @@ export class FriendsController {
 	async acceptFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
 		let receiver_id: number = req.user['id'];
 		const newFriend: Friend = await this.friendsService.acceptFriendRequest(receiver_id, params.id);
-		const removedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(receiver_id, params.id);
-		this.chatGateway.server.emit("friendRequestAccepted", newFriend);
-		this.chatGateway.server.emit("friendRequestDeleted", removedRequest.request_id);
+
+		// Sender has to receive the new user, not the new friend (because the new friend is the sender)
+		if (usersClients[params.id]) {
+			let receiver = await this.userService.getUserById(receiver_id);
+			usersClients[params.id].emit("friendRequestAccepted", {
+				user: receiver
+			});
+		}
+
+		// Send message to receiver
+		if (usersClients[receiver_id]) {
+			usersClients[receiver_id].emit("friendRequestDeleted", params.id);
+			usersClients[receiver_id].emit("friendRequestAccepted", newFriend);
+		}
 		return newFriend;
 	}
 
@@ -76,7 +91,16 @@ export class FriendsController {
 	async deleteFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
 		let receiver_id: number = req.user['id'];
 		const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(receiver_id, params.id);
-		this.chatGateway.server.emit("friendRequestDeleted", deletedRequest.request_id);
+		this.chatGateway.server.emit("friendRequestDeleted", deletedRequest);
+		return deletedRequest;
+	}
+
+	@UseGuards(AuthGuard('jwt-2fa'))
+	@Delete('/requests/cancel/:id')
+	async cancelFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
+		let sender_id: number = req.user['id'];
+		const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(params.id, sender_id);
+		this.chatGateway.server.emit("friendRequestDeleted", deletedRequest);
 		return deletedRequest;
 	}
 }

@@ -84,48 +84,52 @@ export class FriendsService {
         });
     }
 
-    async addFriend(sender: User, userId: number): Promise<FriendRequest> {
-        // TODO: consider upsert to avoid duplicate requests
-        return this.dbService.friendRequest.create({
-            data: {
+    async addFriend(sender: User, user_id: number): Promise<FriendRequest> {
+        return this.dbService.friendRequest.upsert({
+            where: {
+                sender_id_receiver_id: {
+                    sender_id: sender.id,
+                    receiver_id: user_id,
+                }
+            },
+            update: {},
+            create: {
                 sender_id: sender.id,
-                receiver_id: userId,
+                receiver_id: user_id,
             },
         });
     }
 
-    async deleteFriendRequest(receiver_id: number, requestId: number): Promise<FriendRequest> {
+    async deleteFriendRequest(receiver_id: number, sender_id: number): Promise<FriendRequest> {
         // Check if the request belongs to the user
-        const request = await this.dbService.friendRequest.findUnique({
-            where: {
-                request_id: requestId,
-            }
-        });
-        if (request.receiver_id !== receiver_id) {
-            throw new Error('Invalid request');
-        }
         return this.dbService.friendRequest.delete({
             where: {
-                request_id: requestId,
+                sender_id_receiver_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                },
             },
         });
     }
 
-    async acceptFriendRequest(receiver_id: number, requestId: number): Promise<any> {
+    async acceptFriendRequest(receiver_id: number, sender_id: number): Promise<any> {
         // Check if the request belongs to the user
-        const request = await this.dbService.friendRequest.findUnique({
+        const deletedRequest = await this.dbService.friendRequest.delete({
             where: {
-                request_id: requestId,
-            }
+                sender_id_receiver_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                },
+            },
         });
-        if (request.receiver_id !== receiver_id) {
-            throw new Error('Request does not belong to the user');
-        } 
+        if (!deletedRequest) {
+            throw new Error('Request does not exist');
+        }
         // Create a new friend
         return this.dbService.friend.create({
             data: {
                 user_id: receiver_id,
-                friend_id: request.sender_id,
+                friend_id: sender_id,
             },
             select: {
                 user: true,

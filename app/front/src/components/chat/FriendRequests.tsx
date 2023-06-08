@@ -28,7 +28,7 @@ const FriendRequests: React.FC = () => {
     React.useEffect(() => {
         if (!socket) { return; }
         socket.on("friendRequestDeleted", (requestId: number) => {
-            setFriendRequests((requests) => requests.filter((request) => request.request_id !== requestId));
+            setFriendRequests((requests) => requests.filter((request) => request.sender_id !== requestId));
         });
         socket.on("friendRequestAdded", (request: FriendRequest) => {
             setFriendRequests((requests) => [...requests, request]);
@@ -57,14 +57,14 @@ const FriendRequests: React.FC = () => {
                     isTyping={false}
                     isPlaying={false}
                     unreadMessages={0}
-                    key={friendRequest.request_id}
+                    key={friendRequest.sender_id}
                 >
                     <Grid xs={1}>
                         <IconX onClick={() => {
-                            axios.delete(`http://localhost:3000/friends/requests/${friendRequest.request_id}`, {
+                            axios.delete(`http://localhost:3000/friends/requests/${friendRequest.sender_id}`, {
                                 withCredentials: true,
                             }).then(() => {
-                                setFriendRequests((requests) => requests.filter((request) => request.request_id !== friendRequest.request_id));
+                                setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));
                             }).catch((error) => {
                                 throw Error("UNEXPECTED ERROR: " + error);
                             });
@@ -72,10 +72,10 @@ const FriendRequests: React.FC = () => {
                     </Grid>
                     <Grid xs={1}>
                         <IconCheck onClick={() => {
-                            axios.post(`http://localhost:3000/friends/requests/${friendRequest.request_id}/accept`, {}, {
+                            axios.post(`http://localhost:3000/friends/requests/${friendRequest.sender_id}/accept`, {}, {
                                 withCredentials: true,
                             }).then(() => {
-                                setFriendRequests((requests) => requests.filter((request) => request.request_id !== friendRequest.request_id));
+                                setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));
                             }).catch((error) => {
                                 throw Error("UNEXPECTED ERROR: " + error);
                             });
