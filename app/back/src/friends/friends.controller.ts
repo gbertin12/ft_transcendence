@@ -1,7 +1,6 @@
 import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UserService } from '../user/user.service';
 import { Friend, FriendRequest, User } from '@prisma/client';
 import { IsNumber, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';

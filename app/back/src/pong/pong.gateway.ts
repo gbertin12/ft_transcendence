@@ -6,7 +6,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
@@ -14,7 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
 
-@WebSocketGateway(8002, {
+@WebSocketGateway(8001, {
     cors: {
         origin: process.env.FRONT_URL,
         credentials: true,

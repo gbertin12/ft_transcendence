@@ -1,10 +1,11 @@
 import { Grid, Loading, Row } from "@nextui-org/react";
 import PlayerInfo from "@/components/profile/PlayerInfo";
-import PlayerStats from "@/components/profile/PlayerStats";
 import MatchHistory from "@/components/profile/MatchHistory";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { User } from "@/interfaces/user.interface";
+import EloChart from "@/components/profile/EloChart";
+import AvatarTooltip from "@/components/profile/AvatarTooltip";
 
 function handleShowEdit() {}
 
@@ -23,6 +24,7 @@ export default function Profile() {
                     setUser(data);
                 } else {
                     console.log("404 error");
+                    router.push('/');
                 }
             })();
         }
@@ -36,6 +38,14 @@ export default function Profile() {
                 <Grid xs={4}>
                     <PlayerInfo user={user} handleShowEdit={handleShowEdit}/>
                 </Grid>
+
+                <Grid xs={4}>
+                    <EloChart user={user}/>
+                </Grid>
+            </Row>
+
+            <Row justify='center'>
+                <AvatarTooltip user={user} placement="top"/>
             </Row>
 
             <Row justify='center'>

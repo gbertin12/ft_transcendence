@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/fr';
 import { sha512 } from 'js-sha512';
 
 const prisma = new PrismaClient()
@@ -44,13 +44,13 @@ async function createFakeMessage(size: number, author_id: number, channel_id: nu
 }
 
 async function seedUsers() {
-    const user_count: number = 75;
+    const user_count: number = 10;
     const prefix = "batiste_";
 
     let users: Prisma.UserCreateManyInput[] = [];
     for (let i = 0; i < user_count; i++) {
         users.push({
-            name: prefix + faker.word.adjective() + "_" + faker.word.noun(),
+            name: prefix + faker.word.noun() + "_" + faker.word.adjective(),
             password: sha512(faker.internet.password()),
             elo: Math.floor(Math.random() * 1500) + 500,
             wins: 0,
@@ -62,32 +62,77 @@ async function seedUsers() {
     });
 }
 
+function calcElo(eloWinner: number, eloLooser: number, scoreWinner: number, scoreLooser: number) {
+    const p1 = eloWinner / (eloWinner + eloLooser);
+    const p2 = eloLooser / (eloWinner + eloLooser);
+    const k = 42 * (scoreWinner - scoreLooser);
+
+    eloWinner = eloWinner + k * (1 - p1);
+    eloLooser = eloLooser + k * (0 - p2);
+    
+    // prevent elo from reaching 0 or less
+    if (eloLooser <= 0) eloLooser = 1;
+
+
+    return [ Math.round(eloWinner), Math.round(eloLooser) ];
+}
+
 async function seedMatchHistory() {
     const users = await prisma.user.findMany();
-    const game_count = 100;
+    const game_count = 30;
+    const startDate = new Date();
 
+    startDate.setMonth(startDate.getMonth() - 1);
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+    startDate.setMilliseconds(0);
     let games: Prisma.MatchHistoryCreateManyInput[] = [];
 
+    let total: number = 0;
+
+    // iterate once to count total number of games
     for (let i = 0; i < users.length; i++) {
         for (let j = 0; j < users.length; j++) {
             for (let k = 0; k < game_count; k++) {
                 if (i === j) continue; // skip self fights
-                const winner = users[i];
-                const looser = users[j];
+                total++;
+            }
+        }
+    }
+
+    for (let k = 0; k < game_count; k++) {
+        for (let j = 0; j < users.length; j++) {
+            for (let i = 0; i < users.length; i++) {
+                if (i === j) continue; // skip self fights
+                const winner = Math.random() < 0.5 ? users[i] : users[j];
+                const looser = winner === users[i] ? users[j] : users[i];
                 const winnerScore = 10;
                 const looserScore = Math.floor(Math.random() * 10);
-                const winnerElo = Math.floor(Math.random() * 1500) + 500;
-                const looserElo = Math.floor(Math.random() * 1500) + 500;
+                const newElo = calcElo(winner.elo, looser.elo, winnerScore, looserScore);
+                const winnerElo = newElo[0];
+                const looserElo = newElo[1];
                 const eloDiff = Math.floor(Math.random() * 25) + 5;
+                const currentDate = new Date();
+                currentDate.setDate(startDate.getDate() - 30 + k);
+                currentDate.setHours(0);
+                currentDate.setSeconds(0);
+                currentDate.setMilliseconds(0);
+                console.log(currentDate);
                 games.push({
                     winnerId: winner.id,
                     winnerScore: winnerScore,
                     winnerElo: winnerElo,
                     looserId: looser.id,
+                    date: currentDate,
                     looserScore: looserScore,
                     looserElo: looserElo,
                     eloDiff: eloDiff
                 });
+            }
+            total -= games.length;
+            if (total % 10000 === 0) {
+                console.log(total + " games left to generate");
             }
             await prisma.matchHistory.createMany({
                 data: games

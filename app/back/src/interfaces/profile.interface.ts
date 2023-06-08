@@ -6,6 +6,8 @@ export interface MatchHistoryRow {
     opponentName:   string;
     avatar:         string;
     elo:            number;
+    eloOpponent:    number;
+    date:           string;
 }
 
 export interface GameData {
@@ -15,7 +17,8 @@ export interface GameData {
     winnerScore:    number;
     looserScore:    number;
     date:           string;
-    elo:            number;
+    winnerElo:      number;
+    looserElo:      number;
     opponent:       Opponent;
 }
 
@@ -23,4 +26,11 @@ export interface Opponent {
     name:       string;
     avatar:     string;
     elo:        number;
+}
+
+export interface Elo {
+    general:    number;
+    player:     number;
+    date:       string;
+    amt:        number;
 }

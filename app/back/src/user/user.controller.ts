@@ -8,6 +8,7 @@ import {
     Param,
     ParseFilePipe,
     Post,
+    Query,
     Req,
     UploadedFile,
     UseGuards,
@@ -18,6 +19,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
+import { Type } from 'class-transformer';
+import { IsDate, IsISO8601 } from 'class-validator';
+
+class DateDto {
+    @Type(() => () => new Date())
+    @IsISO8601()
+    date: Date;
+}
 
 @Controller('user')
 export class UserController {
@@ -78,5 +87,19 @@ export class UserController {
     @Get('history/:username')
     async getMatchHistory(@Param('username') username: string) {
         return await this.userService.getMatchHistoryByName(username);
+    }
+
+    @Get('elo/general')
+    async getEloDayGeneral(@Query() dto: DateDto) {
+        return await this.userService.getAllPlayersEloByDate(dto.date);
+    }
+
+    @Get('elo/day/:username')
+    async getEloDay(
+        @Param('username') username: string,
+        @Query() dto: DateDto,
+    ) {
+        //console.log(req.user);
+        return await this.userService.getPlayerEloByDate(username, dto.date);
     }
 }

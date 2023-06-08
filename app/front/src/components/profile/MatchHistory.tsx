@@ -3,6 +3,19 @@ import { useEffect, useState } from "react";
 import  { GameData, MatchHistoryRow }  from "@/interfaces/profile.interface"
 import { User } from "@/interfaces/user.interface";
 
+function formatDate(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
+        return `Aujourd'hui à ${date.getHours()}:${date.getMinutes()}`;
+    }
+    if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear()) {
+        return `Hier à ${date.getHours()}:${date.getMinutes()}`;
+    }
+    return `${date.toLocaleDateString()} à ${date.getHours()}:${date.getMinutes()}`;
+}
+
 function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
     let row: MatchHistoryRow = {
         id,
@@ -12,14 +25,20 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
         opponentName: "",
         avatar: "",
         elo: 0,
+        eloOpponent: 0,
+        date: formatDate(new Date(game.date)),
     };
 
     if (victory) {
         row.opponentName = game.looser.name;
         row.avatar = game.looser.avatar;
+        row.elo = game.winnerElo;
+        row.eloOpponent = game.looserElo;
     } else {
         row.opponentName = game.winner.name;
         row.avatar = game.winner.avatar;
+        row.elo = game.looserElo;
+        row.eloOpponent = game.winnerElo;
     }
 
     return row;
@@ -27,6 +46,7 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
 
 function setDataRows(gamesWon: GameData[], gamesLost: GameData[]) {
     let rows: MatchHistoryRow[] = [];
+
 
     let w = 0, l = 0;
     let id = 0;
@@ -52,7 +72,6 @@ export default function MatchHistory({ user }: { user: User }) {
         (async () => {
             const res = await fetch(`http://localhost:3000/user/history/${user.name}`);
             const data = await res.json();
-            console.log(data);
             setRows(setDataRows(data.gamesWon, data.gamesLost));
         })();
     }, []);
@@ -77,6 +96,7 @@ export default function MatchHistory({ user }: { user: User }) {
                         <Table.Column css={{ ta: "center" }} key={6}>ELO</Table.Column>
                         <Table.Column css={{ ta: "center" }} key={7}>USERNAME</Table.Column>
                         <Table.Column css={{ ta: "center" }} key={8}>AVATAR</Table.Column>
+                        <Table.Column css={{ ta: "center" }} key={9}>DATE</Table.Column>
                     </Table.Header>
                     <Table.Body items={rows}>
                         {(item) => (
@@ -91,9 +111,9 @@ export default function MatchHistory({ user }: { user: User }) {
                                     </Row>
                                 </Table.Cell>
                                 <Table.Cell>{user.name}</Table.Cell>
-                                <Table.Cell>{user.elo}</Table.Cell>
-                                <Table.Cell>{(item.victory) ? item.winnerScore : item.looserScore} - {(item.victory) ? item.looserScore : item.winnerScore}</Table.Cell>
                                 <Table.Cell>{item.elo}</Table.Cell>
+                                <Table.Cell>{(item.victory) ? item.winnerScore : item.looserScore} - {(item.victory) ? item.looserScore : item.winnerScore}</Table.Cell>
+                                <Table.Cell>{item.eloOpponent}</Table.Cell>
                                 <Table.Cell>{item.opponentName}</Table.Cell>
                                 <Table.Cell>
                                     <Row justify="center" align="center">
@@ -103,6 +123,7 @@ export default function MatchHistory({ user }: { user: User }) {
                                             src={`http://localhost:3000/static/avatars/${item.avatar}`} />
                                     </Row>
                                 </Table.Cell>
+                                <Table.Cell>{item.date}</Table.Cell>
                             </Table.Row>
                         )}
                     </Table.Body>

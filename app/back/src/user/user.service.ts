@@ -209,9 +209,11 @@ export class UserService {
                             select: {
                                 name: true,
                                 avatar: true,
-                                elo: true,
                             }
                         },
+                    },
+                    orderBy: {
+                        date: 'desc',
                     },
                 },
                 gamesLost: {
@@ -220,12 +222,14 @@ export class UserService {
                             select: {
                                 name: true,
                                 avatar: true,
-                                elo: true,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
+                    orderBy: {
+                        date: 'desc',
+                    },
                 }
-            }
+            },
         });
 
         // ugly workaround
@@ -233,6 +237,87 @@ export class UserService {
         delete playerMatchHistory.otpSecret;
         delete playerMatchHistory.otp;
         return playerMatchHistory;
+    }
+
+    async getAllPlayersEloByDate(date: Date) {
+        const ret = await this.db.user.findMany({
+            include: {
+                gamesWon: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                },
+                gamesLost: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                }
+            },
+        });
+
+        let eloAll = 0;
+        for (let i = 0; i < ret.length; i++) {
+            if (!ret[i].gamesWon.length && !ret[i].gamesLost.length) {
+                eloAll += 1000;
+            } else if (ret[i].gamesWon.length && !ret[i].gamesLost.length) {
+                eloAll += ret[i].gamesWon[0].winnerElo;
+            } else if (ret[i].gamesLost.length && !ret[i].gamesWon.length) {
+                eloAll += ret[i].gamesLost[0].looserElo;
+            } else if (ret[i].gamesWon[0].id > ret[i].gamesLost[0].id) {
+                eloAll += ret[i].gamesWon[0].winnerElo;
+            } else {
+                eloAll += ret[i].gamesLost[0].looserElo;
+            }
+        }
+
+        return Math.round(eloAll / ret.length);
+    }
+
+    async getPlayerEloByDate(name: string, date: Date) {
+        const ret = await this.db.user.findUnique({
+            where: { name },
+            include: {
+                gamesWon: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                },
+                gamesLost: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                }
+            },
+        });
+
+        console.log(ret);
+        if (!ret.gamesWon.length && !ret.gamesLost.length) {
+            return 1000;
+        } else if (ret.gamesWon.length && !ret.gamesLost.length) {
+            return ret.gamesWon[0].winnerElo;
+        } else if (ret.gamesLost.length && !ret.gamesWon.length) {
+            return ret.gamesLost[0].looserElo;
+        } else if (ret.gamesWon[0].id > ret.gamesLost[0].id) {
+            return ret.gamesWon[0].winnerElo;
+        } else {
+            return ret.gamesLost[0].looserElo;
+        }
     }
 
     async addGame(

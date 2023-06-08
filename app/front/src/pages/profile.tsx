@@ -4,6 +4,7 @@ import EditPlayerInfo from "@/components/profile/EditPlayerInfo";
 import { useUser } from "@/contexts/user.context";
 import MatchHistory from "@/components/profile/MatchHistory";
 import { useState } from "react";
+import EloChart from "@/components/profile/EloChart";
 
 export default function Profile() {
     const { user } = useUser();
@@ -22,6 +23,10 @@ export default function Profile() {
                     <Grid xs={4}>
                         <PlayerInfo user={user} handleShowEdit={handleShowEdit}/>
                     </Grid>
+
+                    <Grid xs={4}>
+                        <EloChart user={user}/>
+                    </Grid>
                 </Row>
 
                 <Row justify='center'>
@@ -37,6 +42,10 @@ export default function Profile() {
                 <Row justify='center'>
                     <Grid xs={4}>
                         <EditPlayerInfo user={user} handleShowEdit={handleShowEdit}/>
+                    </Grid>
+
+                    <Grid xs={4}>
+                        <EloChart user={user}/>
                     </Grid>
                 </Row>
 
