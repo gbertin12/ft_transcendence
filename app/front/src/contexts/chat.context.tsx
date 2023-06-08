@@ -1,13 +1,17 @@
 import { Channel, Friend } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSocket } from './socket.context';
 import { useUser } from './user.context';
+import axios from 'axios';
 
 interface ChatContextType {
     channels: Channel[];
     setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
     friends: Friend[];
     setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
+    bannedChannels: Set<number>;
+    setBannedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
+    mutedChannels: Set<number>;
+    setMutedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const ChatContext = createContext<ChatContextType>({
@@ -15,6 +19,10 @@ const ChatContext = createContext<ChatContextType>({
     setChannels: () => { },
     friends: [],
     setFriends: () => { },
+    bannedChannels: new Set<number>(),
+    setBannedChannels: () => { },
+    mutedChannels: new Set<number>(),
+    setMutedChannels: () => { },
 });
 
 export const useChat = () => useContext(ChatContext);
@@ -22,44 +30,72 @@ export const useChat = () => useContext(ChatContext);
 export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
+    const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
+    const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
 
     useEffect(() => {
         const fetchChannels = async () => {
-            const res = await fetch("http://localhost:3000/channel/all", { credentials: "include" });
-            if (res.status === 401) {
-                return ;
-            }
-            const data = await res.json();
-            setChannels(data);
+            axios.get("http://localhost:3000/channel/all", 
+            {
+				withCredentials: true,
+				validateStatus: () => true,
+			})
+            .then((res) => {
+                if (res.status !== 200) return ;
+                setChannels(res.data);
+            })
         };
         const fetchFriends = async () => {
-            const res = await fetch("http://localhost:3000/friends/", { credentials: 'include' });
-            if (res.status === 401) {
+            axios.get("http://localhost:3000/friends/", { withCredentials: true })
+            .then((res) => {
+                if (res.status !== 200) return ;
+                if (Array.isArray(res.data)) {
+                    const friends: Friend[] = res.data.map((friend) => {
+                        return {
+                            id: friend.user.id,
+                            name: friend.user.name,
+                            avatar: friend.user.avatar,
+                            userId: friend.user.id,
+                            isOnline: false, // TODO: implement
+                            isTyping: false,
+                            isPlaying: false,
+                            unreadMessages: 0,
+                        };
+                    });
+                    setFriends(friends);
+                    socket.emit("updateStatus", {"status": "online"});
+                }
+            }).catch((err) => {
+                return ;
+            });
+        };
+        const fetchBans = async () => {
+            try {
+                axios.get("http://localhost:3000/punishments/active", 
+                {
+                    withCredentials: true,
+                    validateStatus: () => true,
+                })
+                .then((res) => {
+                    if (res.status === 200) {
+                        // TODO: handle durations too
+                        if (res.data.hasOwnProperty("banned")) {
+                            setBannedChannels(new Set<number>(res.data.banned));
+                        }
+                        if (res.data.hasOwnProperty("muted")) {
+                            setMutedChannels(new Set<number>(res.data.muted));
+                        }
+                    }
+                });
+            }
+            catch (err) {
                 return ;
             }
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                const friends: Friend[] = data.map((friend) => {
-                    return {
-                        id: friend.user.id,
-                        name: friend.user.name,
-                        avatar: friend.user.avatar,
-                        userId: friend.user.id,
-                        isOnline: false, // TODO: implement
-                        isTyping: false,
-                        isPlaying: false,
-                        unreadMessages: 0,
-                    };
-                });
-                setFriends(friends);
-                socket.emit("updateStatus", {"status": "online"});
-            } else {
-                console.error("Error fetching friends: data is not an array");
-            }
-        };
+        }
 
         fetchChannels();
         fetchFriends();
+        fetchBans();
     }, []);
 
     // Listen for new friends / channels
@@ -78,7 +114,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             socket.on('newFriend', (payload: Friend) => {
                 setFriends((friends) => [...friends, payload]);
             });
-            socket.on('deleteFriend', (payload: number) => { // XXX: Not implemented on the server side
+            socket.on('deleteFriend', (payload: number) => { // TODO: Implement on the server side
                 setFriends((friends) => friends.filter((f) => f.id !== payload));
             });
             socket.on("friendRequestAccepted", (payload: any) => {
@@ -110,6 +146,20 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             socket.on("offline", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: false, isTyping: false, isPlaying: false } : f));
             });
+            socket.on("unbanned", (channel_id: number) => { // TODO: Implement on the server side
+                setBannedChannels((bannedChannels) => {
+                    const newBannedChannels = new Set<number>(bannedChannels);
+                    newBannedChannels.delete(channel_id);
+                    return newBannedChannels;
+                });
+            });
+            socket.on("unmuted", (channel_id: number) => { // TODO: Implement on the server side
+                setMutedChannels((mutedChannels) => {
+                    const newMutedChannels = new Set<number>(mutedChannels);
+                    newMutedChannels.delete(channel_id);
+                    return newMutedChannels;
+                });
+            });
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
@@ -122,12 +172,13 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("playing");
                 socket.off("onlineAnswer");
                 socket.off("offline");
+                socket.off("unbanned");
             }
         }
     }, [socket]);
 
     return (
-        <ChatContext.Provider value={{ channels, setChannels, friends, setFriends }}>
+        <ChatContext.Provider value={{ channels, setChannels, friends, setFriends, bannedChannels, setBannedChannels, mutedChannels, setMutedChannels }}>
             {children}
         </ChatContext.Provider>
     );

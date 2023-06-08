@@ -4,6 +4,8 @@ import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
+import axios from "axios";
+import { useChat } from "@/contexts/chat.context";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -27,23 +29,32 @@ function generateMutedMessage(talkPowerTimer: number): string {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
-    const [mutePunishment, setMutePunishment] = useState<MutePunishment>({ active: false, duration: -1, interval: null });
+    const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
     const [messages, setMessages] = useState<MessageData[]>([]);
-    const [hasAccess, setHasAccess] = useState<boolean>(true);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
+    const { bannedChannels, setBannedChannels, mutedChannels, setMutedChannels } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
-        const url = `http://localhost:3000/channel/${channel.id}/messages`;
-        const res = await fetch(url, { credentials: "include" });
-        // if we have a 403, it means we are not allowed to access this channel (password protected)
-        if (res.status === 403) {
-            setHasAccess(false);
-            return [];
-        }
-        setHasAccess(true);
-        const data = await res.json();
+        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
+            {
+                withCredentials: true,
+                validateStatus: () => true,
+            }
+        ).then((res) => {
+            if (res.status === 401) {
+                setMissingPermissions(true);
+                return [];
+            } else if (res.status === 403) {
+                return [];
+            } else {
+                setMissingPermissions(false);
+            }
+            return res.data;
+        }).catch((err) => {
+            throw Error("UNEXPECTED ERROR: " + err);
+        })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
         });
@@ -70,31 +81,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             // TODO: handle the punishment
             switch (punishment.punishment_type) {
                 case "muted":
-                    // ugly af but it's worth the effort
-                    // XXX: Next strict mode decrements the timer twice due to the double render, not an issue
-                    setMutePunishment({
-                        active: true,
-                        duration: punishment.duration || -1,
-                        interval: punishment.duration || -1 > 1 ? setInterval(() => {
-                            setMutePunishment((punishment) => {
-                                if (punishment.duration > 0) {
-                                    return {
-                                        ...punishment,
-                                        duration: punishment.duration - 1,
-                                    }
-                                } else {
-                                    clearInterval(punishment.interval as NodeJS.Timeout);
-                                    return {
-                                        active: false,
-                                        duration: -1,
-                                        interval: null,
-                                    }
-                                }
-                            });
-                        }, 1000) : null,
+                    setMutedChannels((mutedChannels) => {
+                        return new Set(mutedChannels).add(punishment.channel_id);
                     });
                     break;
                 case "banned":
+                    setBannedChannels((bannedChannels) => {
+                        return new Set(bannedChannels).add(punishment.channel_id);
+                    });
                     break;
                 case "kicked":
                     break;
@@ -112,28 +106,33 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, [socket, channel]);
 
     const handleNewMessage = useCallback((message: string) => {
-        // POST request to send the message to the server
-        fetch(`http://localhost:3000/channel/${channel.id}/message`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ content: message }),
-        })
+        try {
+            axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
+        } catch (err) {
+            throw Error("UNEXPECTED ERROR: " + err);
+        }
     }, [channel]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
 
+    // The user is banned
+    if (bannedChannels.has(channel.id)) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-3xl font-bold">You are banned from this channel</h1>
+            </div>
+        )
+    }
+
     // The user doesn't have access to this password protected channel, we need to ask for a password
-    if (!hasAccess && channel.password === "") {
+    if (missingPermissions && channel.password === "") {
         return (
             <ChannelPasswordPrompt channel={channel} />
         );
-    } else if (!hasAccess && !channel.password) { // The user doesn't have access to this channel and it's not password protected
+    } else if (missingPermissions && !channel.password) { // The user doesn't have access to this channel and it's not password protected
         return ( // Throw a fake 404 message because it is a hidden channel
             <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-3xl font-bold">Salon inconnu</h1>
+                <h1 className="text-3xl font-bold">Unknown room</h1>
             </div>
         )
     }
@@ -178,19 +177,19 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                             </ul>
                         </Grid>
                         <Grid xs={12}>
-                            {hasAccess && (
+                            {(!missingPermissions && !bannedChannels.has(channel.id)) && (
                                 <Textarea
                                     fullWidth
-                                    disabled={mutePunishment.active}
+                                    disabled={mutedChannels.has(channel.id)}
                                     placeholder={
-                                        !mutePunishment.active ? `Send a message to #${channel.name}`
+                                        !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
                                         :
-                                        generateMutedMessage(mutePunishment.duration)
+                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     aria-label={
-                                        !mutePunishment.active ? `Send a message to the channel : ${channel.name}`
+                                        !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
                                         :
-                                        generateMutedMessage(mutePunishment.duration)
+                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     minLength={1}
                                     maxLength={2000}

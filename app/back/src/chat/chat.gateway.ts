@@ -16,12 +16,9 @@ import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
 import { Punishment } from '@prisma/client';
+import { PunishmentsService } from '../punishments/punishments.service';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
-
-// Map of user id to channel id
-// Used to send socket messages to all users watching a channel
-export let usersChannels: Record<number, number> = {};
 
 // Map of user id -> socket client
 export let usersClients: Record<number, Socket> = {};
@@ -39,6 +36,7 @@ export class ChatGateway
         private userService: UserService,
         private friendService: FriendsService,
         private channelService: ChannelService,
+        private punishmentsService: PunishmentsService,
     ) { }
 
     @WebSocketServer()
@@ -93,16 +91,21 @@ export class ChatGateway
 
     @SubscribeMessage('join')
     async handleJoin(client: Socket, channelId: number) {
-        usersChannels[client.id] = channelId;
-        client.join(`channel-${channelId}`); // TODO: use socket.io channels
+        // leave all channels except first one
+        Object.keys(client.rooms).forEach((room) => {
+            if (room !== client.id) {
+                console.log("leaving room:", room)
+                client.leave(room);
+            }
+        });
+        await client.join(`channel-${channelId}`);
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
-        // get active mute
-        let mute: Punishment[] | null = await this.channelService.getActivePunishments(channelId, client['user'].id, 'muted', 1);
-        if (mute && mute.length > 0) {
+        let mute: Punishment | null = await this.punishmentsService.hasActiveMute(client['user'].id, channelId);
+        if (mute) {
             client.emit('punishment', {
                 punishment_type: 'muted',
-                duration: Math.floor((new Date(mute[0].expires_at).getTime() - new Date().getTime()) / 1000),
+                duration: Math.floor((new Date(mute.expires_at).getTime() - new Date().getTime()) / 1000),
             });
         }
     }
@@ -125,7 +128,7 @@ export class ChatGateway
             timestamp: new Date(),
         };
         // insert punishment in database (TODO: treat durations / )
-        let punishment: any = await this.channelService.applyPunishment(
+        let punishment: any = await this.punishmentsService.applyPunishment(
             payload.targetSender.id,
             client['user'].id,
             payload.channel,
@@ -137,12 +140,12 @@ export class ChatGateway
             throw new Error('Failed to apply punishment');
         }
 
-        client.to(`channel-${payload.channel}`).emit('message', systemPayload);
-        client.emit('message', systemPayload);
+        this.server.to(`channel-${payload.channel}`).emit('message', systemPayload);
         // send punishment to the target user        // TODO: Fallback if user is not connected
         if (usersClients[payload.targetSender.id]) { // TODO: Implement duration
             usersClients[payload.targetSender.id].emit('punishment', {
                 punishment_type: payload.action,
+                channel_id: payload.channel,
                 // duration: 3, // no duration is permanent
             });
         }

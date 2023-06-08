@@ -31,11 +31,10 @@ export interface User {
 }
 
 export interface FriendRequest {
-	request_id: number;
-	sender_id: number;
 	receiver_id: number;
-	timestamp: Date;
+	requested_at: Date;
 	sender: User;
+	sender_id: number;
 }
 
 export interface Friend {
@@ -78,5 +77,6 @@ export interface PowerActionData {
 
 export interface PunishmentData {
 	punishment_type: string;
+	channel_id: number;
 	duration?: number; // if null, the punishment is permanent, in seconds
 }

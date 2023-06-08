@@ -10,7 +10,17 @@ const ChatFriendBrowser: React.FC = () => {
     const { friends } = useChat();
     const { socket } = useUser();
     return (
-        <>
+        <ul
+            style={{
+                listStyle: "none",
+                padding: 0,
+                overflowY: "auto",
+                overflowX: "hidden",
+                height: "85vh",
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
             {friends.map((friend) => (
                 <ChatEntry
                     name={friend.name}
@@ -43,7 +53,7 @@ const ChatFriendBrowser: React.FC = () => {
                     </Grid>
                 </ChatEntry>
             ))}
-        </>
+        </ul>
     );
 };
 

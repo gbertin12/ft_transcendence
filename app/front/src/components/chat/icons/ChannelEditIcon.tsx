@@ -3,6 +3,7 @@ import React from 'react';
 import { ChannelNameInput, ChannelPrivateSwitch } from './ChannelCreateIcon';
 import { Channel } from '@/interfaces/chat.interfaces';
 import { IconLock, IconPencil } from '@tabler/icons-react';
+import axios from 'axios';
 
 interface ChannelEditIconProps {
     channel: Channel;
@@ -35,16 +36,13 @@ export const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onCli
             color="error"
             onClick={() => {
                 setDeleting(true);
-                fetch(`http://localhost:3000/channel/${channel.id}`, {
-                    method: "DELETE",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                })
-                    .then((res) => {
-                        onClick();
-                    });
+                axios.delete(`http://localhost:3000/channel/${channel.id}`, {
+                    withCredentials: true,
+                }).then((response) => {
+                    onClick();
+                }).catch((error) => {
+                    throw Error("UNEXPECTED ERROR: " + error);
+                });
             }}
         >
             Delete channel
@@ -166,15 +164,12 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                 editedChannel.name = name;
                                 editedChannel.private = isPrivate;
                                 editedChannel.password = password;
-                                fetch(`http://localhost:3000/channel/${channel.id}`, {
-                                    method: "PATCH",
-                                    credentials: "include",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify(editedChannel),
-                                }).then((res) => {
+                                axios.patch(`http://localhost:3000/channel/${channel.id}`, editedChannel, {
+                                    withCredentials: true,
+                                }).then((response) => {
                                     setIsOpen(false);
+                                }).catch((error) => {
+                                    throw Error("UNEXPECTED ERROR: " + error);
                                 });
                             }}
                             />
@@ -188,15 +183,12 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                     onClick={() => {
                                         let editedChannel = channel;
                                         editedChannel.password = null;
-                                        fetch(`http://localhost:3000/channel/${channel.id}`, {
-                                            method: "PATCH",
-                                            credentials: "include",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify(editedChannel),
-                                        }).then((res) => {
+                                        axios.patch(`http://localhost:3000/channel/${channel.id}`, editedChannel, {
+                                            withCredentials: true,
+                                        }).then((response) => {
                                             setIsOpen(false);
+                                        }).catch((error) => {
+                                            throw Error("UNEXPECTED ERROR: " + error);
                                         });
                                     }}
                                 >

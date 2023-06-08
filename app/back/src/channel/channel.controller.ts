@@ -2,11 +2,12 @@ import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGu
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
-import ChatGateway, { usersChannels } from '../chat/chat.gateway';
+import ChatGateway from '../chat/chat.gateway';
 import { Channel, Message } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
 import { MessageData } from '../interfaces/chat.interfaces';
+import { PunishmentsService } from '../punishments/punishments.service';
 
 class ChannelDto {
     @Type(() => Number)
@@ -39,6 +40,7 @@ export class ChannelController {
     constructor(
         private channelService: ChannelService,
         private chatGateway: ChatGateway,
+        private punishmentsService: PunishmentsService,
     ) { }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -50,6 +52,10 @@ export class ChannelController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get(':channel_id/messages')
     async channelMessages(@Param() dto: ChannelDto, @Req() req) {
+        // Check if user is banned
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
         return await this.channelService.getMessages(dto.channel_id, req.user);
     }
 
@@ -59,9 +65,14 @@ export class ChannelController {
         if (!body || !body.content) { throw new HttpException('Invalid Message', 400); }
         if (body.content.length > 2000) { throw new HttpException('Message too long', 400); }
 
-        // TODO: Check that the channel exists
-        // TODO: Check that the user is in the channel
-        // TODO: Check that the user is not muted
+        // TODO: Check that the channel exists (insert would fail in theory)
+        // TODO: Check that the user has access to the channel
+
+        // Check that the user is not muted
+        if (await this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are muted in this channel', 403);
+        }
+
         let senderId = req.user['id'];
         let message: Message = await this.channelService.createMessage(senderId, dto.channel_id, body.content);
         let data: MessageData = {
@@ -74,12 +85,7 @@ export class ChannelController {
             },
             message_id: message.message_id,
         }
-        // TODO: Emit to socket.io room
-        for (const [id, channel] of Object.entries(usersChannels)) {
-            if (channel === dto.channel_id) {
-                this.chatGateway.server.to(id).emit('message', data);
-            }
-        }
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('message', data);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -133,8 +139,13 @@ export class ChannelController {
             throw new HttpException('Channel has no password', 400);
         }
 
+        // Check if user has been banned
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
+
         if (!await argon2.verify(channelPassword, body.password)) {
-            throw new HttpException('Invalid password', 403);
+            throw new HttpException('Invalid password', 401);
         }
 
         let userId = req.user['id'];
