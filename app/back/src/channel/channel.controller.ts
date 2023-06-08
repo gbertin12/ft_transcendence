@@ -78,11 +78,7 @@ export class ChannelController {
         let data: MessageData = {
             content: message.content,
             timestamp: message.timestamp,
-            sender: {
-                avatar: req.user['avatar'],
-                name: req.user['name'],
-                id: req.user['id'],
-            },
+            sender: req.user,
             message_id: message.message_id,
         }
         this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('message', data);

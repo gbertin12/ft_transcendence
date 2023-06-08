@@ -56,7 +56,7 @@ export interface SenderData {
 
 export interface MessageData {
 	content: string;
-	sender: SenderData;
+	sender: User;
 	timestamp: Date;
 	message_id: number;
 }
