@@ -94,10 +94,11 @@ export class ChatGateway
         // leave all channels except first one
         Object.keys(client.rooms).forEach((room) => {
             if (room !== client.id) {
+                console.log("leaving room:", room)
                 client.leave(room);
             }
         });
-        client.join(`channel-${channelId}`);
+        await client.join(`channel-${channelId}`);
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
         let mute: Punishment | null = await this.punishmentsService.hasActiveMute(client['user'].id, channelId);
@@ -140,11 +141,12 @@ export class ChatGateway
         }
 
         client.to(`channel-${payload.channel}`).emit('message', systemPayload);
-        client.emit('message', systemPayload);
+        client.to(`channel-${payload.channel}`).emit('message', systemPayload);
         // send punishment to the target user        // TODO: Fallback if user is not connected
         if (usersClients[payload.targetSender.id]) { // TODO: Implement duration
             usersClients[payload.targetSender.id].emit('punishment', {
                 punishment_type: payload.action,
+                channel_id: payload.channel,
                 // duration: 3, // no duration is permanent
             });
         }

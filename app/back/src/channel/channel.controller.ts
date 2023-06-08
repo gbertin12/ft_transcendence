@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGu
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
-import ChatGateway, { usersChannels } from '../chat/chat.gateway';
+import ChatGateway from '../chat/chat.gateway';
 import { Channel, Message } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
@@ -65,8 +65,8 @@ export class ChannelController {
         if (!body || !body.content) { throw new HttpException('Invalid Message', 400); }
         if (body.content.length > 2000) { throw new HttpException('Message too long', 400); }
 
-        // TODO: Check that the channel exists
-        // TODO: Check that the user is in the channel
+        // TODO: Check that the channel exists (insert would fail in theory)
+        // TODO: Check that the user has access to the channel
 
         // Check that the user is not muted
         if (await this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
@@ -85,12 +85,7 @@ export class ChannelController {
             },
             message_id: message.message_id,
         }
-        // TODO: Emit to socket.io room
-        for (const [id, channel] of Object.entries(usersChannels)) {
-            if (channel === dto.channel_id) {
-                this.chatGateway.server.to(id).emit('message', data);
-            }
-        }
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('message', data);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
