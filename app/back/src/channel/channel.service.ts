@@ -237,4 +237,12 @@ export class ChannelService {
         });
         return staff;
     }
+
+    async deleteMessage(messageId: number) {
+        return await this.db.message.delete({
+            where: {
+                message_id: messageId
+            }
+        });
+    }
 }
