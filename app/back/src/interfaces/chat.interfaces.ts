@@ -81,3 +81,8 @@ export interface PunishmentData {
 	channel_id: number;
 	duration?: number; // if null, the punishment is permanent, in seconds
 }
+
+export interface Relationships {
+	friends: any[];
+	blocked: any[];
+}

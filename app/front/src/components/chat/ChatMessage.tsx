@@ -10,6 +10,7 @@ interface ChatMessageProps {
     concatenate: boolean;
     channel: Channel;
     sender: User;
+    blocked?: boolean;
     isAuthor?: boolean;
     senderOwner?: boolean;
     senderAdmin?: boolean;
@@ -33,7 +34,7 @@ function formatDate(date: Date): string {
     return `${date.toLocaleDateString()} at ${hours}:${minutes}`;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, blocked, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
     const [hover, setHover] = React.useState<boolean>(false);
 
     if (data.sender.id === -1) { // System message
@@ -76,7 +77,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
                         </div>
                         <Text className="overflow-hidden block relative">
                             <Text span color="$black" className="mr-1 text-lg font-medium">
-                                {data.sender.name}
+                                {data.sender.name + (blocked ? " (blocked)" : "")}
                                 {senderOwner && (
                                     <Text color="$error" css={{ display: "inline-flex" }}>
                                         <Tooltip
@@ -133,9 +134,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
                         />
                     )}
                 </div>
-                <div>
+                <div className={(blocked ? "blur-sm hover:blur-none" : "")}>
                     {/* wrap the text */}
-                    <Text span css={{ wordWrap: "break-word" }} >
+                    <Text span css={{
+                        wordWrap: "break-word",
+                    }}>
                         {data.content}
                     </Text>
                 </div>
