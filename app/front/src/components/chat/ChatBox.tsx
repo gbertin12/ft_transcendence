@@ -37,7 +37,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
-    const { bannedChannels, setBannedChannels, mutedChannels, setMutedChannels } = useChat();
+    const {
+        bannedChannels,
+        setBannedChannels,
+        mutedChannels,
+        setMutedChannels,
+        blockedUsers,
+        setBlockedUsers,
+    } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
@@ -180,6 +187,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                             isOwner={user.id === ownerId}
                                             isAdmin={admins.has(user.id)}
                                             isAuthor={message.sender.id === user.id}
+                                            blocked={blockedUsers.has(message.sender.id)}
                                             sender={message.sender}
                                             channel={channel}
                                             key={message.message_id}

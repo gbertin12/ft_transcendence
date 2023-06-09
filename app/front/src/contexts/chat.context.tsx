@@ -1,4 +1,4 @@
-import { Channel, Friend, FriendRequest } from '@/interfaces/chat.interfaces';
+import { Channel, Friend, FriendRequest, Relationships } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -14,6 +14,8 @@ interface ChatContextType {
     setMutedChannels: React.Dispatch<React.SetStateAction<Set<number>>>;
     friendRequests: FriendRequest[];
     setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
+    blockedUsers: Set<number>;
+    setBlockedUsers: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 const ChatContext = createContext<ChatContextType>({
@@ -27,6 +29,8 @@ const ChatContext = createContext<ChatContextType>({
     setMutedChannels: () => { },
     friendRequests: [],
     setFriendRequests: () => { },
+    blockedUsers: new Set<number>(),
+    setBlockedUsers: () => { },
 });
 
 export const useChat = () => useContext(ChatContext);
@@ -37,6 +41,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+    const [blockedUsers, setBlockedUsers] = useState<Set<number>>(new Set<number>());
+    const { user } = useUser();
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -51,22 +57,44 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             })
         };
         const fetchFriends = async () => {
-            axios.get("http://localhost:3000/friends/", { withCredentials: true })
+            axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
             .then((res) => {
                 if (res.status !== 200) return ;
-                if (Array.isArray(res.data)) {
-                    const friends: Friend[] = res.data.map((friend) => {
-                        return {
-                            id: friend.user.id,
-                            name: friend.user.name,
-                            avatar: friend.user.avatar,
-                            userId: friend.user.id,
-                            isOnline: false, // TODO: implement
-                            isTyping: false,
-                            isPlaying: false,
-                            unreadMessages: 0,
-                        };
+                const relationships: Relationships = res.data;
+                if (Array.isArray(relationships.friends)) {
+                    const friends: Friend[] = relationships.friends.map((friend) => {
+                        // if user id is self, use user2 instead
+                        if (friend.user.id === user.id) {
+                            return {
+                                id: friend.user2.id,
+                                name: friend.user2.name,
+                                avatar: friend.user2.avatar,
+                                userId: friend.user2.id,
+                                isOnline: false,
+                                isTyping: false,
+                                isPlaying: false,
+                                unreadMessages: 0,
+                            };
+                        } else {
+                            return {
+                                id: friend.user.id,
+                                name: friend.user.name,
+                                avatar: friend.user.avatar,
+                                userId: friend.user.id,
+                                isOnline: false,
+                                isTyping: false,
+                                isPlaying: false,
+                                unreadMessages: 0,
+                            };
+                        }
                     });
+                    const blockedUsers: Set<number> = new Set<number>();
+                    if (Array.isArray(relationships.blocked)) {
+                        relationships.blocked.forEach((blocked) => {
+                            blockedUsers.add(blocked.user_id);
+                        });
+                    }
+                    setBlockedUsers(blockedUsers);
                     setFriends(friends);
                     socket.emit("updateStatus", {"status": "online"});
                 }
@@ -104,7 +132,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             }).then((response) => {
                 if (response.status === 200) {
                     setFriendRequests(response.data);
-                    console.log(friendRequests)
                 }
             });
         };
@@ -137,7 +164,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     name: payload.user.name,
                     avatar: payload.user.avatar,
                     userId: payload.user.id,
-                    isOnline: false, // TODO: implement
+                    isOnline: false,
                     isTyping: false,
                     isPlaying: false,
                     unreadMessages: 0,
@@ -202,6 +229,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             setMutedChannels,
             friendRequests,
             setFriendRequests,
+            blockedUsers,
+            setBlockedUsers,
         }}>
             {children}
         </ChatContext.Provider>

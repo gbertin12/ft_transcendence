@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException, Query } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
@@ -31,8 +31,12 @@ export class FriendsController {
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get('/')
-    async getUserFriends(@Req() req) {
-        return this.friendsService.getUserFriends(req.user);
+    async getUserFriends(@Req() req, @Query('blocked') blocked: boolean = false) {
+        if (blocked) {
+            return this.friendsService.getUserRelationships(req.user);
+        } else {
+            return this.friendsService.getUserFriends(req.user);
+        }
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))

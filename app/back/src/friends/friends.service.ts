@@ -8,9 +8,9 @@ import { FriendRequest } from '@prisma/client';
 export class FriendsService {
     constructor(private dbService: DbService) { }
 
-    async getUserFriends(user: User): Promise<Friend[]> {
+    async getUserRelationships(user: User) {
         // return each friend with their user info, where user_id = userId or friend_id = userId, unique results only
-        let relations: any[] = await this.dbService.friend.findMany({
+        let friendships: any[] = await this.dbService.friend.findMany({
             where: {
                 OR: [
                     {
@@ -36,18 +36,7 @@ export class FriendsService {
                         otpSecret: false,
                     },
                 },
-                user_id: true,
-                friend_id: true,
-            },
-        });
-        // for each friend, if friend_id = userId, swap user_id and friend_id and set user to asynchrously get the user info
-        relations = await Promise.all(relations.map(async (relation) => {
-            if (relation.friend_id === user.id) {
-                const friend = relation.user;
-                relation.user = await this.dbService.user.findUnique({
-                    where: {
-                        id: relation.user_id,
-                    },
+                user2: {
                     select: { // don't leak any sensitive info
                         avatar: true,
                         elo: true,
@@ -59,15 +48,86 @@ export class FriendsService {
                         password: false,
                         otpSecret: false,
                     },
-                });
-                // swap user_id and friend_id
-                relation.friend_id = relation.user.id;
-                relation.user_id = user.id;
-                relation.user.friend = friend;
-            }
-            return relation;
-        }));
-        return relations;
+                },
+                user_id: true,
+                friend_id: true,
+            },
+        });
+        let blockedUsers: any[] = await this.dbService.blockedUser.findMany({
+            where: {
+                user_id: user.id,
+            },
+            select: {
+                blocked_id: true,
+                user_id: true,
+                user: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+            },
+        });
+        return {
+            friends: friendships,
+            blocked: blockedUsers,
+        };
+    }
+
+
+    async getUserFriends(user: User): Promise<Friend[]> {
+        // return each friend with their user info, where user_id = userId or friend_id = userId, unique results only
+        let friendships: any[] = await this.dbService.friend.findMany({
+            where: {
+                OR: [
+                    {
+                        user_id: user.id,
+                    },
+                    {
+                        friend_id: user.id,
+                    },
+                ],
+            },
+            distinct: ['user_id', 'friend_id'],
+            select: {
+                user: {
+                    select: { // don't leak any sensitive info
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+                user2: {
+                    select: { // don't leak any sensitive info
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+                user_id: true,
+                friend_id: true,
+            },
+        });
+        return friendships;
     }
 
     async getUserFriendRequests(userId: number) {
