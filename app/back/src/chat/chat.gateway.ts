@@ -9,19 +9,33 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-import { ChannelStaff, PowerActionData } from '../interfaces/chat.interfaces';
+import { ChannelStaff, MessageData, PowerActionData } from '../interfaces/chat.interfaces';
 import * as cookie from 'cookie';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { FriendsService } from '../friends/friends.service';
 import { ChannelService } from '../channel/channel.service';
-import { Punishment } from '@prisma/client';
+import { Channel, Punishment } from '@prisma/client';
 import { PunishmentsService } from '../punishments/punishments.service';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
 
 // Map of user id -> socket client
 export let usersClients: Record<number, Socket> = {};
+
+function powerLevel(channel: ChannelStaff, user_id: number, messageData?: MessageData): number {
+    if (channel.owner_id === user_id) {
+        return 3;
+    }
+    if (channel.administrators.includes(user_id)) {
+        return 2;
+    }
+    if (messageData && messageData.sender.id === user_id) {
+        return 1;
+    }
+    return 0;
+}
 
 @WebSocketGateway(8001, {
     cors: {
@@ -114,10 +128,27 @@ export class ChatGateway
     async handlePowerAction(client: Socket, payload: PowerActionData) {
         // Check if channel's owner_id is the user, or if the user's id is in ChannelAdmin
         let staff: ChannelStaff = await this.channelService.getChannelStaff(payload.channel);
-        let senderRole: number = (staff.owner_id === client['user'].id) ? 2 : (staff.administrators.includes(client['user'].id) ? 1 : 0);
-        let targetRole: number = (staff.owner_id === payload.targetSender.id) ? 2 : (staff.administrators.includes(payload.targetSender.id) ? 1 : 0);
+        if (payload.action == "deleted") {
+            let senderRole: number = powerLevel(staff, client['user'].id, payload.targetMessage);
+            // user must be owner, admin or author of the message
+            if (senderRole == 0) {
+                throw new ForbiddenException("You are not allowed to delete this message");
+            }
+            // remove message from database
+            try {
+                await this.channelService.deleteMessage(payload.targetMessage.message_id);
+                // emit a messageDeleted event to all clients in the channel
+                this.server.to(`channel-${payload.channel}`).emit('messageDeleted', payload.targetMessage);
+            } catch (e) {
+                throw new BadRequestException('Failed to delete message');
+            } finally {
+                return ;
+            }
+        }
+        let senderRole: number = powerLevel(staff, client['user'].id);
+        let targetRole: number = powerLevel(staff, payload.targetSender.id, payload.targetMessage);
         if (senderRole == 0 || senderRole < targetRole) { // TODO: Check permissions for ban, mute, kick and delete, not blocking
-            return ;
+            throw new ForbiddenException("You are not allowed to perform this action");
         }
         // TODO: implement and check if user is staff in the channel, otherwise ignore
         let systemPayload = {
@@ -127,7 +158,7 @@ export class ChatGateway
             sender: { avatar: null, id: -1, username: "System", },
             timestamp: new Date(),
         };
-        // insert punishment in database (TODO: treat durations / )
+        // insert punishment in database (TODO: treat durations)
         let punishment: any = await this.punishmentsService.applyPunishment(
             payload.targetSender.id,
             client['user'].id,

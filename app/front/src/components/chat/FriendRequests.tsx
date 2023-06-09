@@ -1,8 +1,8 @@
-import { Friend, FriendRequest, User } from "@/interfaces/chat.interfaces";
-import { Badge, Grid, Text } from "@nextui-org/react";
+import { FriendRequest } from "@/interfaces/chat.interfaces";
+import { Grid, Text } from "@nextui-org/react";
 import React from "react";
 import ChatEntry from "./ChatEntry";
-import { IconCheck, IconClock } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { IconX } from "@tabler/icons-react";
 import { useUser } from "@/contexts/user.context";
 import axios from "axios";
@@ -100,7 +100,6 @@ const SentRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequests
                             key={request.receiver_id}
                         >
                             <Grid xs={1}>
-                                <IconClock />
                                 <IconX onClick={() => {
                                     axios.delete(`http://localhost:3000/friends/requests/cancel/${request.receiver_id}`, { withCredentials: true })
                                         .then((res) => {
@@ -161,48 +160,6 @@ const FriendRequests: React.FC = () => {
                 }}
             >
             </ul>
-            {/* {friendRequests.map((friendRequest) => (
-                <li className="list-none">
-                    <ChatEntry
-                        name={friendRequest.sender.name}
-                        avatar={friendRequest.sender.avatar}
-                        userId={friendRequest.sender.id}
-                        isOnline={false} // set these to false to obfuscate the data
-                        isTyping={false}
-                        isPlaying={false}
-                        unreadMessages={0}
-                        key={friendRequest.sender_id}
-                    >
-                        <Grid xs={1}>
-                            <IconX onClick={() => {
-                                axios.delete(`http://localhost:3000/friends/requests/${friendRequest.sender_id}`, {
-                                    withCredentials: true,
-                                }).then(() => {
-                                    setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));
-                                }).catch((error) => {
-                                    throw Error("UNEXPECTED ERROR: " + error);
-                                });
-                            }} />
-                        </Grid>
-                        <Grid xs={1}>
-                            {friendRequest.sender_id === user.id ? (
-                                <IconClock />
-                            ) : (
-                                <IconCheck onClick={() => {
-                                    axios.post(`http://localhost:3000/friends/requests/${friendRequest.sender_id}/accept`, {}, {
-                                        withCredentials: true,
-                                    }).then(() => {
-                                        setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));
-                                    }).catch((error) => {
-                                        throw Error("UNEXPECTED ERROR: " + error);
-                                    });
-                                }} />
-                            )}
-                        </Grid>
-                    </ChatEntry>
-                </li>
-            ))}
-        </> */}
             <div className="mt-2">
                 <ReceivedRequests requests={receivedRequests} setFriendRequests={setFriendRequests} />
                 <SentRequests requests={sentRequests} setFriendRequests={setFriendRequests} />

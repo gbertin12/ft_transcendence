@@ -71,6 +71,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             payload.timestamp = new Date(payload.timestamp);
             setMessages((messages) => [payload, ...messages]);
         });
+        socket.on('messageDeleted', (payload: MessageData) => {
+            // find the message in the list and remove it
+            setMessages((messages) => {
+                const index = messages.findIndex((message) => message.message_id === payload.message_id);
+                if (index !== -1) {
+                    messages.splice(index, 1);
+                }
+                return [...messages];
+            });
+        });
         socket.on('joinChannel', (payload: any) => {
             fetchMessages(channel).then((messages) => {
                 setMessages(messages);
