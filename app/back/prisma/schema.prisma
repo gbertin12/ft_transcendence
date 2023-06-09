@@ -19,12 +19,14 @@ model User {
     otpVerified       Boolean         @default(false)
     password          String?
     channels          Channel[]
-    friends           Friend[]
     sent_requests     FriendRequest[] @relation("friend_request_sender")
     received_requests FriendRequest[] @relation("friend_request_receiver")
     gamesWon          MatchHistory[]  @relation("wonGame")
     gamesLost         MatchHistory[]  @relation("lostGame")
     Message           Message[]
+    BlockedUser       BlockedUser[]
+    friend            Friend[]        @relation("friend")
+    friend2           Friend[]        @relation("friend2")
 }
 
 model MatchHistory {
@@ -46,11 +48,22 @@ model Friend {
     user_id     Int
     friend_id   Int
     friended_at DateTime @default(now()) @db.Timestamp(6)
-    user        User?    @relation(fields: [friend_id], references: [id])
+    user        User?    @relation("friend", fields: [friend_id], references: [id])
+    user2       User?    @relation("friend2", fields: [user_id], references: [id])
 
     @@id([user_id, friend_id])
     @@index([user_id, friend_id], name: "user_id_friend_id")
     @@index([friend_id, user_id], name: "friend_id_user_id")
+}
+
+model BlockedUser {
+    user_id    Int
+    blocked_id Int
+    blocked_at DateTime @default(now()) @db.Timestamp(6)
+    user       User?    @relation(fields: [blocked_id], references: [id])
+
+    @@id([user_id, blocked_id])
+    @@index([user_id, blocked_id], name: "user_id_blocked_id")
 }
 
 model FriendRequest {
