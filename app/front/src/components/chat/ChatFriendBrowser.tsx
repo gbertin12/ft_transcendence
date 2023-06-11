@@ -5,6 +5,7 @@ import { IconDeviceGamepad, IconEye, IconMessageCircle } from "@tabler/icons-rea
 import { Friend } from "@/interfaces/chat.interfaces";
 import { useChat } from "@/contexts/chat.context";
 import { useUser } from "@/contexts/user.context";
+import Link from "next/link";
 
 const ChatFriendBrowser: React.FC = () => {
     const { friends } = useChat();
@@ -47,7 +48,9 @@ const ChatFriendBrowser: React.FC = () => {
                             color="error"
                             css={{ display: (friend.unreadMessages === 0) ? "none" : "block" }}
                         >
-                            <IconMessageCircle />
+                            <Link href={`/chat/dm/${friend.userId}`}>
+                                    <IconMessageCircle />
+                            </Link>
                         </Badge>
                     </Grid>
                 </ChatEntry>
