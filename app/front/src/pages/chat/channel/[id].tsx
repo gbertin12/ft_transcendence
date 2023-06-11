@@ -17,8 +17,8 @@ const ChannelChat: React.FC = () => {
         return (
             <ChatLayout>
                 <div className="flex flex-col items-center justify-center h-full">
-                    <h1 className="text-3xl font-bold">Salon introuvable</h1>
-                    <p className="text-xl">Le salon que vous cherchez n'existe pas. Il a peut-être été supprimé.</p>
+                    <h1 className="text-3xl font-bold">404</h1>
+                    <p className="text-xl">Could not find the channel you are looking for.</p>
                 </div>
             </ChatLayout>
         );
