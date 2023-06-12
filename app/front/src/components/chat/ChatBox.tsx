@@ -122,6 +122,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('joinChannel');
             socket.off('staff');
             socket.off('punishment');
+            socket.off('messageDeleted');
+            socket.emit('leave', channel.id);
         }
     }, [socket, channel]);
 

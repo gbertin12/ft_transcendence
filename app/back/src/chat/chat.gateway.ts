@@ -107,7 +107,7 @@ export class ChatGateway
     async handleJoin(client: Socket, channelId: number) {
         // leave all channels except first one
         Object.keys(client.rooms).forEach((room) => {
-            if (room !== client.id) {
+            if (room !== client.id && room.startsWith("channel-")) {
                 console.log("leaving room:", room)
                 client.leave(room);
             }
@@ -122,6 +122,17 @@ export class ChatGateway
                 duration: Math.floor((new Date(mute.expires_at).getTime() - new Date().getTime()) / 1000),
             });
         }
+    }
+
+    @SubscribeMessage('leave')
+    async handleLeave(client: Socket, channelId: number) {
+        // leave all channels except first one
+        Object.keys(client.rooms).forEach((room) => {
+            if (room !== client.id && room.startsWith("channel-")) {
+                console.log("leaving room:", room)
+                client.leave(room);
+            }
+        });
     }
 
     @SubscribeMessage('powerAction')
