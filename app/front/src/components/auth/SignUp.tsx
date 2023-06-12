@@ -2,7 +2,7 @@ import { Input, Spacer, Button , Grid, Text} from "@nextui-org/react";
 
 
 function dummyLogin() {
-    window.location.href = 'http://localhost:3000/auth/dummy';
+    window.location.href = 'http://bess-f1r2s5:3000/auth/dummy';
 }
 
 export default function SignIn() {

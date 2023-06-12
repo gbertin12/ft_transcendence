@@ -40,7 +40,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const { bannedChannels, setBannedChannels, mutedChannels, setMutedChannels } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
+        let data = await axios.get(`http://bess-f1r2s5:3000/channel/${channel.id}/messages`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -110,7 +110,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     const handleNewMessage = useCallback((message: string) => {
         try {
-            axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
+            axios.post(`http://bess-f1r2s5:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
             throw Error("UNEXPECTED ERROR: " + err);
         }
