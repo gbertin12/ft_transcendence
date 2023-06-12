@@ -124,6 +124,17 @@ export class ChatGateway
         }
     }
 
+    @SubscribeMessage('leave')
+    async handleLeave(client: Socket, channelId: number) {
+        // leave all channels except first one
+        Object.keys(client.rooms).forEach((room) => {
+            if (room !== client.id && room.startsWith("channel-")) {
+                console.log("leaving room:", room)
+                client.leave(room);
+            }
+        });
+    }
+
     @SubscribeMessage('powerAction')
     async handlePowerAction(client: Socket, payload: PowerActionData) {
         // Check if channel's owner_id is the user, or if the user's id is in ChannelAdmin
