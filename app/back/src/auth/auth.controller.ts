@@ -36,6 +36,7 @@ export class AuthController {
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
+    // TODO: CHANGE DISCORD STUFF
     @Get('discord/callback')
     @UseGuards(AuthGuard('discord'))
     async discordCallback(

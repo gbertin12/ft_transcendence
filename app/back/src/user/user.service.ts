@@ -306,7 +306,6 @@ export class UserService {
             },
         });
 
-        console.log(ret);
         if (!ret.gamesWon.length && !ret.gamesLost.length) {
             return 1000;
         } else if (ret.gamesWon.length && !ret.gamesLost.length) {

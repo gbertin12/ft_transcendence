@@ -43,7 +43,7 @@ export class ChatGateway
     server;
     
     afterInit(server: any) {
-        console.log('Init');
+        //console.log('Init');
     }
     
     async handleConnection(client: Socket) 
@@ -94,7 +94,7 @@ export class ChatGateway
         // leave all channels except first one
         Object.keys(client.rooms).forEach((room) => {
             if (room !== client.id) {
-                console.log("leaving room:", room)
+                //console.log("leaving room:", room)
                 client.leave(room);
             }
         });
