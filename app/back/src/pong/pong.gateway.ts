@@ -103,10 +103,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 state: 0,
                 pongState: {
                     ball: {
-                        x: 0,
-                        y: 0,
-                        speedX: 0.6,
-                        speedY: 0.4,
+                        x: 50,
+                        y: 50,
+                        speedX: 1,
+                        speedY: 1,
                     },
                     player1: waitingPlayer,
                     player2: player,
@@ -129,14 +129,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         {
             if (room.pongState.player1.id === data.clientId) 
             {
-                const percent = 75 - data.percent;
-                room.pongState.player2.y = percent;
+                const percent = 87.5 - data.percent;
                 room.pongState.player1.y = percent;
                 this.server.to(room.pongState.player2.id).emit('playerMove', percent);
             } 
             else if (room.pongState.player2.id === data.clientId) 
             {
-                const percent = 75 - data.percent;
+                const percent = 87.5 - data.percent;
                 room.pongState.player2.y = percent;
                 this.server.to(room.pongState.player1.id).emit('playerMove', percent);
             }
