@@ -8,7 +8,8 @@ import AvatarTooltip from '../profile/AvatarTooltip';
 interface ChatMessageProps {
     data: MessageData;
     concatenate: boolean;
-    channel: Channel;
+    channel?: Channel;
+    interlocutor?: User;
     sender: User;
     blocked?: boolean;
     isAuthor?: boolean;
@@ -34,7 +35,7 @@ function formatDate(date: Date): string {
     return `${date.toLocaleDateString()} at ${hours}:${minutes}`;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, blocked, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, interlocutor, sender, blocked, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
     const [hover, setHover] = React.useState<boolean>(false);
 
     if (data.sender.id === -1) { // System message
@@ -126,6 +127,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
                     {hover && (
                         <PowerActions
                             channel={channel}
+                            interlocutor={interlocutor}
                             sender={sender}
                             message={data}
                             isAuthor={isAuthor || false}

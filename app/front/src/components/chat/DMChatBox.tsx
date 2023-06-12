@@ -1,23 +1,18 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
-import { Button, Container, Grid, Text, Textarea } from "@nextui-org/react";
+import { Message, MessageData, User } from "@/interfaces/chat.interfaces";
+import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
-import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
-import { IconShieldCog } from "@tabler/icons-react";
 
 interface DMChatBoxProps {
     interlocutor: User;
 }
 
 const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
-    const [missingPermissions, setMissingPermissions] = useState<boolean>(false);
+    const [missingPermissions, setMissingPermissions] = useState<boolean>(false); // Used to prevent the user from sending messages if they're not friends
     const [messages, setMessages] = useState<MessageData[]>([]);
-    const [powerModalOpen, setPowerModalOpen] = useState<boolean>(false);
-    const [ownerId, setOwnerId] = useState<number>(-1);
-    const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const { socket, user } = useUser();
     const {
         bannedChannels,
@@ -54,7 +49,6 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     }, []);
 
     useEffect(() => {
-        socket.emit('join-dm', channel.id);
         socket.on('message', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
@@ -70,74 +64,24 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                 return [...messages];
             });
         });
-        socket.on('joinChannel', (payload: any) => {
-            fetchMessages(channel).then((messages) => {
-                setMessages(messages);
-            });
-        });
-        socket.on('staff', (staff: ChannelStaff) => {
-            setOwnerId(staff.owner_id);
-            setAdmins(new Set(staff.administrators));
-        });
-        socket.on("punishment", (punishment: PunishmentData) => {
-            // TODO: handle the punishment
-            switch (punishment.punishment_type) {
-                case "muted":
-                    setMutedChannels((mutedChannels) => {
-                        return new Set(mutedChannels).add(punishment.channel_id);
-                    });
-                    break;
-                case "banned":
-                    setBannedChannels((bannedChannels) => {
-                        return new Set(bannedChannels).add(punishment.channel_id);
-                    });
-                    break;
-                case "kicked":
-                    break;
-            }
-        });
-        fetchMessages(channel).then((messages) => {
+        fetchMessages(user).then((messages) => {
             setMessages(messages);
         });
         return () => {
             socket.off('message');
-            socket.off('joinChannel');
-            socket.off('staff');
-            socket.off('punishment');
+            socket.off('messageDeleted');
         }
-    }, [socket, channel]);
+    }, [socket, user]);
 
     const handleNewMessage = useCallback((message: string) => {
         try {
-            axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
+            axios.post(`http://localhost:3000/dms/${user.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
             throw Error("UNEXPECTED ERROR: " + err);
         }
-    }, [channel]);
+    }, [user]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
-
-    // The user is banned
-    if (bannedChannels.has(channel.id)) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-3xl font-bold">You are banned from this channel</h1>
-            </div>
-        )
-    }
-
-    // The user doesn't have access to this password protected channel, we need to ask for a password
-    if (missingPermissions && channel.password === "") {
-        return (
-            <ChannelPasswordPrompt channel={channel} />
-        );
-    } else if (missingPermissions && !channel.password) { // The user doesn't have access to this channel and it's not password protected
-        return ( // Throw a fake 404 message because it is a hidden channel
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-3xl font-bold">Unknown room</h1>
-            </div>
-        )
-    }
 
     return (
         <Container>
@@ -146,10 +90,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                     <Grid.Container>
                         <Grid css={{ w: "stretch" }}>
                             <Container direction="row" justify="space-between" alignItems="center" display="flex">
-                                <Text h3>{channel.name.replace(/^/, '# ')}</Text>
-                                <Button auto light onPress={() => setPowerModalOpen(true)}>
-                                    <IconShieldCog />
-                                </Button>
+                                <Text h3>{user.name}</Text>
                             </Container>
                             <ul
                                 style={{
@@ -164,14 +105,10 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                                 {memoizedMessages.map((message: MessageData, index: number) => (
                                     <li key={message.message_id} className="relative">
                                         <ChatMessage
-                                            senderOwner={message.sender.id === ownerId}
-                                            senderAdmin={admins.has(message.sender.id)}
-                                            isOwner={user.id === ownerId}
-                                            isAdmin={admins.has(user.id)}
                                             isAuthor={message.sender.id === user.id}
                                             blocked={blockedUsers.has(message.sender.id)}
                                             sender={message.sender}
-                                            channel={channel}
+                                            interlocutor={interlocutor}
                                             key={message.message_id}
                                             data={message}
                                             concatenate={
@@ -185,36 +122,25 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                             </ul>
                         </Grid>
                         <Grid xs={12}>
-                            {(!missingPermissions && !bannedChannels.has(channel.id)) && (
-                                <Textarea
-                                    fullWidth
-                                    disabled={mutedChannels.has(channel.id)}
-                                    placeholder={
-                                        !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
-                                        :
-                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
-                                    }
-                                    aria-label={
-                                        !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
-                                        :
-                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
-                                    }
-                                    minLength={1}
-                                    maxLength={2000}
-                                    onKeyPress={(e: any) => {
-                                        if (e.key === "Enter" && !e.shiftKey) {
-                                            e.preventDefault();
-                                            let message: string = e.target.value;
-                                            message = message.trim();
-                                            if (message.length > 0) {
-                                                handleNewMessage(message);
-                                                e.target.value = "";
-                                            }
+                            <Textarea
+                                fullWidth
+                                placeholder={`Send a message to ${user.name}`}
+                                aria-label={`Send a message to ${user.name}`}
+                                minLength={1}
+                                maxLength={2000}
+                                onKeyPress={(e: any) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        let message: string = e.target.value;
+                                        message = message.trim();
+                                        if (message.length > 0) {
+                                            handleNewMessage(message);
+                                            e.target.value = "";
                                         }
-                                    }}
-                                />
+                                    }
+                                }}
+                            />
                             )
-                            }
                         </Grid>
                     </Grid.Container>
                 </Grid>
