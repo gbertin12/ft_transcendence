@@ -18,8 +18,15 @@ export interface PlayerInterface {
     state: number;
     y: number;
     score: number;
-	modes: boolean;
-	userInfos : User;
+    modes: boolean;
+    userInfos : User;
+}
+
+export interface PlayerEndGame {
+    id:         number;
+    room:       roomInterface;
+    eloDiff:    number;
+    forfeit:    boolean;
 }
 
 // interface du state

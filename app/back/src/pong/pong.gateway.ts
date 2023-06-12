@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { roomInterface, PlayerInterface } from '../../src/interfaces/pong.interface';
+import { roomInterface, PlayerInterface, PlayerEndGame } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../src/user/user.service';
@@ -38,8 +38,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // verify user with 'session' cookie
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
-            console.log('NO SESSION FOUND');
-            //client.disconnect();
             client.emit('unauthorized', '/auth');
             return "UnauthorizedException";
         }
@@ -59,7 +57,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 userInfos : user,
             };
             this.players.push(player);
-            console.log('players', this.players);
+            //console.log('players', this.players);
             // send the player id to the client
             client.emit('playerId', client.id);
         } catch {
@@ -72,11 +70,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     handleDisconnect(client: Socket) 
     {
         // Retirer le joueur de la liste des joueurs actifs
-        const playerIndex = this.players.findIndex(
-            (player) => player.id === client.id,
+        const leaver = this.players.find(
+            (player) => player.id === client.id && player.state === 2,
         );
-        if (playerIndex !== -1) {
-            this.players.splice(playerIndex, 1);
+        // if player disconnects while in game
+        if (leaver) {
+            const room = this.rooms.find((room) => leaver.id === room.pongState.player1.id || leaver.id === room.pongState.player2.id);
+
+            console.log(`DISCONNECTED: ${leaver}`);
+
+            this.bustLeaver(client, room.name);
         }
     }
 
@@ -115,7 +118,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
             this.gameService.handleGame(newRoom, this.server);
         }
-        console.log(this.rooms);
+        //console.log(this.rooms);
     }
 
     @SubscribeMessage('playerMove')
@@ -154,7 +157,28 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('startGame')
     handleMessage(@MessageBody() clientId: string): void 
     {
-        console.log(clientId);
+        //console.log(clientId);
         this.server.emit('startGame', clientId);
+    }
+
+    bustLeaver(client: Socket, roomName: string) {
+        const room = this.rooms.find((room) => room.name === roomName);
+
+        if (room) {
+            if (room.pongState.player1.id === client.id) {
+                room.pongState.player1.score = 0;
+                room.pongState.player2.score = 10;
+            } else {
+                room.pongState.player1.score = 10;
+                room.pongState.player2.score = 0;
+            }
+            this.gameService.handleEndGame(room, this.server, true);
+        }
+    }
+
+    @SubscribeMessage('leaveGame')
+    handleLeaveGame(client: Socket, roomName: string)
+    {
+        this.bustLeaver(client, roomName);
     }
 }
