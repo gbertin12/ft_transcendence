@@ -8,25 +8,26 @@ datasource db {
 }
 
 model User {
-    id                Int             @id @default(autoincrement())
-    name              String          @unique
-    avatar            String          @default("default.jpg")
-    wins              Int             @default(0)
-    losses            Int             @default(0)
-    elo               Int             @default(1000)
-    otp               Boolean         @default(false)
+    id                Int              @id @default(autoincrement())
+    name              String           @unique
+    avatar            String           @default("default.jpg")
+    wins              Int              @default(0)
+    losses            Int              @default(0)
+    elo               Int              @default(1000)
+    otp               Boolean          @default(false)
     otpSecret         String?
-    otpVerified       Boolean         @default(false)
+    otpVerified       Boolean          @default(false)
     password          String?
     channels          Channel[]
-    sent_requests     FriendRequest[] @relation("friend_request_sender")
-    received_requests FriendRequest[] @relation("friend_request_receiver")
-    gamesWon          MatchHistory[]  @relation("wonGame")
-    gamesLost         MatchHistory[]  @relation("lostGame")
+    sent_requests     FriendRequest[]  @relation("friend_request_sender")
+    received_requests FriendRequest[]  @relation("friend_request_receiver")
+    gamesWon          MatchHistory[]   @relation("wonGame")
+    gamesLost         MatchHistory[]   @relation("lostGame")
     Message           Message[]
     BlockedUser       BlockedUser[]
-    friend            Friend[]        @relation("friend")
-    friend2           Friend[]        @relation("friend2")
+    friend            Friend[]         @relation("friend")
+    friend2           Friend[]         @relation("friend2")
+    PrivateMessage    PrivateMessage[]
 }
 
 model MatchHistory {
@@ -129,4 +130,15 @@ model Punishment {
     @@id([issuer_id, punished_id, channel_id])
     @@index([punished_id, issuer_id, type], name: "punished_id_issuer_id_type")
     @@index([punished_id, channel_id, type], name: "punished_id_channel_id_type")
+}
+
+model PrivateMessage {
+    message_id  Int      @id @default(autoincrement())
+    sender_id   Int
+    receiver_id Int
+    timestamp   DateTime @default(now()) @db.Timestamp(6)
+    content     String   @db.VarChar(2000)
+    sender      User     @relation(fields: [sender_id], references: [id])
+
+    @@index([sender_id, receiver_id, timestamp], name: "sender_id_receiver_id_timestamp")
 }

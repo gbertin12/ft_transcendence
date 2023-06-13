@@ -342,4 +342,23 @@ export class FriendsService {
             return res.count > 0;
         });
     }
+
+    async areFriends(user_id: number, other_id: number): Promise<boolean> {
+        return this.dbService.friend.findMany({
+            where: {
+                OR: [
+                    {
+                        user_id: user_id,
+                        friend_id: other_id,
+                    },
+                    {
+                        user_id: other_id,
+                        friend_id: user_id,
+                    }
+                ]
+            },
+        }).then((res) => {
+            return res.length > 0;
+        });
+    }
 }
