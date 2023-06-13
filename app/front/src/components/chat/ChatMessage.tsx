@@ -133,6 +133,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, i
                             isAuthor={isAuthor || false}
                             isOwner={(isOwner || false)}
                             isAdmin={(isAdmin || false)}
+                            blocked={blocked || false}
                         />
                     )}
                 </div>

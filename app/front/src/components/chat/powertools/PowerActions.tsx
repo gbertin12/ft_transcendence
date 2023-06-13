@@ -1,10 +1,11 @@
 import { useUser } from '@/contexts/user.context';
 import { Channel, MessageData, PowerAction, SenderData, User } from '@/interfaces/chat.interfaces';
 import { Grid } from '@nextui-org/react';
-import { IconVolume3, IconTrash, IconBan, IconDoorExit, IconUserX } from '@tabler/icons-react';
+import { IconVolume3, IconTrash, IconBan, IconDoorExit, IconUserX, IconUser } from '@tabler/icons-react';
 import React from 'react';
 import { Socket } from 'socket.io-client';
 import PowerButton from './PowerButton';
+import axios from 'axios';
 
 interface PowerActionsProps {
     channel?: Channel;
@@ -14,6 +15,7 @@ interface PowerActionsProps {
     isAuthor: boolean;
     isAdmin: boolean;
     isOwner: boolean;
+    blocked: boolean;
 }
 
 function emitPowerActionDM(
@@ -65,7 +67,7 @@ function emitPowerAction(
 
 }
 
-const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, message, sender, isAuthor, isAdmin, isOwner }) => {
+const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, message, sender, isAuthor, isAdmin, isOwner, blocked }) => {
     const { socket } = useUser();
     if (channel) { // Private / public channels
         return (
@@ -79,14 +81,35 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                 alignItems='center'
             >
                 <Grid>
-                    <PowerButton
-                        tooltip="Block user"
-                        ariaLabel="Block the sender of this message"
-                        icon={<IconUserX />}
-                        color="default"
-                        render={true}
-                        onPress={() => emitPowerAction(channel, "blocked", socket, sender)}
-                    />
+                {!blocked && (
+                        <PowerButton
+                            tooltip="Block user"
+                            ariaLabel="Block the sender of this message"
+                            icon={<IconUserX />}
+                            color="default"
+                            render={true}
+                            onPress={() => {
+                                axios.post(`http://localhost:3000/friends/block/${sender.id}`, {}, {
+                                    withCredentials: true,
+                                    validateStatus: () => true,
+                                })
+                            }}
+                        />
+                    ) || (
+                        <PowerButton
+                            tooltip="Unblock user"
+                            ariaLabel="Unblock the sender of this message"
+                            icon={<IconUser />}
+                            color="default"
+                            render={true}
+                            onPress={() => {
+                                axios.post(`http://localhost:3000/friends/unblock/${sender.id}`, {}, {
+                                    withCredentials: true,
+                                    validateStatus: () => true,
+                                })
+                            }}
+                        />
+                    )}
                 </Grid>
                 <Grid>
                     <PowerButton
@@ -145,14 +168,35 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                 alignItems='center'
             >
                 <Grid>
-                    <PowerButton
-                        tooltip="Block user"
-                        ariaLabel="Block the sender of this message"
-                        icon={<IconUserX />}
-                        color="default"
-                        render={true}
-                        onPress={() => alert("TODO")}
-                    />
+                    {!blocked && (
+                        <PowerButton
+                            tooltip="Block user"
+                            ariaLabel="Block the sender of this message"
+                            icon={<IconUserX />}
+                            color="default"
+                            render={true}
+                            onPress={() => {
+                                axios.post(`http://localhost:3000/friends/block/${sender.id}`, {}, {
+                                    withCredentials: true,
+                                    validateStatus: () => true,
+                                })
+                            }}
+                        />
+                    ) || (
+                        <PowerButton
+                            tooltip="Unblock user"
+                            ariaLabel="Unblock the sender of this message"
+                            icon={<IconUser />}
+                            color="default"
+                            render={true}
+                            onPress={() => {
+                                axios.post(`http://localhost:3000/friends/unblock/${sender.id}`, {}, {
+                                    withCredentials: true,
+                                    validateStatus: () => true,
+                                })
+                            }}
+                        />
+                    )}
                 </Grid>
                 <Grid>
                     <PowerButton

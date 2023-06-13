@@ -361,4 +361,31 @@ export class FriendsService {
             return res.length > 0;
         });
     }
+
+    async blockUser(user_id: number, other_id: number) {
+        return this.dbService.blockedUser.upsert({
+            where: {
+                user_id_blocked_id: {
+                    user_id: user_id,
+                    blocked_id: other_id,
+                },
+            },
+            update: {},
+            create: {
+                user_id: user_id,
+                blocked_id: other_id,
+            },
+        });
+    }
+
+    async unblockUser(user_id: number, other_id: number) {
+        return this.dbService.blockedUser.delete({
+            where: {
+                user_id_blocked_id: {
+                    user_id: user_id,
+                    blocked_id: other_id,
+                },
+            },
+        });
+    }
 }

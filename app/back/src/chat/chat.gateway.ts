@@ -155,8 +155,6 @@ export class ChatGateway
                     catch (e) {
                         throw new BadRequestException('Failed to delete message ' + e);
                     }
-                case "blocked": // TODO: implement
-                    break;
                 default: // no other actions are allowed since we're in dms
                     throw new BadRequestException("Invalid action");
             }

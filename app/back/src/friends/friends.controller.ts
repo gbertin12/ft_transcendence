@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException, Query } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException, Query, BadRequestException } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
@@ -151,4 +151,37 @@ export class FriendsController {
             this.chatGateway.usersClients[params.id].emit("deleteFriend", req.user['id']);
         }
     }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Post("/block/:id")
+    async blockUser(@Req() req, @Param () params: FriendReqIdDto) {
+        if (req.user['id'] == params.id) {
+            throw new BadRequestException("You can't block yourself");
+        }
+        try {
+            await this.friendsService.blockUser(req.user['id'], params.id);
+            if (this.chatGateway.usersClients[req.user['id']]) {
+                this.chatGateway.usersClients[req.user['id']].emit("blocked", params.id);
+            }
+        } catch (e) {
+            // TODO: throw an error maybe ?
+        }
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Post("/unblock/:id")
+    async unblockUser(@Req() req, @Param () params: FriendReqIdDto) {
+        if (req.user['id'] == params.id) {
+            throw new BadRequestException("You can't unblock yourself");
+        }
+        try {
+            await this.friendsService.unblockUser(req.user['id'], params.id);
+            if (this.chatGateway.usersClients[req.user['id']]) {
+                this.chatGateway.usersClients[req.user['id']].emit("unblocked", params.id);
+            }
+        } catch (e) {
+            // TODO: throw an error maybe ?
+        }
+    }
+    
 }
