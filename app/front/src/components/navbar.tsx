@@ -12,7 +12,7 @@ export default function myNavbar() {
 	return (
 		<Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
 			<Navbar.Brand >
-				<Text color="primary">ft_pong</Text>
+				<Text h1 size={20} color="primary">ft_pong</Text>
 			</Navbar.Brand >
 			<Navbar.Content gap={50} >
 				<Navbar.Link href="/leaderboard" color="primary">
