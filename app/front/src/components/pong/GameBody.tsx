@@ -10,15 +10,17 @@ import { PlayerEndGame } from '@/interfaces/pong.interface';
 export default function GameBody({ roomName, handleSetRoomName }: { roomName: string, handleSetRoomName: (name: string) => void}) {
     const [playGame, setPlayGame] = useState(false);
     const [endGame, setEndGame] = useState(false);
+    const [who, setWho] = useState<number>(-1);
     const [searchGame, setSearchGame] = useState(false);
     const [modes, setModes] = useState(true);
     const [dataEndGame, setDataEndGame] = useState<PlayerEndGame>({} as PlayerEndGame);
 
     const { user, socket } = useUser();
 
-    const handleGameStart = (roomName: string) => {
+    const handleGameStart = (roomName: string, who : number) => {
         setPlayGame(true);
         handleSetRoomName(roomName);
+        setWho(who);
         setEndGame(false);
     }
 
@@ -35,6 +37,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
 
     const handleCloseCardEndGame = () => {
         setEndGame(false);
+        setWho(-1);
         handleSetRoomName("");
         setSearchGame(false);
     }
@@ -68,7 +71,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
     }
     else if (playGame) {
         return <>
-            <Pong roomName={roomName} handleSetEndGame={handleSetEndGame} />
+            <Pong roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
         </>
     }
     else

@@ -114,11 +114,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 },
             };
             this.rooms.push(newRoom);
-            this.server.to(playerId).emit('searchGame', newRoom.name);
-            this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name);
+            this.server.to(playerId).emit('searchGame', newRoom.name, 1);
+            this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0);
             this.gameService.handleGame(newRoom, this.server);
         }
-        //console.log(this.rooms);
     }
 
     @SubscribeMessage('playerMove')

@@ -3,7 +3,7 @@ import { Button } from '@nextui-org/react'
 import { useUser } from '@/contexts/user.context';
 
 export default function ButtonStart({ searchGame, modes, handleGameStart, handleSetSearchGame }
-    : { searchGame: boolean, modes: boolean, handleGameStart: (roomName: string) => void, handleSetSearchGame: (value: boolean) => void }) {
+    : { searchGame: boolean, modes: boolean, handleGameStart: (roomName: string, who: number) => void, handleSetSearchGame: (value: boolean) => void }) {
     const { socket } = useUser();
 
     // Cancel Game
