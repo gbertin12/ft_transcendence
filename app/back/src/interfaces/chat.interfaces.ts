@@ -67,7 +67,7 @@ export interface ChannelStaff {
 	administrators: number[];
 }
 
-export type PowerAction = 'blocked' | 'deleted' | 'muted' | 'banned' | 'kicked';
+export type PowerAction = 'deleted' | 'muted' | 'banned' | 'kicked';
 
 export interface PowerActionData {
 	action: PowerAction;

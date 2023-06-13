@@ -91,7 +91,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     const blockedUsers: Set<number> = new Set<number>();
                     if (Array.isArray(relationships.blocked)) {
                         relationships.blocked.forEach((blocked) => {
-                            blockedUsers.add(blocked.user_id);
+                            blockedUsers.add(blocked.blocked_id);
                         });
                     }
                     setBlockedUsers(blockedUsers);
@@ -201,6 +201,20 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     return newMutedChannels;
                 });
             });
+            socket.on("blocked", (user_id: number) => {
+                setBlockedUsers((blockedUsers) => {
+                    const newBlockedUsers = new Set<number>(blockedUsers);
+                    newBlockedUsers.add(user_id);
+                    return newBlockedUsers;
+                });
+            });
+            socket.on("unblocked", (user_id: number) => {
+                setBlockedUsers((blockedUsers) => {
+                    const newBlockedUsers = new Set<number>(blockedUsers);
+                    newBlockedUsers.delete(user_id);
+                    return newBlockedUsers;
+                });
+            });
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
@@ -213,6 +227,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("onlineAnswer");
                 socket.off("offline");
                 socket.off("unbanned");
+                socket.off("unmuted");
+                socket.off("blocked");
             }
         }
     }, [socket]);
