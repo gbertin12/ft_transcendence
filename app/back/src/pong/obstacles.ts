@@ -68,13 +68,7 @@ export const createObstacle = (server: Server, room: roomInterface, obstacles: o
 	obstacles.push(newObstacle);
 
 
-	server.to(room.pongState.player1.id).emit('addObstacle', {
-		x: newObstacle.x,
-		y: newObstacle.y,
-		id: newObstacle.id,	
-		size: newObstacle.size
-	});
-	server.to(room.pongState.player2.id).emit('addObstacle', {
+	server.to(room.name).emit('addObstacle', {
 		x: newObstacle.x,
 		y: newObstacle.y,
 		id: newObstacle.id,	

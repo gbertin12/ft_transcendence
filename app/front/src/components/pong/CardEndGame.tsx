@@ -5,7 +5,7 @@ import { PlayerEndGame, PlayerInterface } from '@/interfaces/pong.interface';
 
 function PlayerInfos ({win, score, username, avatar, badgeContent, newElo} : {win: boolean, score: number, username: string, avatar: string, badgeContent: string, newElo : number}) {
     let color: string = "success";
-    const pathAvatar : string = "http://bess-f1r2s10:3000/static/avatars/" + avatar;
+    const pathAvatar : string = "http://localhost:3000/static/avatars/" + avatar;
     if (!win)
     color = "error"
     return (

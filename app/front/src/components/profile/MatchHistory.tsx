@@ -70,7 +70,7 @@ export default function MatchHistory({ user }: { user: User }) {
 
     useEffect(() => {
         (async () => {
-            const res = await fetch(`http://bess-f1r2s10:3000/user/history/${user.name}`);
+            const res = await fetch(`http://localhost:3000/user/history/${user.name}`);
             const data = await res.json();
             setRows(setDataRows(data.gamesWon, data.gamesLost));
         })();
@@ -107,7 +107,7 @@ export default function MatchHistory({ user }: { user: User }) {
                                         <Avatar
                                             bordered
                                             color={(item.victory) ? "success" : "error"}
-                                            src={`http://bess-f1r2s10:3000/static/avatars/${user.avatar}`} />
+                                            src={`http://localhost:3000/static/avatars/${user.avatar}`} />
                                     </Row>
                                 </Table.Cell>
                                 <Table.Cell>{user.name}</Table.Cell>
@@ -120,7 +120,7 @@ export default function MatchHistory({ user }: { user: User }) {
                                         <Avatar
                                             bordered
                                             color={(item.victory ? "error" : "success")}
-                                            src={`http://bess-f1r2s10:3000/static/avatars/${item.avatar}`} />
+                                            src={`http://localhost:3000/static/avatars/${item.avatar}`} />
                                     </Row>
                                 </Table.Cell>
                                 <Table.Cell>{item.date}</Table.Cell>
