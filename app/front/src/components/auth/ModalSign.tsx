@@ -14,7 +14,7 @@ export default function App() {
 
 	return (
 		<div>
-			<Button auto onPress={handler} css={{borderRadius:'0%'}}>
+			<Button auto onPress={handler}>
 				<Text bold color="secondary">Se connecter </Text>
 			</Button>
 			<Modal closeButton

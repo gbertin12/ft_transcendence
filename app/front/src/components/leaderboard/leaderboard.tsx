@@ -14,8 +14,7 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
 
 				<Grid.Container direction="column" alignItems='stretch' >
 				<Grid>
-					<Table
-						striped
+					<Table sticked
 						aria-label="Leaderboard"
 						css={{
 							height: "auto",
@@ -39,7 +38,7 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
 							<Table.Cell>{item.winrate}%</Table.Cell>
 							<Table.Cell>{item.elo}</Table.Cell>
 							<Table.Cell>
-								<Button>VIEW</Button>
+								<Button color="primary" auto ghost>VIEW</Button>
 							</Table.Cell>
         				</Table.Row>
         			)}
@@ -50,7 +49,6 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
     				</Table>
 				</Grid>
 				</Grid.Container>
-
 			</Grid.Container>
 	)
 }
