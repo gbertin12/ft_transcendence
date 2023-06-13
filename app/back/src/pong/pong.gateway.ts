@@ -95,7 +95,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const waitingPlayer = this.players.find(
             (player) => player.state === 1 && player.id !== playerId && player.modes === data.modes,
         );
-        if (waitingPlayer && player) {
+        if (waitingPlayer && player && waitingPlayer.id != player.id) {
             player.state = 2;
             waitingPlayer.state = 2;
             const newRoom: roomInterface = {
@@ -113,6 +113,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     modes: data.modes
                 },
             };
+            
             this.rooms.push(newRoom);
             this.server.to(playerId).emit('searchGame', newRoom.name, 1);
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0);
@@ -152,12 +153,21 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(playerId).emit('cancelGame');
     }
 
-    @SubscribeMessage('startGame')
-    handleMessage(@MessageBody() clientId: string): void 
+    @SubscribeMessage('joinRoom')
+    handleJoinRoom(client: Socket, roomName : string): void 
     {
-        //console.log(clientId);
-        this.server.emit('startGame', clientId);
+        client.join(roomName);
+        console.log("joinRoom", client.id);
     }
+
+    @SubscribeMessage('leaveRoom')
+    handleLeaveRoom(client: Socket, roomName : string): void 
+    {
+        client.leave(roomName);
+        console.log("leaveRoom", client.id);
+
+    }
+
 
     bustLeaver(client: Socket, roomName: string) {
         const room = this.rooms.find((room) => room.name === roomName);

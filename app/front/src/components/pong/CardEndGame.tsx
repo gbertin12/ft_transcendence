@@ -27,9 +27,9 @@ function PlayerInfos ({win, score, username, avatar, badgeContent, newElo} : {wi
     )
 }
 
-export default function CardEndGame({endGame, handleCloseCardEndGame} 
-    : { endGame: PlayerEndGame, handleCloseCardEndGame: () => void}) {
-    const { user } = useUser();
+export default function CardEndGame({endGame, roomName, handleCloseCardEndGame} 
+    : { endGame: PlayerEndGame, roomName : string, handleCloseCardEndGame: () => void}) {
+    const { user, socket } = useUser();
 
     let badgeContent1: string = "";
     let badgeContent2: string = "";
@@ -38,6 +38,8 @@ export default function CardEndGame({endGame, handleCloseCardEndGame}
     let player2 = {} as PlayerInterface;
     let win: boolean;
     let title: string;
+
+    socket.emit('leaveRoom', roomName);
 
     if (playerId == 1) {
         player1 = endGame.room.pongState.player1;

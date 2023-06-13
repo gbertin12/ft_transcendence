@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Pong from './Pong'
 import {Container, Row, Spacer, Text, Checkbox } from '@nextui-org/react'
 import CardPlayerInformation from './CardPlayerInformation';
@@ -17,15 +17,28 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
 
     const { user, socket } = useUser();
 
+    const handleStartGame = () => {
+        
+    }
+
+    useEffect(() => {
+        socket.on('startGame', handleStartGame);
+        return () => {
+            socket.off('startGame', handleStartGame);
+        }
+    }, [socket, roomName]);
+
     const handleGameStart = (roomName: string, who : number) => {
         setPlayGame(true);
         handleSetRoomName(roomName);
         setWho(who);
+        
         setEndGame(false);
     }
 
     const handleSetSearchGame = (value: boolean) => {
         setSearchGame(value);
+        socket.emit("joinRoom", roomName);
     }
 
     const handleSetEndGame = (endGame: PlayerEndGame)  => {
@@ -40,6 +53,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
         setWho(-1);
         handleSetRoomName("");
         setSearchGame(false);
+
     }
     //return <Pong socket={socket} roomName={roomName} handleSetEndGame={handleSetEndGame} />
     //return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
@@ -66,7 +80,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
     else if (!playGame && endGame)
     {
         return <>
-            <CardEndGame endGame={dataEndGame} handleCloseCardEndGame={handleCloseCardEndGame} />
+            <CardEndGame endGame={dataEndGame} roomName={roomName} handleCloseCardEndGame={handleCloseCardEndGame} />
         </>
     }
     else if (playGame) {
