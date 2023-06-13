@@ -1,33 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import {Card, Grid, Text, Button, Row, Col, Avatar, Badge, Container } from "@nextui-org/react"
-
-
-// function DisplayNewElo({win, elo, pts} : {win: boolean, elo: number, pts: number})
-// {
-// 	let color = "rgba(0, 200, 0, 10.8)";
-// 	let operator = "";
-	
-// 	if (win)
-// 	{
-// 		operator = " + " + pts;
-// 		elo += pts;
-// 	}
-// 	else
-// 	{
-// 		elo -= pts;
-// 		if (elo < 0)
-// 			elo = 0;
-// 		color = "rgba(255, 0, 0, 0.8)";
-// 		operator = " - " + pts;
-// 	}
-// 	return (
-// 		<>
-// 			<Text css={{ ta:'center' }} color={color}>{elo}{operator}</Text>
-// 		</>
-// 	)
-// }
-
+import { useUser } from '@/contexts/user.context';
 
 function PlayerInfos ({win, score, username, avatar} : {win: boolean, score: number, username: string, avatar: string}) {
     let color: String = "success";
@@ -57,7 +31,10 @@ function PlayerInfos ({win, score, username, avatar} : {win: boolean, score: num
 }
 
 
-export default function CardEndGame({win, score1, score2, handleCloseCardEndGame} : {win: boolean, score1: number, score2: number, handleCloseCardEndGame: () => void}) {
+export default function CardEndGame({win, score1, score2, handleCloseCardEndGame} 
+    : {win: boolean, score1: number, score2: number, handleCloseCardEndGame: () => void}) {
+    const { user } = useUser();
+    const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
     return <> 
         <Card >
             <Card.Header css={{jc:'center', }}>
@@ -69,8 +46,8 @@ export default function CardEndGame({win, score1, score2, handleCloseCardEndGame
                     <PlayerInfos
                         win={win}
                         score={score1}
-                        username='gbertin'
-                        avatar='https://i.imgur.com/fjZQLH6.png'
+                        username={user.name}
+                        avatar={pathAvatar}
                     />
                     <Grid  ><Text css={{mx: "15px"}} h1 b> - </Text></Grid>
                     <Grid>

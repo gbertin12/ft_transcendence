@@ -1,7 +1,7 @@
-import { Channel } from '@/interfaces/chat.interfaces';
-import { Button, Container, Grid, Input, Loading, Popover, Switch } from '@nextui-org/react';
+import { Button, Container, Grid, Input, Loading, Popover, Switch, Tooltip } from '@nextui-org/react';
+import { IconEye, IconEyeClosed, IconLock, IconLockOpen, IconPlus } from '@tabler/icons-react';
+import axios from 'axios';
 import React from 'react';
-import { FaLock, FaLockOpen, FaPlus } from 'react-icons/fa';
 
 function respectCriteria(name: string): string {
     if (name.length === 0) return "Name cannot be empty";
@@ -14,10 +14,6 @@ function transformName(name: string): string {
     return name.replace(/\s+/g, '-').toLowerCase().replace(/#/g, '');
 }
 
-interface ChannelCreateProps {
-    onCreation: (channel: Channel) => void;
-}
-
 export const ChannelNameInput: React.FC<any> = ({ setName, error, setError, name }: {setName: (name: string) => void, error: string, setError: (error: string) => void, name?: string}) => {
     setError(respectCriteria(name || ""));
     return (
@@ -27,6 +23,7 @@ export const ChannelNameInput: React.FC<any> = ({ setName, error, setError, name
             clearable
             value={name || ""}
             placeholder="channel-name"
+            aria-label="Name of the channel"
             labelLeft="#"
             helperText={error}
             helperColor={(error === "" ? "success" : "error")}
@@ -44,8 +41,8 @@ export const ChannelPrivateSwitch: React.FC<any> = ({ error, isPrivate, setPriva
     return (
         <Switch
             color={(error === "" ? "success" : "error")}
-            iconOn={<FaLock />}
-            iconOff={<FaLockOpen />}
+            iconOn={<IconEyeClosed />}
+            iconOff={<IconEye />}
             checked={isPrivate}
             onChange={(e) => {
                 setPrivate(e.target.checked);
@@ -55,7 +52,7 @@ export const ChannelPrivateSwitch: React.FC<any> = ({ error, isPrivate, setPriva
 }
 
 
-const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
+const ChannelCreateIcon: React.FC = () => {
     const [creating, setCreating] = React.useState<boolean>(false);
     const [isPrivate, setPrivate] = React.useState<boolean>(false);
     const [password, setPassword] = React.useState<string>("");
@@ -75,7 +72,7 @@ const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
         }}>
             <Popover.Trigger>
                 <Grid xs={2} justify="flex-end" css={{ my: "auto" }} as="a">
-                    <FaPlus />
+                    <IconPlus />
                 </Grid>
             </Popover.Trigger>
             <Popover.Content>
@@ -104,7 +101,8 @@ const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                                     underlined
                                     clearable
                                     placeholder="Password (optional)"
-                                    labelLeft=<FaLock />
+                                    labelLeft=<IconLock />
+                                    aria-label="Password of the channel"
                                     css={{ w: "stretch" }}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
@@ -119,25 +117,23 @@ const ChannelCreateIcon: React.FC<ChannelCreateProps> = ({ onCreation }) => {
                             css={{ w: "stretch", mt: "$8" }}
                             onClick={() => {
                                 setCreating(true);
-                                // Send a POST to /channel/create
-                                fetch("http://localhost:3000/channel/create", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                        name: name,
-                                        isPrivate: isPrivate,
-                                        password: password,
-                                    })
+                                axios.post("http://localhost:3000/channel/create", {
+                                    name: name,
+                                    isPrivate: isPrivate,
+                                    password: password,
+                                }, {
+                                    withCredentials: true,
                                 })
-                                    // TODO: Handle errors
-                                    .then((res) => res.json())
-                                    .then((data) => {
-                                        setCreating(false);
-                                        onCreation(data);
-                                        setPopIsOpen(false);
-                                    });
+                                .then((res) => {
+                                    setCreating(false);
+                                    setPopIsOpen(false);
+                                }).catch((err) => {
+                                    setCreating(false);
+                                    setPopIsOpen(false);
+                                    throw Error("UNEXPECTED ERROR: " + err)
+                                });
+
+
                             }}
                         >
                             {error === "" ? "Create" : "Invalid name"}

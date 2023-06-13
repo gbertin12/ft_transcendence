@@ -6,7 +6,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { UnauthorizedException } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
@@ -39,16 +38,19 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // verify user with 'session' cookie
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
-            client.disconnect();
+            console.log('NO SESSION FOUND');
+            //client.disconnect();
+            client.emit('unauthorized', '/auth');
             return "UnauthorizedException";
         }
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
             const user = await this.userService.getUserById(payload.id);
-
+            client['user'] = user;
             // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
             const player: PlayerInterface = {
                 id: client.id,
+                userId: user.id,
                 name: user.name,
                 state: 0,
                 y: 0,

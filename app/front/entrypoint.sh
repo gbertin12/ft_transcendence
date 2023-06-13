@@ -2,7 +2,7 @@
 
 FLAG_FILE=.npm_modules_installed
 if [ ! -f "$FLAG_FILE" ]; then
-    npm install
+    pnpm install
     touch "$FLAG_FILE"
 fi
 

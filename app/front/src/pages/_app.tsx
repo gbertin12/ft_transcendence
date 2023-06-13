@@ -18,36 +18,42 @@ const lightTheme = createTheme({
 })
 
 const darkTheme = createTheme({
-	type: 'dark',
-	theme: {
-		colors: {
-			backgroundAlpha: "#121212",
-			background: "#0F0F0F",
-			primary: "#32BE32",
-			secondary: "#121212",
+    type: 'dark',
+    theme: {
+        colors: {
+            backgroundAlpha: "#121212",
+            background: "#0F0F0F",
+            primary: "#32BE32",
+            secondary: "#121212",
 
-			primaryLightContrast: "#289828"
-		}
-	}
+            primaryLightContrast: "#289828"
+        }
+    }
 })
 
 import { NextUIProvider } from '@nextui-org/react';
+import { UserContextProvider } from '@/contexts/user.context';
+import { ChatContextProvider } from '@/contexts/chat.context';
 
 export default function App({ Component, pageProps }: AppProps) {
-	return (
-		<NextThemesProvider
-			defaultTheme='system'
-			attribute='class'
-			value={{
-				light: lightTheme.className,
-				dark: darkTheme.className
-			}}
-		>
-			<NextUIProvider>
-				<Layout>
-					<Component {...pageProps} />
-				</Layout>
-			</NextUIProvider>
-		</NextThemesProvider>
-	);
+    return (
+        <NextThemesProvider
+            defaultTheme='system'
+            attribute='class'
+            value={{
+                light: lightTheme.className,
+                dark: darkTheme.className
+            }}
+            >
+            <NextUIProvider>
+                <UserContextProvider>
+                    <ChatContextProvider>
+                        <Layout>
+                            <Component {...pageProps} />
+                        </Layout>
+                    </ChatContextProvider>
+                </UserContextProvider>
+            </NextUIProvider>
+        </NextThemesProvider>
+    );
 }

@@ -1,16 +1,16 @@
-import { Badge, Button, Grid, Popover, Text } from '@nextui-org/react';
+import { Badge, Grid, Text } from '@nextui-org/react';
 import React from 'react';
-import { FaLock, FaTrash } from 'react-icons/fa';
-// import ChannelDeleteIcon from './icons/ChannelDeleteIcon';
-import { Channel } from '@/interfaces/chat.interfaces';
-import ChannelEditIcon from './icons/ChannelEditIcon';
+import { Channel, User } from '@/interfaces/chat.interfaces';
+import { ChannelEditIcon } from './icons/ChannelEditIcon';
+import { IconLock } from '@tabler/icons-react';
 
 interface ChannelEntryProps {
     isSelected: boolean;
     channel: Channel;
+    banned: boolean;
+    muted: boolean;
+    user: User;
     onClick: () => void;
-    onDelete: (channel: Channel) => void;
-    onEdit: (channel: Channel) => void;
     unreadMessages?: number;
 }
 
@@ -24,39 +24,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-function onDeleteConfirmed(channel: Channel, parentHandler: (channel: Channel) => void): boolean {
-    fetch(`http://localhost:3000/channel/${channel.id}`, {
-        method: "DELETE",
-    }).then((response) => {
-        if (response.ok) {
-            parentHandler(channel);
-        }
-        return response.ok;
-    });
-    return false;
-}
-
-function onChannelEdited(modifiedChannel: Channel, parentHandler: (channel: Channel) => void): boolean {
-    fetch(`http://localhost:3000/channel/${modifiedChannel.id}`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: modifiedChannel.name,
-            private: modifiedChannel.private,
-            password: modifiedChannel.password
-        })
-    }).then((res) => {
-        if (res.ok) {
-            parentHandler(modifiedChannel);
-        }
-        return res.ok;
-    });
-    return false;
-}
-
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClick, onDelete, onEdit, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, muted, user, onClick, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
@@ -73,6 +41,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                 borderRadius: "5px",
                 padding: "5px",
                 transition: "background-color 0.05s ease-in-out",
+                cursor: (banned) ? "not-allowed" : "pointer",
             }}
         >
             <Grid xs={1} css={{ my: "auto" }}>
@@ -80,7 +49,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                     content={unreadMessages > 9 ? "9+" : unreadMessages.toString()}
                     placement="bottom-right"
                     color="error"
-                    isInvisible={(unreadMessages === 0)}
+                    css={{ display: (unreadMessages === 0) ? "none" : "block" }}
                 >
                     <Text
                         span
@@ -97,12 +66,22 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                     size="$xl"
                     weight="bold"
                 >
+                    {banned && (
+                        <Badge color="error" css={{"mr": "$2"}}>
+                            BANNED
+                        </Badge>
+                    )}
+                    {muted && (
+                        <Badge color="warning" css={{"mr": "$2"}}>
+                            MUTED
+                        </Badge>
+                    )}
                     {channel.name}
                 </Text>
             </Grid>
-            {channel.owner_id === 1 && (
+            {channel.owner_id === user.id && (
                 <>
-                    <ChannelEditIcon channel={channel} onDelete={() => onDeleteConfirmed(channel, onDelete)} onEdit={() => onChannelEdited(channel, onEdit)} />
+                    <ChannelEditIcon channel={channel} />
                 </>
             ) || (
                     // empty grid to keep the icon in the same place
@@ -113,7 +92,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, onClic
                 )}
             {channel.password !== null && ( // TODO: Handle properly passwords (send a boolean rather than a string?)
                 <Grid xs={1} css={{ my: "auto" }}>
-                    <FaLock />
+                    <IconLock />
                 </Grid>
             ) || (
                     // empty grid to keep the icon in the same place

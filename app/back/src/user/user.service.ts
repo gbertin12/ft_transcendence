@@ -17,14 +17,46 @@ function generateRandomString(len: number) {
 export class UserService {
     constructor(private db: DbService) {}
 
-    async getUserById(id: number): Promise<User> {
+    async getUserById(id: number) {
+        const user = await this.db.user.findUnique({
+            where: { id },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+                otp: true,
+            },
+        });
+        return user;
+    }
+
+    async getUserByName(name: string) {
+        const user = await this.db.user.findUniqueOrThrow({
+            where: { name },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+                otp: true,
+            },
+        });
+        return user;
+    }
+ 
+    async getUserByIdFull(id: number) {
         const user = await this.db.user.findUnique({
             where: { id },
         });
         return user;
     }
 
-    async getUserByName(name: string): Promise<User> {
+    async getUserByNameFull(name: string) {
         const user = await this.db.user.findUniqueOrThrow({
             where: { name },
         });
@@ -39,10 +71,26 @@ export class UserService {
     }
 
     async updateAvatar(id: number, filename: string) {
-        // TODO: delete previous avatar (except if default)
         await this.db.user.update({
             data: { avatar: filename },
             where: { id },
+        });
+    }
+
+    async getAllUserOrderedByElo() {
+        return await this.db.user.findMany({
+            orderBy: {
+                elo:'desc'
+            },
+            select : {
+                id: true,
+                name: true,
+                avatar: true,
+                wins: true,
+                losses: true,
+                elo: true,
+                otp: true,
+            },
         });
     }
 
@@ -56,10 +104,17 @@ export class UserService {
 
     async updateOTPSecret(id: number, otpSecret: string) {
         // can't use update because it only wants unique fields on the 'where'
-        await this.db.user.updateMany({
-            data: { otp: true, otpSecret },
-            where: { id, otp: false },
-        });
+        if (otpSecret) {
+            await this.db.user.updateMany({
+                data: { otp: true, otpSecret },
+                where: { id, otp: false },
+            });
+        } else {
+            await this.db.user.updateMany({
+                data: { otp: false, otpSecret: null },
+                where: { id, otp: true },
+            });
+        }
     }
 
     // create a new user if it doesn't already exist
@@ -105,6 +160,185 @@ export class UserService {
         await this.db.user.update({
             data : { elo },
             where: { name },
+        });
+    }
+
+    async getMatchHistoryById(id: number) {
+        const playerMatchHistory = await this.db.user.findUnique({
+            where: { id },
+            include: {
+                gamesWon: {
+                    include: {
+                        looser: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        }
+                    },
+                },
+                gamesLost: {
+                    include: {
+                        winner: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                                elo: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // ugly workaround
+        delete playerMatchHistory.password;
+        delete playerMatchHistory.otpSecret;
+        delete playerMatchHistory.otp;
+        return playerMatchHistory;
+    }
+
+    async getMatchHistoryByName(name: string) {
+        const playerMatchHistory = await this.db.user.findUnique({
+            where: { name },
+            include: {
+                gamesWon: {
+                    include: {
+                        looser: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                            }
+                        },
+                    },
+                    orderBy: {
+                        date: 'desc',
+                    },
+                },
+                gamesLost: {
+                    include: {
+                        winner: {
+                            select: {
+                                name: true,
+                                avatar: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        date: 'desc',
+                    },
+                }
+            },
+        });
+
+        // ugly workaround
+        delete playerMatchHistory.password;
+        delete playerMatchHistory.otpSecret;
+        delete playerMatchHistory.otp;
+        return playerMatchHistory;
+    }
+
+    async getAllPlayersEloByDate(date: Date) {
+        const ret = await this.db.user.findMany({
+            include: {
+                gamesWon: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                },
+                gamesLost: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                }
+            },
+        });
+
+        let eloAll = 0;
+        for (let i = 0; i < ret.length; i++) {
+            if (!ret[i].gamesWon.length && !ret[i].gamesLost.length) {
+                eloAll += 1000;
+            } else if (ret[i].gamesWon.length && !ret[i].gamesLost.length) {
+                eloAll += ret[i].gamesWon[0].winnerElo;
+            } else if (ret[i].gamesLost.length && !ret[i].gamesWon.length) {
+                eloAll += ret[i].gamesLost[0].looserElo;
+            } else if (ret[i].gamesWon[0].id > ret[i].gamesLost[0].id) {
+                eloAll += ret[i].gamesWon[0].winnerElo;
+            } else {
+                eloAll += ret[i].gamesLost[0].looserElo;
+            }
+        }
+
+        return Math.round(eloAll / ret.length);
+    }
+
+    async getPlayerEloByDate(name: string, date: Date) {
+        const ret = await this.db.user.findUnique({
+            where: { name },
+            include: {
+                gamesWon: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                },
+                gamesLost: {
+                    where: {
+                        date: { lte: date }
+                    },
+                    orderBy: {
+                        id: 'desc',
+                    },
+                    take: 1
+                }
+            },
+        });
+
+        console.log(ret);
+        if (!ret.gamesWon.length && !ret.gamesLost.length) {
+            return 1000;
+        } else if (ret.gamesWon.length && !ret.gamesLost.length) {
+            return ret.gamesWon[0].winnerElo;
+        } else if (ret.gamesLost.length && !ret.gamesWon.length) {
+            return ret.gamesLost[0].looserElo;
+        } else if (ret.gamesWon[0].id > ret.gamesLost[0].id) {
+            return ret.gamesWon[0].winnerElo;
+        } else {
+            return ret.gamesLost[0].looserElo;
+        }
+    }
+
+    async addGame(
+        winnerId: number,
+        winnerScore: number,
+        looserId: number,
+        looserScore: number,
+        eloDiff: number,
+        winnerElo: number,
+        looserElo: number,
+    ) {
+        await this.db.matchHistory.create({
+            data: {
+                winnerId,
+                winnerScore,
+                looserId,
+                looserScore,
+                eloDiff, 
+                winnerElo,
+                looserElo,
+            }
         });
     }
 }

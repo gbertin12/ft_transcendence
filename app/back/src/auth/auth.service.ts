@@ -123,7 +123,7 @@ export class AuthService {
         const secret = new OTPAuth.Secret({ size: 42 });
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
-            label: 'ft_transcendence',
+            label: 'ft_pong',
             algorithm: 'SHA256',
             digits: 6,
             period: 30,
@@ -134,12 +134,16 @@ export class AuthService {
         return uri;
     }
 
+    async unsetOTP(id: number) {
+        await this.userService.updateOTPSecret(id, null);
+    }
+
     async verifyOTP(id: number, token: string): Promise<Boolean> {
         const otpSecret = await this.userService.getOTPSecretById(id);
         const secret = OTPAuth.Secret.fromBase32(otpSecret);
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
-            label: 'ft_transcendence',
+            label: 'ft_pong',
             algorithm: 'SHA256',
             digits: 6,
             period: 30,

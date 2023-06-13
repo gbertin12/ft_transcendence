@@ -5,9 +5,10 @@ import io, { Socket } from 'socket.io-client';
 import CardPlayerInformation from './CardPlayerInformation';
 import ButtonStart  from './ButtonStart'
 import CardEndGame from './CardEndGame';
+import { useUser } from '@/contexts/user.context';
 
 
-export default function GameBody({socket} : {socket: Socket}) {
+export default function GameBody() {
 	const [playGame, setPlayGame] = useState(false);
 	const [endGame, setEndGame] = useState(false);
 	const [roomId, setRoomId] = useState('');
@@ -16,7 +17,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 	const [dataEndGame, setDataEndGame] = useState({
 		win: false, score1: 0, score2: 0 
 	})
-	
+
 	const handleGameStart = (roomName: string) => {
 		setPlayGame(true);
 		setRoomId(roomName);
@@ -55,7 +56,7 @@ export default function GameBody({socket} : {socket: Socket}) {
 				</Row>
 			</Container>
 			<Spacer y={2} />
-			<ButtonStart searchGame={searchGame} socket={socket} modes={modes} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
+			<ButtonStart searchGame={searchGame} modes={modes} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
 		</>
 	}
 	else if (!playGame && endGame)
@@ -66,7 +67,9 @@ export default function GameBody({socket} : {socket: Socket}) {
 	}
 	else if (playGame) {
 		return <>
-			<Pong socket={socket} roomId={roomId} handleSetEndGame={handleSetEndGame} />
+			<Pong roomId={roomId} handleSetEndGame={handleSetEndGame} />
 		</>
 	}
+	else
+		return <></>
 }
