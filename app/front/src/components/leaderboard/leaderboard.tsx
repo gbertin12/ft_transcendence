@@ -56,7 +56,7 @@ function setDataRow(users : User[]) {
 		
 		if (!winrate)
 			winrate = 0;
-		const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
+		const pathAvatar : string = "http://bess-f1r2s10:3000/static/avatars/" + user.avatar;
 		let newRow : RowLeaderboard = {
 			rank : id,
 			avatar:  pathAvatar,
@@ -74,7 +74,7 @@ export default function Leaderboard() {
 	const [rowsLeaderboard, setRowsLeaderboard] = useState<RowLeaderboard[]>([]);
 
 	useEffect(() => {
-        fetch("http://localhost:3000/user/leaderboard")
+        fetch("http://bess-f1r2s10:3000/user/leaderboard")
             .then((res) => res.json())
             .then((data) => {
 				setRowsLeaderboard(setDataRow(data))

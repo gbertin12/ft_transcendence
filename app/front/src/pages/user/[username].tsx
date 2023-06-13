@@ -17,7 +17,7 @@ export default function Profile() {
         if (router.query.username) {
             (async () => {
                 const res = await fetch(
-                    `http://localhost:3000/user/profile/${router.query.username}`
+                    `http://bess-f1r2s10:3000/user/profile/${router.query.username}`
                 );
                 if (res?.ok) {
                     const data = await res.json();

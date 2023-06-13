@@ -9,7 +9,7 @@ interface UserContextType {
     socket: Socket;
 }
 
-let socket: Socket = io('http://localhost:8001', { withCredentials: true });
+let socket: Socket = io('http://bess-f1r2s10:8001', { withCredentials: true });
 
 const UserContext = createContext<UserContextType>({
 user: {} as User,
@@ -24,7 +24,7 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchUser = async () => {
-        axios.get('http://localhost:3000/user/me',
+        axios.get('http://bess-f1r2s10:3000/user/me',
                 {
                     withCredentials: true,
                     validateStatus: () => true,

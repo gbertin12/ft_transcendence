@@ -35,7 +35,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchChannels = async () => {
-            axios.get("http://localhost:3000/channel/all", 
+            axios.get("http://bess-f1r2s10:3000/channel/all", 
             {
 				withCredentials: true,
 				validateStatus: () => true,
@@ -46,7 +46,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             })
         };
         const fetchFriends = async () => {
-            axios.get("http://localhost:3000/friends/", { withCredentials: true })
+            axios.get("http://bess-f1r2s10:3000/friends/", { withCredentials: true })
             .then((res) => {
                 if (res.status !== 200) return ;
                 if (Array.isArray(res.data)) {
@@ -71,7 +71,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         };
         const fetchBans = async () => {
             try {
-                axios.get("http://localhost:3000/punishments/active", 
+                axios.get("http://bess-f1r2s10:3000/punishments/active", 
                 {
                     withCredentials: true,
                     validateStatus: () => true,

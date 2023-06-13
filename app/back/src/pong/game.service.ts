@@ -47,11 +47,8 @@ const updateBallSpeedY = (room: roomInterface, player: number) => {
 const sendBallPosition = (room: roomInterface, server: Server) => {
     const x = convertToPercent(room.pongState.ball.x, canvasWidth);
     const y = convertToPercent(room.pongState.ball.y, canvasHeight);
-    server.to(room.pongState.player1.id).emit('updateBall', {
-        x: x,
-        y: y,
-    });
-    server.to(room.pongState.player2.id).emit('updateBall', {
+
+    server.to(room.name).emit('updateBall', {
         x: x,
         y: y,
     });
