@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpException, HttpStatus, Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { DbModule } from '../db/db.module';
 import { UserController } from './user.controller';
@@ -14,13 +14,28 @@ const storage = diskStorage({
     }
 });
 
+const fileFilter = (
+    _req: any,
+    file: any,
+    callback: (error: Error, acceptFile: boolean) => any,
+) => {
+    if (!file.originalname.match(/\.(png|jpe?g|gif|webp)$/)) {
+        callback(
+            new HttpException("Error: only images are allowed (size must be under 10kB)", HttpStatus.BAD_REQUEST),
+            false,
+        );
+    }
+    callback(null, true);
+};
+
 @Module({
     controllers: [UserController],
     providers: [UserService],
     imports: [
         DbModule,
         MulterModule.register({
-            storage
+            storage,
+            fileFilter,
         }),
     ],
     exports: [UserService],

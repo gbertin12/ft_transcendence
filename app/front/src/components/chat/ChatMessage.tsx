@@ -1,36 +1,141 @@
-import { Avatar, Grid, Text } from '@nextui-org/react';
+import { Channel, MessageData, SenderData } from '@/interfaces/chat.interfaces';
+import { Avatar, Text, Tooltip } from '@nextui-org/react';
+import { IconCrown, IconShield } from '@tabler/icons-react';
 import React from 'react';
+import PowerActions from './powertools/PowerActions';
 
 interface ChatMessageProps {
-    content: string;
-    senderId: number;
-    userId: number;
+    data: MessageData;
+    concatenate: boolean;
+    channel: Channel;
+    sender: SenderData;
+    isAuthor?: boolean;
+    senderOwner?: boolean;
+    senderAdmin?: boolean;
+    isOwner?: boolean; // current user
+    isAdmin?: boolean; // current user
     ghost?: boolean;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ content, senderId, userId }) => {
+function formatDate(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
+        return `Today ${hours}:${minutes}`;
+    }
+    if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear()) {
+        return `Yesterday ${hours}:${minutes}`;
+    }
+    return `${date.toLocaleDateString()} at ${hours}:${minutes}`;
+}
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, sender, isAuthor, senderOwner, senderAdmin, isOwner, isAdmin, ghost }) => {
+    const [hover, setHover] = React.useState<boolean>(false);
+
+    if (data.sender.id === -1) { // System message
+        return (
+            <Text
+                span
+                color="$accents7"
+                css={{
+                    ta: "center",
+                    display: "block",
+                }}
+            >
+                {data.content}
+            </Text>
+        )
+    }
+
     return (
-        <Grid.Container>
-            <Grid xs={1}>
-                {senderId !== userId &&
-                    <Avatar />
-                }
-            </Grid>
-            <Grid xs={11} css={{ w: "stretch" }} justify={senderId === userId ? "flex-end" : "flex-start"}>
-                <Text
-                    span
-                    css={{
-                        backgroundColor: senderId === userId ? "$success" : "$gray200",
-                        textAlign: senderId === userId ? "right" : "left",
-                        borderRadius: "$2xl",
-                        padding: "$xs",
-                        color: senderId === userId ? "$white" : "default",
-                    }}
-                >
-                    {content}
-                </Text>
-            </Grid>
-        </Grid.Container>
+        <div>
+            <div
+                className='static ml-0 indent-0 pl-[70px]'
+                onMouseEnter={() => setHover(true)}
+                onMouseLeave={() => setHover(false)}
+            >
+                {!concatenate && (
+                    <>
+                        <Avatar
+                            src={`http://localhost:3000/static/avatars/${data.sender.avatar}`}
+                            css={{
+                                position: "absolute",
+                                left: "16px",
+                                w: "40px",
+                                h: "40px",
+                                mt: "calc(4px - 0.125rem)",
+                            }}
+                        />
+                        <Text className="overflow-hidden block relative">
+                            <Text span color="$black" className="mr-1 text-lg font-medium">
+                                {data.sender.name}
+                                {senderOwner && (
+                                    <Text color="$error" css={{ display: "inline-flex" }}>
+                                        <Tooltip
+                                            rounded
+                                            hideArrow
+                                            color="error"
+                                            content="Owner"
+                                        >
+                                            <IconCrown
+                                                size={20}
+                                                cursor="pointer"
+                                                style={{
+                                                    marginLeft: "0.25rem",
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Text>
+                                )}
+                                {senderAdmin && (
+                                    <Text
+                                        color="$warning"
+                                        css={{ display: "inline-flex" }}
+                                    >
+                                        <Tooltip
+                                            rounded
+                                            hideArrow
+                                            color="warning"
+                                            content="Admin"
+                                        >
+                                            <IconShield
+                                                size={20}
+                                                cursor="pointer"
+                                                style={{
+                                                    marginLeft: "0.25rem",
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Text>
+                                )}
+                            </Text>
+                            <Text span color="$neutral" className="text-sm">{formatDate(data.timestamp)}</Text>
+                        </Text>
+                    </>
+                )}
+                <div className='absolute right-4 top-0'>
+                    {hover && (
+                        <PowerActions
+                            channel={channel}
+                            sender={sender}
+                            message={data}
+                            isAuthor={isAuthor || false}
+                            isOwner={(isOwner || false)}
+                            isAdmin={(isAdmin || false)}
+                        />
+                    )}
+                </div>
+                <div>
+                    {/* wrap the text */}
+                    <Text span css={{ wordWrap: "break-word" }} >
+                        {data.content}
+                    </Text>
+                </div>
+            </div>
+        </div>
     );
 };
 

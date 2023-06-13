@@ -19,7 +19,7 @@ const setAvailablePower = (
 	obstacles: obstaclesInterface[],
 	) : number  => {
 
-	const id = Math.floor(Math.random() *  (powerAvailables.length - nbPowers));
+	const id = Math.floor(Math.random() * (powerAvailables.length - nbPowers));
 	let i = 0;
 	let nbAvailable = 0;
 	while (nbAvailable != id && i < powerAvailables.length)
@@ -28,10 +28,10 @@ const setAvailablePower = (
 			nbAvailable++;
 		i++;
 	}
-	//const type = getType(obstacles, powerAvailables);
+	const type = getType(obstacles, powerAvailables);
 	while (powerAvailables[i].isActive && i < powerAvailables.length)
 		i++;
-	const type = 1;
+	//const type = 2;
 	powerAvailables[i].isActive = true;
 	powerAvailables[i].type = type;
 	return i;

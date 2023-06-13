@@ -8,6 +8,7 @@ import {
     Param,
     ParseFilePipe,
     Post,
+    Query,
     Req,
     UploadedFile,
     UseGuards,
@@ -17,6 +18,15 @@ import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import { Type } from 'class-transformer';
+import { IsDate, IsISO8601 } from 'class-validator';
+
+class DateDto {
+    @Type(() => () => new Date())
+    @IsISO8601()
+    date: Date;
+}
 
 @Controller('user')
 export class UserController {
@@ -31,11 +41,32 @@ export class UserController {
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
-    async updateName(
+    @UseInterceptors(FileInterceptor('avatar'))
+    async update(
         @Req() req: Request,
-        @Body('name') new_name: string
+        @Body('name') new_name: string,
+        @UploadedFile(new ParseFilePipe({
+            validators: [
+                new MaxFileSizeValidator({ maxSize: 10000 }),
+            ],
+        })) avatar?: Express.Multer.File,
     ) {
-        await this.userService.updateName(req.user['id'], new_name);
+        try {
+            await this.userService.updateName(req.user['id'], new_name);
+        } catch {
+            throw new HttpException(
+                `Error: Username '${new_name}' already exists`,
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (avatar) {
+            await this.userService.updateAvatar(req.user['id'], avatar.filename);
+            if (req.user['avatar'] !== 'default.jpg') {
+                fs.unlinkSync(`/app/files/static/avatars/${req.user['avatar']}`);
+            }
+            return avatar.filename;
+        }
     }
 
     @Get('profile/:username')
@@ -48,17 +79,27 @@ export class UserController {
         }
     }
 
-    @UseGuards(AuthGuard('jwt-2fa'))
-    @Post('avatar')
-    @UseInterceptors(FileInterceptor('avatar'))
-    async uploadAvatar(
-        @UploadedFile(new ParseFilePipe({
-            validators: [
-                new MaxFileSizeValidator({ maxSize: 10000 }),
-            ],
-        })) avatar: Express.Multer.File,
-        @Req() req: Request
+    @Get('leaderboard')
+    async getLeaderboard() {
+        return await this.userService.getAllUserOrderedByElo();
+    }
+
+    @Get('history/:username')
+    async getMatchHistory(@Param('username') username: string) {
+        return await this.userService.getMatchHistoryByName(username);
+    }
+
+    @Get('elo/general')
+    async getEloDayGeneral(@Query() dto: DateDto) {
+        return await this.userService.getAllPlayersEloByDate(dto.date);
+    }
+
+    @Get('elo/day/:username')
+    async getEloDay(
+        @Param('username') username: string,
+        @Query() dto: DateDto,
     ) {
-        await this.userService.updateAvatar(req.user['id'], avatar.filename);
+        //console.log(req.user);
+        return await this.userService.getPlayerEloByDate(username, dto.date);
     }
 }
