@@ -74,6 +74,7 @@ export interface PowerActionData {
 	channel: number;
 	targetSender: SenderData;
 	targetMessage: MessageData;
+	dm?: boolean;
 }
 
 export interface PunishmentData {

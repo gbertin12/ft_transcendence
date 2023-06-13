@@ -24,7 +24,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     } = useChat();
 
     const fetchMessages = useCallback(async (interlocutor: User): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/dm/${interlocutor.id}/messages`,
+        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/messages`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -64,7 +64,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                 return [...messages];
             });
         });
-        fetchMessages(user).then((messages) => {
+        fetchMessages(interlocutor).then((messages) => {
             setMessages(messages);
         });
         return () => {
@@ -75,7 +75,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
 
     const handleNewMessage = useCallback((message: string) => {
         try {
-            axios.post(`http://localhost:3000/dms/${user.id}/message`, { content: message }, { withCredentials: true })
+            axios.post(`http://localhost:3000/dms/${interlocutor.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
             throw Error("UNEXPECTED ERROR: " + err);
         }
@@ -90,7 +90,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                     <Grid.Container>
                         <Grid css={{ w: "stretch" }}>
                             <Container direction="row" justify="space-between" alignItems="center" display="flex">
-                                <Text h3>{user.name}</Text>
+                                <Text h3>{interlocutor.name}</Text>
                             </Container>
                             <ul
                                 style={{
@@ -124,8 +124,8 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                         <Grid xs={12}>
                             <Textarea
                                 fullWidth
-                                placeholder={`Send a message to ${user.name}`}
-                                aria-label={`Send a message to ${user.name}`}
+                                placeholder={`Send a message to ${interlocutor.name}`}
+                                aria-label={`Send a message to ${interlocutor.name}`}
                                 minLength={1}
                                 maxLength={2000}
                                 onKeyPress={(e: any) => {
@@ -140,7 +140,6 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                                     }
                                 }}
                             />
-                            )
                         </Grid>
                     </Grid.Container>
                 </Grid>

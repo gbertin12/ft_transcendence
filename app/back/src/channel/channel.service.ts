@@ -230,6 +230,9 @@ export class ChannelService {
                 },
             },
         }).then((channel) => {
+            if (!channel) {
+                return null; // could be a dm
+            }
             staff.owner_id = channel.owner_id;
             staff.administrators = channel.admins.map((admin) => {
                 return admin.user_id;

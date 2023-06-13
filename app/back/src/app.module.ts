@@ -6,9 +6,10 @@ import { PongModule } from './pong/pong.module';
 import { ChatModule } from './chat/chat.module';
 import { PunishmentsModule } from './punishments/punishments.module';
 import { DatasModule } from './datas/datas.module';
+import { DmsModule } from './dms/dms.module';
 
 @Module({
-    imports: [AuthModule, DbModule, UserModule, PongModule, ChatModule, PunishmentsModule, DatasModule],
+    imports: [AuthModule, DbModule, UserModule, PongModule, ChatModule, PunishmentsModule, DatasModule, DmsModule],
 })
 
 export class AppModule {}

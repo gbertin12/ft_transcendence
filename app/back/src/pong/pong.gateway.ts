@@ -58,7 +58,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 modes: true,
             };
             this.players.push(player);
-            console.log('players', this.players);
+            // console.log('players', this.players);
             // send the player id to the client
             client.emit('playerId', client.id);
         } catch {
