@@ -33,7 +33,7 @@ export default function EditPlayerInfo(
         }
 
         if (name || files) {
-            const res = await fetch("http://bess-f1r2s10:3000/user/me", {
+            const res = await fetch("http://localhost:3000/user/me", {
                 credentials: "include",
                 method: "POST",
                 body: formData,

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react'
 import { useUser } from '@/contexts/user.context';
 
-export default function ButtonStart({ searchGame, modes, handleGameStart, handleSetSearchGame }
-    : { searchGame: boolean, modes: boolean, handleGameStart: (roomName: string, who: number) => void, handleSetSearchGame: (value: boolean) => void }) {
+export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
+    : { searchGame: boolean, modes: boolean, handleSetSearchGame: (value: boolean) => void }) {
     const { socket } = useUser();
 
     // Cancel Game
@@ -25,13 +25,6 @@ export default function ButtonStart({ searchGame, modes, handleGameStart, handle
             handleSetSearchGame(true);
         }
     }
-
-    useEffect(() => {
-        socket?.on('searchGame', handleGameStart)
-        return () => {
-            socket?.off('searchGame', handleGameStart);
-        }
-    }, [handleGameStart]);
 
     if (searchGame === true) {
         return <>

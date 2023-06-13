@@ -15,7 +15,7 @@ export default function MFAButton() {
     const [ showInput, setShowInput ] = useState<boolean>(false);
 
     async function verify2FA() {
-        const res = await fetch("http://bess-f1r2s10:3000/auth/2fa/verify", {
+        const res = await fetch("http://localhost:3000/auth/2fa/verify", {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -26,7 +26,7 @@ export default function MFAButton() {
     }
 
     async function enable2FA() {
-        const res = await fetch("http://bess-f1r2s10:3000/auth/2fa/enable", {
+        const res = await fetch("http://localhost:3000/auth/2fa/enable", {
             credentials: "include"
         });
         if (res?.ok) {
@@ -38,7 +38,7 @@ export default function MFAButton() {
     }
 
     async function disable2FA() {
-        await fetch("http://bess-f1r2s10:3000/auth/2fa/disable", {
+        await fetch("http://localhost:3000/auth/2fa/disable", {
             credentials: "include"
         });
         setUser({ ...user, otp: false });

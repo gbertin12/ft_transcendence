@@ -1,10 +1,10 @@
 import {
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
+    MessageBody,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { roomInterface, PlayerInterface, PlayerEndGame } from '../../src/interfaces/pong.interface';
@@ -33,8 +33,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
     // when a client connects, we add it to the connectedUsers array
-    async handleConnection(client: Socket) 
-    {
+    async handleConnection(client: Socket) {
         // verify user with 'session' cookie
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
         if (!cookies || !cookies.hasOwnProperty('session')) {
@@ -54,7 +53,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 y: 0,
                 score: 0,
                 modes: true,
-                userInfos : user,
+                userInfos: user,
             };
             this.players.push(player);
             //console.log('players', this.players);
@@ -67,8 +66,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // remove player from the players array
-    handleDisconnect(client: Socket) 
-    {
+    handleDisconnect(client: Socket) {
         // Retirer le joueur de la liste des joueurs actifs
         const leaver = this.players.find(
             (player) => player.id === client.id && player.state === 2,
@@ -84,8 +82,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('searchGame')
-    searchGame(@MessageBody() data: {clientId: string, modes: boolean}) 
-    {
+    searchGame(@MessageBody() data: { clientId: string, modes: boolean }) {
         const playerId = data.clientId;
         const player = this.players.find((player) => player.id === playerId);
         if (player) {
@@ -113,7 +110,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     modes: data.modes
                 },
             };
-            
+
             this.rooms.push(newRoom);
             this.server.to(playerId).emit('searchGame', newRoom.name, 1);
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0);
@@ -122,29 +119,30 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('playerMove')
-    playerMove(@MessageBody() data: { percent: number; clientId: string; room: string }) 
-    {
+    playerMove(@MessageBody() data: { percent: number; clientId: string; room: string }) {
         const room = this.rooms.find((room) => room.name === data.room);
-        if (room) 
-        {
-            if (room.pongState.player1.id === data.clientId) 
-            {
-                const percent = 87.5 - data.percent;
+        if (room) {
+            if (room.pongState.player1.id === data.clientId) {
+                const percent = data.percent;
                 room.pongState.player1.y = percent;
-                this.server.to(room.pongState.player2.id).emit('playerMove', percent, room.pongState.player2.y);
-            } 
-            else if (room.pongState.player2.id === data.clientId) 
-            {
-                const percent = 87.5 - data.percent;
+                this.server.to(room.name).emit('playerMove', {
+                    player: 1,
+                    percent: percent,
+                });
+            }
+            else if (room.pongState.player2.id === data.clientId) {
+                const percent = data.percent;
                 room.pongState.player2.y = percent;
-                this.server.to(room.pongState.player1.id).emit('playerMove', room.pongState.player1.y, percent);
+                this.server.to(room.name).emit('playerMove', {
+                    player: 2,
+                    percent: percent,
+                });
             }
         }
     }
 
     @SubscribeMessage('cancelGame')
-    cancelGame(@MessageBody() data: {clientId: string}) 
-    {
+    cancelGame(@MessageBody() data: { clientId: string }) {
         const playerId = data.clientId;
         const player = this.players.find((player) => player.id === playerId);
         if (player) {
@@ -154,15 +152,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('joinRoom')
-    handleJoinRoom(client: Socket, roomName : string): void 
-    {
+    handleJoinRoom(client: Socket, roomName: string): void {
         client.join(roomName);
         console.log("joinRoom", client.id);
     }
 
     @SubscribeMessage('leaveRoom')
-    handleLeaveRoom(client: Socket, roomName : string): void 
-    {
+    handleLeaveRoom(client: Socket, roomName: string): void {
         client.leave(roomName);
         console.log("leaveRoom", client.id);
 
@@ -185,8 +181,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('leaveGame')
-    handleLeaveGame(client: Socket, roomName: string)
-    {
+    handleLeaveGame(client: Socket, roomName: string) {
         this.bustLeaver(client, roomName);
     }
 }

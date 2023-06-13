@@ -7,9 +7,10 @@ import CardEndGame from './CardEndGame';
 import { useUser } from '@/contexts/user.context';
 import { PlayerEndGame } from '@/interfaces/pong.interface';
 
-export default function GameBody({ roomName, handleSetRoomName }: { roomName: string, handleSetRoomName: (name: string) => void}) {
+export default function GameBody() {
     const [playGame, setPlayGame] = useState(false);
     const [endGame, setEndGame] = useState(false);
+    const [roomName, setRoomName] = useState('');
     const [who, setWho] = useState<number>(-1);
     const [searchGame, setSearchGame] = useState(false);
     const [modes, setModes] = useState(true);
@@ -17,28 +18,23 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
 
     const { user, socket } = useUser();
 
-    const handleStartGame = () => {
-        
-    }
-
-    useEffect(() => {
-        socket.on('startGame', handleStartGame);
-        return () => {
-            socket.off('startGame', handleStartGame);
-        }
-    }, [socket, roomName]);
-
-    const handleGameStart = (roomName: string, who : number) => {
+    const handleStartGame = (roomName: string, playerNumber: number) => {
+        setRoomName(roomName);
+        setWho(playerNumber);
+        socket.emit("joinRoom", roomName);
         setPlayGame(true);
-        handleSetRoomName(roomName);
-        setWho(who);
-        
         setEndGame(false);
     }
 
+    useEffect(() => {
+        socket.on('searchGame', handleStartGame)
+        return () => {
+            socket.off('searchGame', handleStartGame);
+        }
+    }, [socket, roomName]);
+
     const handleSetSearchGame = (value: boolean) => {
         setSearchGame(value);
-        socket.emit("joinRoom", roomName);
     }
 
     const handleSetEndGame = (endGame: PlayerEndGame)  => {
@@ -51,13 +47,12 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
     const handleCloseCardEndGame = () => {
         setEndGame(false);
         setWho(-1);
-        handleSetRoomName("");
+        setRoomName("");
         setSearchGame(false);
-
     }
     //return <Pong socket={socket} roomName={roomName} handleSetEndGame={handleSetEndGame} />
     //return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
-    const pathAvatar : string = "http://bess-f1r2s10:3000/static/avatars/" + user.avatar;
+    const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
     if (!playGame && !endGame)
     {
         return <>
@@ -74,7 +69,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
                 </Row>
             </Container>
             <Spacer y={2} />
-            <ButtonStart searchGame={searchGame} modes={modes} handleGameStart={handleGameStart} handleSetSearchGame={handleSetSearchGame} />
+            <ButtonStart searchGame={searchGame} modes={modes} handleSetSearchGame={handleSetSearchGame} />
         </>
     }
     else if (!playGame && endGame)

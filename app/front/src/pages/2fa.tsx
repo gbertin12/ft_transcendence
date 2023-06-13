@@ -8,7 +8,7 @@ export default function Mfa() {
     useEffect(() => {
         (async () => {
             const res = await fetch(
-                'http://bess-f1r2s10:3000/auth/2fa/activate',
+                'http://localhost:3000/auth/2fa/activate',
                 { credentials: 'include' }
             );
             if (res?.ok) {

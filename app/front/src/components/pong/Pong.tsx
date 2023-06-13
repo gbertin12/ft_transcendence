@@ -40,10 +40,12 @@ const convertToPixel = (value: number, maxValue: number) => {
     return (value * maxValue) / 100;
 };
 
-export default function Pong({ roomName, who, handleSetEndGame }: { roomName: string, who : number, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
+export default function Pong({ roomName, who, handleSetEndGame }: { roomName: string, who: number, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
     const [score, setScore] = useState({ scorePlayer1: 0, scorePlayer2: 0 });
     const [ball, setBall] = useState({ x: 0, y: 0 });
-    const [playerPosition, setPlayerPosition] = useState({ yPlayerOne: 0, yPlayerTwo: 0 });
+    const [playerOnePosition, setPlayerOnePosition] = useState<number>(0);
+    const [playerTwoPosition, setPlayerTwoPosition] = useState<number>(0);
+
     const [canvas, setCanvas] = useState({ height: 0, width: 0, speedPlayer: 0 });
     const [powers, setPowers] = useState([
         { isActive: false, x: 0, y: 0, id: 0, type: 0 },
@@ -87,15 +89,17 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
     // ======================== CallBack pour update la position de la balle ============================================
 
-    const handleKeyDown = useCallback((e : KeyboardEvent) => {
-        if (e.key === 'ArrowUp')
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'ArrowUp') {
             setKeyState(1);
-        else if (e.key === 'ArrowDown')
+        }
+        else if (e.key === 'ArrowDown') {
             setKeyState(-1);
+        }
     }, [canvas]);
 
 
-    const handleKeyUp = useCallback((e : KeyboardEvent) => {
+    const handleKeyUp = useCallback((e: KeyboardEvent) => {
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
             setKeyState(0);
     }, [canvas]);
@@ -106,56 +110,54 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
     const gameLoop = useCallback(() => {
         callBackSetCanvasProperties();
         // Arrow up
-        if (keyState === 1)
-		{   // player 1
-            if (who == 0)
-            {
-                if (playerPosition.yPlayerOne -5 > 0)
+        let playerPos: number = (who === 0) ? playerOnePosition : playerTwoPosition;
+        let newPos: number = -1;
+        let newPosPixel: number = -1;
+        switch (keyState) {
+            case 1: // up
+                console.table({
+                    "type": "newPos UP",
+                    "newPos": newPos,
+                    "playerPos": playerPos,
+                    "keyState": keyState,
+                    "speedPlayer": canvas.speedPlayer,
+                    "height": canvas.height,
+                })
+                newPos = (playerPos - canvas.speedPlayer) * 100 / canvas.height;
+                newPos = (newPos < 0) ? 0 : newPos;
+                newPosPixel = convertToPixel(newPos, canvas.height);
+                break;
+            case -1: // down
+                console.table({
+                    "type": "newPos DOWN",
+                    "newPos": newPos,
+                    "playerPos": playerPos,
+                    "keyState": keyState,
+                    "speedPlayer": canvas.speedPlayer,
+                    "height": canvas.height,
+                })
+                newPos = (playerPos + canvas.speedPlayer) * 100 / canvas.height;
+                newPos = (newPos > 87.5) ? 87.5 : newPos;
+                newPosPixel = convertToPixel(newPos, canvas.height);
+                break;
+            default:
+                newPos = -1;
+                break;
+        }
+        console.log(newPos);
+        if (newPos && newPos !== -1 && newPos !== playerPos) {
+            socket.emit('playerMove',
                 {
-                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne - canvas.speedPlayer, yPlayerTwo: playerPosition.yPlayerTwo});
-                    var percent = (playerPosition.yPlayerOne - canvas.speedPlayer) * 100 / canvas.height;
-                    if (percent > 87.5)
-                        percent = 87.5;
-                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
+                    percent: newPos,
+                    clientId: socket.id,
+                    room: roomName
                 }
-            } else if (who === 1) {
-                // player 2
-                if (playerPosition.yPlayerTwo - 5 > 0)
-                {
-                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne, yPlayerTwo: playerPosition.yPlayerTwo  - canvas.speedPlayer});
-                    var percent = (playerPosition.yPlayerTwo - canvas.speedPlayer) * 100 / canvas.height;
-                    if (percent > 87.5)
-                        percent = 87.5;
-                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
-                }
-            }
-		}
-		if (keyState == -1)
-		{
-            // Arrow down
+            );
             if (who === 0)
-            {
-                //player 1
-                if (playerPosition.yPlayerOne + canvas.speedPlayer < canvas.height - canvas.height / 8)
-                {
-                    var percent = (playerPosition.yPlayerOne + canvas.speedPlayer) * 100 / canvas.height;
-                    if (percent > 87.5)
-                    percent = 87.5;
-                    setPlayerPosition({yPlayerOne: convertToPixel(percent, canvas.height), yPlayerTwo: playerPosition.yPlayerTwo});
-                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
-                }
-            } else if (who === 1) {
-                //player 2
-                if (playerPosition.yPlayerTwo + canvas.speedPlayer < canvas.height - canvas.height / 8)
-                {
-                    var percent = (playerPosition.yPlayerTwo + canvas.speedPlayer) * 100 / canvas.height;
-                    if (percent > 87.5)
-                        percent = 87.5;
-                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne, yPlayerTwo: convertToPixel(percent, canvas.height)});
-                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
-                }
-            }
-		}
+                setPlayerOnePosition(newPosPixel);
+            else
+                setPlayerTwoPosition(newPosPixel);
+        }
         setBall({ x: ball.x, y: ball.y });
     }, [ball, callBackSetCanvasProperties]);
 
@@ -163,8 +165,11 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
     // =============================== Handle receive socket information ===============================================
 
-    const handleMovePlayer = (posP1: number, posP2 : number) => {
-        setPlayerPosition({ yPlayerOne: convertToPixel(posP1, canvas.height), yPlayerTwo : convertToPixel(posP2, canvas.height)})
+    const handleMovePlayer = (playerNumber: number, percent: number) => {
+        if (playerNumber === 0)
+            setPlayerOnePosition(convertToPixel(percent, canvas.height));
+        else
+            setPlayerTwoPosition(convertToPixel(percent, canvas.height));
     }
 
     const handleUpdateScore = ({ scorePlayer1, scorePlayer2 }: { scorePlayer1: number, scorePlayer2: number }) => {
@@ -226,7 +231,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         console.log('resetPlayers', percentP1, percentP2);
         const newYP1 = convertToPixel(percentP1, canvas.height);
         const newYP2 = convertToPixel(percentP2, canvas.height);
-        setPlayerPosition({ yPlayerOne: newYP1, yPlayerTwo: newYP2 });
+        setPlayerOnePosition(newYP1);
+        setPlayerTwoPosition(newYP2);
     }
 
     const handleEndGame = (endGame: PlayerEndGame) => {
@@ -266,7 +272,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 cancelAnimationFrame(gameLoop);
             }
         }
-    }, [gameLoop, playerPosition, canvas, socket]);
+    }, [gameLoop, canvas, socket]);
 
     function DisplayInfoPlayer({ avatar, username, score, elo, reversed }: { avatar: string, username: string, score: number, elo: number, reversed: boolean }) {
         if (!reversed) {
@@ -315,8 +321,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 <div>
                     <div ref={ref} id="pong" className={styles.board}>
                         <Ball x={ball.x} y={ball.y} />
-                        <Player x={canvas.width * 5 / 100 - 12} y={playerPosition.yPlayerOne} canvasHeight={canvas.height} />
-                        <Player x={canvas.width - canvas.width * 5 / 100} y={playerPosition.yPlayerTwo} canvasHeight={canvas.height} />
+                        <Player x={canvas.width * 5 / 100 - 12} y={playerOnePosition} canvasHeight={canvas.height} />
+                        <Player x={canvas.width - canvas.width * 5 / 100} y={playerTwoPosition} canvasHeight={canvas.height} />
                         <Power x={powers[0].x} y={powers[0].y} isActive={powers[0].isActive} type={powers[0].type} />
                         <Power x={powers[1].x} y={powers[1].y} isActive={powers[1].isActive} type={powers[1].type} />
                         <Power x={powers[2].x} y={powers[2].y} isActive={powers[2].isActive} type={powers[2].type} />
