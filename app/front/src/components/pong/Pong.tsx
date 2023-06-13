@@ -39,7 +39,7 @@ const convertToPixel = (value: number, maxValue: number) => {
     return (value * maxValue) / 100;
 };
 
-export default function Pong({ roomName, handleSetEndGame }: { roomName: string, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
+export default function Pong({ roomName, who, handleSetEndGame }: { roomName: string, who : number, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
     const [score, setScore] = useState({ scorePlayer1: 0, scorePlayer2: 0 });
     const [ball, setBall] = useState({ x: 0, y: 0 });
     const [playerPosition, setPlayerPosition] = useState({ yPlayerOne: 0, yPlayerTwo: 0 });
@@ -104,27 +104,54 @@ export default function Pong({ roomName, handleSetEndGame }: { roomName: string,
 
     const gameLoop = useCallback(() => {
         callBackSetCanvasProperties();
+        // Arrow up
         if (keyState === 1)
-		{
-			if (playerPosition.yPlayerOne -5 > 0)
-			{
-				setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne - canvas.speedPlayer, yPlayerTwo: playerPosition.yPlayerTwo});
-				var percent = (playerPosition.yPlayerOne - canvas.speedPlayer) * 100 / canvas.height;
-				if (percent > 87.5)
-					percent = 87.5;
-				socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
-			}
+		{   // player 1
+            if (who == 1)
+            {
+                if (playerPosition.yPlayerOne -5 > 0)
+                {
+                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne - canvas.speedPlayer, yPlayerTwo: playerPosition.yPlayerTwo});
+                    var percent = (playerPosition.yPlayerOne - canvas.speedPlayer) * 100 / canvas.height;
+                    if (percent > 87.5)
+                        percent = 87.5;
+                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
+                }
+            } else {
+                // player 2
+                if (playerPosition.yPlayerTwo - 5 > 0)
+                {
+                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne, yPlayerTwo: playerPosition.yPlayerTwo  - canvas.speedPlayer});
+                    var percent = (playerPosition.yPlayerTwo - canvas.speedPlayer) * 100 / canvas.height;
+                    if (percent > 87.5)
+                        percent = 87.5;
+                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
+                }
+            }
 		}
 		if (keyState == -1)
 		{
-			if (playerPosition.yPlayerOne + canvas.speedPlayer < canvas.height - canvas.height / 8)
-			{
-				setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne + canvas.speedPlayer, yPlayerTwo: playerPosition.yPlayerTwo});
-				var percent = (playerPosition.yPlayerOne + canvas.speedPlayer) * 100 / canvas.height;
-				if (percent > 87.5)
-					percent = 87.5;
-				socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
-			}
+            // Arrow down
+            if (who === 1)
+            {
+                if (playerPosition.yPlayerOne + canvas.speedPlayer < canvas.height - canvas.height / 8)
+                {
+                    var percent = (playerPosition.yPlayerOne + canvas.speedPlayer) * 100 / canvas.height;
+                    if (percent > 87.5)
+                    percent = 87.5;
+                    setPlayerPosition({yPlayerOne: convertToPixel(percent, canvas.height), yPlayerTwo: playerPosition.yPlayerTwo});
+                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
+                }
+            } else {
+                if (playerPosition.yPlayerTwo + canvas.speedPlayer < canvas.height - canvas.height / 8)
+                {
+                    var percent = (playerPosition.yPlayerTwo + canvas.speedPlayer) * 100 / canvas.height;
+                    if (percent > 87.5)
+                        percent = 87.5;
+                    setPlayerPosition({yPlayerOne: playerPosition.yPlayerOne, yPlayerTwo: convertToPixel(percent, canvas.height)});
+                    socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
+                }
+            }
 		}
         setBall({ x: ball.x, y: ball.y });
     }, [ball, callBackSetCanvasProperties]);
