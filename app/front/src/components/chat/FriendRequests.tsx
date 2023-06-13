@@ -12,7 +12,7 @@ const FriendRequests: React.FC = () => {
 
     React.useEffect(() => {
         const fetchFriendRequests = async () => {
-            axios.get("http://bess-f1r2s5:3000/friends/requests", {
+            axios.get("http://localhost:3000/friends/requests", {
                 withCredentials: true,
                 validateStatus: () => true,
             }).then((response) => {
@@ -61,7 +61,7 @@ const FriendRequests: React.FC = () => {
                 >
                     <Grid xs={1}>
                         <IconX onClick={() => {
-                            axios.delete(`http://bess-f1r2s5:3000/friends/requests/${friendRequest.sender_id}`, {
+                            axios.delete(`http://localhost:3000/friends/requests/${friendRequest.sender_id}`, {
                                 withCredentials: true,
                             }).then(() => {
                                 setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));
@@ -72,7 +72,7 @@ const FriendRequests: React.FC = () => {
                     </Grid>
                     <Grid xs={1}>
                         <IconCheck onClick={() => {
-                            axios.post(`http://bess-f1r2s5:3000/friends/requests/${friendRequest.sender_id}/accept`, {}, {
+                            axios.post(`http://localhost:3000/friends/requests/${friendRequest.sender_id}/accept`, {}, {
                                 withCredentials: true,
                             }).then(() => {
                                 setFriendRequests((requests) => requests.filter((request) => request.sender_id !== friendRequest.sender_id));

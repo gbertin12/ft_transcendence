@@ -12,7 +12,7 @@ const HourlyMessageChart: React.FC<HourlyMessageChartProps> = ( { channel_id, ho
     const [chartData, setChartData] = useState<any>();
 
     useEffect(() => {
-        axios.get(`http://bess-f1r2s5:3000/datas/hourly_messages/${channel_id}/${hours}`,
+        axios.get(`http://localhost:3000/datas/hourly_messages/${channel_id}/${hours}`,
             {
                 withCredentials: true,
                 validateStatus: () => true

@@ -27,14 +27,14 @@ function ProfileTooltip({ user }: { user: User }) {
     }, [friends]);
 
     function handleAddFriend(id: number) {
-        axios.post('http://bess-f1r2s5:3000/friends/add', { to: id }, {
+        axios.post('http://localhost:3000/friends/add', { to: id }, {
             withCredentials: true,
             validateStatus: () => true,
         });
     }
 
     function handleRemoveFriend(id: number) {
-        axios.delete(`http://bess-f1r2s5:3000/friends/${id}`, {
+        axios.delete(`http://localhost:3000/friends/${id}`, {
             withCredentials: true,
             validateStatus: () => true,
         });
@@ -93,7 +93,7 @@ export default function AvatarTooltip({ user, placement }: { user: User, placeme
             placement={placement}
             content={<ProfileTooltip user={user}/>}>
             <Avatar
-                src={`http://bess-f1r2s5:3000/static/avatars/${user.avatar}`}
+                src={`http://localhost:3000/static/avatars/${user.avatar}`}
             />
         </Tooltip>
     );

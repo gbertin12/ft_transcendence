@@ -43,7 +43,7 @@ export default function GameBody({ roomName, handleSetRoomName }: { roomName: st
     }
     //return <Pong socket={socket} roomName={roomName} handleSetEndGame={handleSetEndGame} />
     //return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
-    const pathAvatar : string = "http://bess-f1r2s5:3000/static/avatars/" + user.avatar;
+    const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
     if (!playGame && !endGame)
     {
         return <>

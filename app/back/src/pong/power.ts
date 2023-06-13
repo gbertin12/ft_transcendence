@@ -71,8 +71,8 @@ export const handleNewPower = (
 					type: powerAvailables[id].type
 				});
 				server.to(room.pongState.player2.id).emit('newPower', {
-					x: 100 - powerAvailables[id].x,
-					y: 100 - powerAvailables[id].y,
+					x: powerAvailables[id].x,
+					y: powerAvailables[id].y,
 					id: powerAvailables[id].id,
 					type: powerAvailables[id].type
 				});

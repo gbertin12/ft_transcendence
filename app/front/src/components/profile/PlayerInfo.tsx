@@ -29,7 +29,7 @@ export default function PlayerInfo(
             <Card.Body>
                 <Col align="center">
                     <Avatar
-                        src={`http://bess-f1r2s5:3000/static/avatars/${user.avatar}`}
+                        src={`http://localhost:3000/static/avatars/${user.avatar}`}
                         css={{ size: "$40" }}
                         alt="user picture"
                         bordered>
