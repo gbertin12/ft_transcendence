@@ -74,15 +74,9 @@ export const createObstacle = (server: Server, room: roomInterface, obstacles: o
 		id: newObstacle.id,	
 		size: newObstacle.size
 	});
-	// update y for second player
-	let yP2: number = newObstacle.y;
-	if (yP2 > 0)
-		yP2 = 0;
-	else
-		yP2 = 100 - size;
 	server.to(room.pongState.player2.id).emit('addObstacle', {
-		x: 100 - newObstacle.x,
-		y: yP2,
+		x: newObstacle.x,
+		y: newObstacle.y,
 		id: newObstacle.id,	
 		size: newObstacle.size
 	});

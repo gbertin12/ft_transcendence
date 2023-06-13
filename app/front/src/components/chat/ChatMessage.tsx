@@ -60,7 +60,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, s
                 {!concatenate && (
                     <>
                         <Avatar
-                            src={`http://bess-f1r2s5:3000/static/avatars/${data.sender.avatar}`}
+                            src={`http://localhost:3000/static/avatars/${data.sender.avatar}`}
                             css={{
                                 position: "absolute",
                                 left: "16px",

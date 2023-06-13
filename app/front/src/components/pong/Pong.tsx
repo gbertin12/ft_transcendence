@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useUser } from '@/contexts/user.context';
 import { User } from '../../interfaces/user.interface'
 import { PlayerEndGame } from '@/interfaces/pong.interface';
+import { headers } from 'next/dist/client/components/headers';
 
 
 
@@ -107,7 +108,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         // Arrow up
         if (keyState === 1)
 		{   // player 1
-            if (who == 1)
+            if (who == 0)
             {
                 if (playerPosition.yPlayerOne -5 > 0)
                 {
@@ -117,7 +118,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                         percent = 87.5;
                     socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
                 }
-            } else {
+            } else if (who === 1) {
                 // player 2
                 if (playerPosition.yPlayerTwo - 5 > 0)
                 {
@@ -132,8 +133,9 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 		if (keyState == -1)
 		{
             // Arrow down
-            if (who === 1)
+            if (who === 0)
             {
+                //player 1
                 if (playerPosition.yPlayerOne + canvas.speedPlayer < canvas.height - canvas.height / 8)
                 {
                     var percent = (playerPosition.yPlayerOne + canvas.speedPlayer) * 100 / canvas.height;
@@ -142,7 +144,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                     setPlayerPosition({yPlayerOne: convertToPixel(percent, canvas.height), yPlayerTwo: playerPosition.yPlayerTwo});
                     socket.emit('playerMove', {percent: percent, clientId: socket.id, room: roomName});
                 }
-            } else {
+            } else if (who === 1) {
+                //player 2
                 if (playerPosition.yPlayerTwo + canvas.speedPlayer < canvas.height - canvas.height / 8)
                 {
                     var percent = (playerPosition.yPlayerTwo + canvas.speedPlayer) * 100 / canvas.height;
@@ -160,10 +163,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
     // =============================== Handle receive socket information ===============================================
 
-
-    const handleMovePlayer = (message: number) => {
-        const newPos = message * canvas.height / 100;
-        setPlayerPosition({ yPlayerOne: playerPosition.yPlayerOne, yPlayerTwo: newPos })
+    const handleMovePlayer = (posP1: number, posP2 : number) => {
+        setPlayerPosition({ yPlayerOne: convertToPixel(posP1, canvas.height), yPlayerTwo : convertToPixel(posP2, canvas.height)})
     }
 
     const handleUpdateScore = ({ scorePlayer1, scorePlayer2 }: { scorePlayer1: number, scorePlayer2: number }) => {
