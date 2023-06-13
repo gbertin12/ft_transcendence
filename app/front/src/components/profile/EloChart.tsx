@@ -11,7 +11,7 @@ function formatDate(date: Date): string {
 }
 
 async function fetchElo(username: string, date: Date): Promise<number> {
-    const res = await fetch(`http://localhost:3000/user/elo/day/${username}?date=${date.toISOString()}`, {
+    const res = await fetch(`http://bess-f1r2s10:3000/user/elo/day/${username}?date=${date.toISOString()}`, {
         credentials: "include",
     });
     const elo = await res.text();
@@ -20,7 +20,7 @@ async function fetchElo(username: string, date: Date): Promise<number> {
 }
 
 async function fetchEloGeneral(date: Date): Promise<number> {
-    const res = await fetch(`http://localhost:3000/user/elo/general?date=${date.toISOString()}`);
+    const res = await fetch(`http://bess-f1r2s10:3000/user/elo/general?date=${date.toISOString()}`);
     const elo = await res.text();
 
     return parseInt(elo);

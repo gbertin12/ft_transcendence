@@ -59,7 +59,7 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, i
                 >
                     <Avatar
                         size="lg"
-                        src={`http://localhost:3000/static/avatars/${avatar}`}
+                        src={`http://bess-f1r2s10:3000/static/avatars/${avatar}`}
                     />
                 </Badge>
             </Grid>
