@@ -100,8 +100,9 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
 
     const handleKeyUp = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
             setKeyState(0);
+        }
     }, [canvas]);
     // =================================================================================================================
 
@@ -144,7 +145,6 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 newPos = -1;
                 break;
         }
-        console.log("NEW POS", newPos);
         if (newPos && newPos !== -1 && newPos !== playerPos) {
             socket.emit('playerMove',
                 {
@@ -165,11 +165,14 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
     // =============================== Handle receive socket information ===============================================
 
-    const handleMovePlayer = (playerNumber: number, percent: number) => {
-        if (playerNumber === 0)
-            setPlayerOnePosition(convertToPixel(percent, canvas.height));
-        else
-            setPlayerTwoPosition(convertToPixel(percent, canvas.height));
+    const handleMovePlayer = ({ player, percent }: { player: number, percent: number}) => {
+        if (player !== who) {
+            if (player === 0) {
+                setPlayerOnePosition(convertToPixel(percent, canvas.height));
+            } else {
+                setPlayerTwoPosition(convertToPixel(percent, canvas.height));
+            }
+        }
     }
 
     const handleUpdateScore = ({ scorePlayer1, scorePlayer2 }: { scorePlayer1: number, scorePlayer2: number }) => {
