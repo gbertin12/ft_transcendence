@@ -76,9 +76,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (leaver) {
             const room = this.rooms.find((room) => leaver.id === room.pongState.player1.id || leaver.id === room.pongState.player2.id);
 
-            console.log(`DISCONNECTED: ${leaver}`);
+            if (room.state === 1) {
+                console.log(`DISCONNECTED: ${leaver}`);
 
-            this.bustLeaver(client, room.name);
+                this.bustLeaver(client, room.name);
+            }
         }
     }
 

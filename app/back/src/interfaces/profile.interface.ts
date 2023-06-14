@@ -8,6 +8,7 @@ export interface MatchHistoryRow {
     elo:            number;
     eloOpponent:    number;
     date:           string;
+    mode:           boolean;
 }
 
 export interface GameData {
@@ -19,6 +20,7 @@ export interface GameData {
     date:           string;
     winnerElo:      number;
     looserElo:      number;
+    mode:           boolean;
     opponent:       Opponent;
 }
 

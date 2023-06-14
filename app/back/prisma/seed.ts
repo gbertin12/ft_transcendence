@@ -127,7 +127,8 @@ async function seedMatchHistory() {
                     date: currentDate,
                     looserScore: looserScore,
                     looserElo: looserElo,
-                    eloDiff: eloDiff
+                    eloDiff: eloDiff,
+                    mode: true
                 });
             }
             total -= games.length;
