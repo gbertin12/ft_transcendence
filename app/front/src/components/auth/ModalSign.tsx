@@ -1,9 +1,16 @@
 import SignIn from './SignIn';
 import SignUp from './SignUp';
+import AvatarTooltip from '@/components/profile/AvatarTooltip';
+
 import React from "react";
 import { Modal, Button, Text, Input, Grid } from "@nextui-org/react";
+import  { User } from "@/interfaces/user.interface";
+import { useUser } from '@/contexts/user.context';
 
-export default function App() {
+
+export default function ModalSign(){
+	const {user}  = useUser();
+	console.log(user);
 	const [visible, setVisible] = React.useState(false);
 	const handler = () => setVisible(true);
 
@@ -13,10 +20,14 @@ export default function App() {
 	};
 
 	return (
-		<div>
-			<Button auto onPress={handler}>
-				<Text bold color="secondary">Se connecter </Text>
-			</Button>
+		<div>{
+		!user.id ?
+		<Button auto onPress={handler}>
+			<Text bold color="secondary">Se connecter </Text>
+		</Button>
+		:
+		<AvatarTooltip user={user} placement="bottom"/>
+		}
 			<Modal closeButton
 				blur
 				aria-labelledby="SignIn"
@@ -24,7 +35,7 @@ export default function App() {
 				open={visible}
 				onClose={closeHandler}
 			>
-				<Modal.Body >
+				<Modal.Body>
 					<Grid direction="row" >
 						<Grid.Container justify='center' gap={4} >
 							<Grid>
@@ -40,3 +51,4 @@ export default function App() {
 		</div>
 	);
 }
+//

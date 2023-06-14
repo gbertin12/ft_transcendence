@@ -6,8 +6,7 @@ import { Navbar, Button, Link, Modal, Text, Input, Spacer, Grid } from "@nextui-
 import ModalSign from "./auth/ModalSign";
 // type NavbarMaxWidth = "fluid";
 
-export default function myNavbar() {
-	type NavbarMaxWidth = "fluid";
+export function TranscendenceNavbar() {
 
 	return (
 		<Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
@@ -26,7 +25,7 @@ export default function myNavbar() {
 				</Navbar.Link>
 
 			</Navbar.Content>
-			<Navbar.Content color="primarySolidContrast">
+			<Navbar.Content color="primary">
 				<ModalSign />
 			</Navbar.Content>
 		</Navbar>

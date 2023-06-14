@@ -1,6 +1,6 @@
 import { Modal, Button, Text, Input, Grid, Pagination , Table, Avatar, Loading} from "@nextui-org/react";
 import { useEffect, useState, useMemo, Suspense } from "react";
-import  { User, RowLeaderboard }  from "@/interfaces/user.interface"
+import  { User, RowLeaderboard } from "@/interfaces/user.interface"
 
 function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard[]}) {
 	return (
@@ -31,21 +31,21 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
     				</Table.Header>
 					<Table.Body items={rowsLeaderboard}>
 					{(item) => (
-        				<Table.Row key={item.rank}>
+        				<Table.Row key={item.rank} css={{style: ""}}>
 							<Table.Cell>{item.rank}</Table.Cell>
 							<Table.Cell><Avatar src={item.avatar} /></Table.Cell>
 							<Table.Cell>{item.name}</Table.Cell>
 							<Table.Cell>{item.winrate}%</Table.Cell>
 							<Table.Cell>{item.elo}</Table.Cell>
 							<Table.Cell>
-								<Button color="primary" auto ghost>VIEW</Button>
+								<Button>VIEW</Button>
 							</Table.Cell>
         				</Table.Row>
         			)}
 					</Table.Body>
 					<Table.Pagination
     				    align="center"
-    				    rowsPerPage={12}/>
+    				    rowsPerPage={12} />
     				</Table>
 				</Grid>
 				</Grid.Container>
