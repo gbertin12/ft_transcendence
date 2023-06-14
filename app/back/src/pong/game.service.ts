@@ -189,6 +189,8 @@ export class GameService {
     }
 
     async handleEndGame(room: roomInterface, server: Server, forfeit: boolean) {
+        console.log("SCORE1", room.pongState.player1.score);
+        console.log("SCORE2", room.pongState.player2.score);
         let eloDiff = 0;
         if (room.pongState.player1.score > room.pongState.player2.score) {
             await this.userService.incrementWin(room.pongState.player1.name);
@@ -199,6 +201,16 @@ export class GameService {
             eloDiff = eloWinner - room.pongState.player1.userInfos.elo;
             room.pongState.player1.userInfos.elo = eloWinner;
             room.pongState.player2.userInfos.elo = eloLooser;
+
+            await this.userService.addGame(
+                room.pongState.player1.userId,
+                room.pongState.player1.score,
+                room.pongState.player2.userId,
+                room.pongState.player2.score,
+                Math.abs(eloWinner - eloLooser),
+                eloWinner,
+                eloLooser
+            );
         } else {
             await this.userService.incrementWin(room.pongState.player2.name);
             await this.userService.incrementLoose(room.pongState.player1.name);
@@ -208,6 +220,16 @@ export class GameService {
             eloDiff = eloWinner - room.pongState.player2.userInfos.elo;
             room.pongState.player2.userInfos.elo = eloWinner;
             room.pongState.player1.userInfos.elo = eloLooser;
+
+            await this.userService.addGame(
+                room.pongState.player2.userId,
+                room.pongState.player2.score,
+                room.pongState.player1.userId,
+                room.pongState.player1.score,
+                Math.abs(eloWinner - eloLooser),
+                eloWinner,
+                eloLooser
+            );
         }
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);
         const user2 = await this.userService.getUserByName(room.pongState.player2.name);

@@ -19,6 +19,7 @@ export default function GameBody() {
     const { user, socket } = useUser();
 
     const handleStartGame = (roomName: string, playerNumber: number) => {
+        console.log("ROOM NAME", roomName);
         setRoomName(roomName);
         setWho(playerNumber);
         socket.emit("joinRoom", roomName);
