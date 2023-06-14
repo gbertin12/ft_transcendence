@@ -128,9 +128,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (room) {
             if (room.pongState.player1.id === data.clientId) {
                 const percent = data.percent;
+                console.log("PLAYER1:", percent);
                 room.pongState.player1.y = percent;
                 this.server.to(room.name).emit('playerMove', {
-                    player: 1,
+                    player: 0,
                     percent: percent,
                 });
             }
@@ -138,7 +139,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 const percent = data.percent;
                 room.pongState.player2.y = percent;
                 this.server.to(room.name).emit('playerMove', {
-                    player: 2,
+                    player: 1,
                     percent: percent,
                 });
             }

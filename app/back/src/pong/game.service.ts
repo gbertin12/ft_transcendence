@@ -23,9 +23,8 @@ export const convertToPixel = (value: number, maxValue: number) => {
 
 const updateBallSpeedX = (speedX: number) => {
     let newSpeed = speedX;
-
-    if (speedX > 0) newSpeed = speedX + 0.2;
-    else if (speedX < 0) newSpeed = speedX - 0.2;
+    if (speedX > 0 && speedX < 3) newSpeed = speedX + 0.2;
+    else if (speedX < 0 && speedX > -3) newSpeed = speedX - 0.2;
     return newSpeed;
 };
 
@@ -55,10 +54,14 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 };
 
 const handleCheckCollision = (room: roomInterface) => {
+    if (room.pongState.ball.x - radiusBall < spaceBetweenPlayerAndWall) {
+        console.log("Ball", room.pongState.ball);
+        console.log("Player1", room.pongState.player1);
+    }
     // check collision with player 1
     if (room.pongState.ball.x - radiusBall <= spaceBetweenPlayerAndWall &&
-        room.pongState.ball.y >= convertToPixel(87.5 - room.pongState.player1.y, canvasHeight) &&
-        room.pongState.ball.y <= convertToPixel(87.5 - room.pongState.player1.y, canvasHeight) + playerHeight
+        room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
+        room.pongState.ball.y <= convertToPixel(room.pongState.player1.y, canvasHeight) + playerHeight
     ) {
         if (room.pongState.ball.speedX < 0) {
             room.pongState.ball.speedX = -room.pongState.ball.speedX;
