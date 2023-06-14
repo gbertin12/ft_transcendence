@@ -11,6 +11,7 @@ import { useUser } from '@/contexts/user.context';
 export default function ModalSign(){
 	const {user}  = useUser();
 	console.log(user);
+	const userId = user?.id
 	const [visible, setVisible] = React.useState(false);
 	const handler = () => setVisible(true);
 
@@ -21,7 +22,7 @@ export default function ModalSign(){
 
 	return (
 		<div>{
-		!user.id ?
+		!userId ?
 		<Button auto onPress={handler}>
 			<Text bold color="secondary">Se connecter </Text>
 		</Button>
