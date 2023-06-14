@@ -327,6 +327,7 @@ export class UserService {
         eloDiff: number,
         winnerElo: number,
         looserElo: number,
+        mode: boolean
     ) {
         await this.db.matchHistory.create({
             data: {
@@ -337,6 +338,7 @@ export class UserService {
                 eloDiff, 
                 winnerElo,
                 looserElo,
+                mode
             }
         });
     }

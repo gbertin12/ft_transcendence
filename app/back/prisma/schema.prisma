@@ -38,6 +38,7 @@ model MatchHistory {
     looserElo   Int
     date        DateTime @default(now()) @db.Timestamp(6)
     eloDiff     Int
+    mode        Boolean
     //duration    Int
 }
 

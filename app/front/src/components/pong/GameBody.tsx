@@ -39,6 +39,7 @@ export default function GameBody() {
     }
 
     const handleSetEndGame = (endGame: PlayerEndGame)  => {
+        socket.emit('leaveRoom', endGame.room.name);
         setDataEndGame(endGame);
         //handleSetRoomName('');
         setPlayGame(false);

@@ -39,7 +39,7 @@ export default function CardEndGame({endGame, roomName, handleCloseCardEndGame}
     let win: boolean;
     let title: string;
 
-    socket.emit('leaveRoom', roomName);
+    //socket.emit('leaveRoom', roomName);
 
     if (playerId == 1) {
         player1 = endGame.room.pongState.player1;

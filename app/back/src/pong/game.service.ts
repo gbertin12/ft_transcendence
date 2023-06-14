@@ -209,7 +209,8 @@ export class GameService {
                 room.pongState.player2.score,
                 Math.abs(eloWinner - eloLooser),
                 eloWinner,
-                eloLooser
+                eloLooser,
+                room.pongState.modes
             );
         } else {
             await this.userService.incrementWin(room.pongState.player2.name);
@@ -228,7 +229,8 @@ export class GameService {
                 room.pongState.player1.score,
                 Math.abs(eloWinner - eloLooser),
                 eloWinner,
-                eloLooser
+                eloLooser,
+                room.pongState.modes
             );
         }
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);

@@ -2,6 +2,7 @@ import { Button, Text, Grid, Pagination , Table, Avatar, Loading, Row} from "@ne
 import { useEffect, useState } from "react";
 import  { GameData, MatchHistoryRow }  from "@/interfaces/profile.interface"
 import { User } from "@/interfaces/user.interface";
+import { IconBolt, IconBallTennis } from '@tabler/icons-react';
 
 function formatDate(date: Date): string {
     const today = new Date();
@@ -27,6 +28,7 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
         elo: 0,
         eloOpponent: 0,
         date: formatDate(new Date(game.date)),
+        mode: game.mode
     };
 
     if (victory) {
@@ -41,17 +43,16 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
         row.eloOpponent = game.winnerElo;
     }
 
+    console.log("ROW", row);
     return row;
 }
 
 function setDataRows(gamesWon: GameData[], gamesLost: GameData[]) {
     let rows: MatchHistoryRow[] = [];
-
-
     let w = 0, l = 0;
     let id = 0;
-    while (w < gamesWon.length && l < gamesLost.length) {
-        if (gamesWon[w].id > gamesLost[l].id) {
+    while (w < gamesWon.length || l < gamesLost.length) {
+        if (gamesWon[w] && ((gamesWon[w] && !gamesLost[l]) || gamesWon[w].id > gamesLost[l].id)) {
             const row = generateRow(gamesWon[w], true, id++);
             rows.push(row);
             w++; 
@@ -61,7 +62,6 @@ function setDataRows(gamesWon: GameData[], gamesLost: GameData[]) {
             l++;
         }
     }
-
     return (rows);
 }
 
@@ -72,6 +72,7 @@ export default function MatchHistory({ user }: { user: User }) {
         (async () => {
             const res = await fetch(`http://localhost:3000/user/history/${user.name}`);
             const data = await res.json();
+            console.log(data);
             setRows(setDataRows(data.gamesWon, data.gamesLost));
         })();
     }, []);
@@ -101,7 +102,7 @@ export default function MatchHistory({ user }: { user: User }) {
                     <Table.Body items={rows}>
                         {(item) => (
                             <Table.Row css={{ ta: "center" }} key={item.id}>
-                                <Table.Cell>MODE</Table.Cell>
+                                <Table.Cell>{(item.mode) ? <Text color="warning"><IconBolt/></Text>: <Text color="success"><IconBallTennis/></Text> }</Table.Cell>
                                 <Table.Cell>
                                     <Row justify="center" align="center">
                                         <Avatar
