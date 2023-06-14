@@ -119,7 +119,7 @@ const ChannelCreateIcon: React.FC = () => {
                                 setCreating(true);
                                 axios.post("http://localhost:3000/channel/create", {
                                     name: name,
-                                    isPrivate: isPrivate,
+                                    private: isPrivate,
                                     password: password,
                                 }, {
                                     withCredentials: true,
@@ -132,8 +132,6 @@ const ChannelCreateIcon: React.FC = () => {
                                     setPopIsOpen(false);
                                     throw Error("UNEXPECTED ERROR: " + err)
                                 });
-
-
                             }}
                         >
                             {error === "" ? "Create" : "Invalid name"}
