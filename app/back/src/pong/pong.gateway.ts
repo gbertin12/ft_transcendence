@@ -12,6 +12,7 @@ import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../../src/user/user.service';
 import * as cookie from 'cookie';
+import { v4 as uuidv4 } from 'uuid';
 
 @WebSocketGateway(8001, {
     cors: {
@@ -95,8 +96,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (waitingPlayer && player && waitingPlayer.id != player.id) {
             player.state = 2;
             waitingPlayer.state = 2;
+            const roomName: string = uuidv4();
             const newRoom: roomInterface = {
-                name: 'room' + this.rooms.length,
+                name: roomName,
                 state: 0,
                 pongState: {
                     ball: {
@@ -163,7 +165,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log("leaveRoom", client.id);
 
     }
-
 
     bustLeaver(client: Socket, roomName: string) {
         const room = this.rooms.find((room) => room.name === roomName);

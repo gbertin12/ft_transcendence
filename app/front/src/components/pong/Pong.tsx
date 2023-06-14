@@ -144,7 +144,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 newPos = -1;
                 break;
         }
-        console.log(newPos);
+        console.log("NEW POS", newPos);
         if (newPos && newPos !== -1 && newPos !== playerPos) {
             socket.emit('playerMove',
                 {
@@ -248,7 +248,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         socket.on('newPower', handleNewPowers);
         socket.on('removePower', handleRemovePower);
         socket.on('addObstacle', handleAddObstacle);
-        socket.on('end0Game', handleEndGame);
+        socket.on('endGame', handleEndGame);
         return () => {
             socket.off('playerMove', handleMovePlayer);
             socket.off('updateScore', handleUpdateScore);
