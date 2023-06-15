@@ -282,4 +282,22 @@ export class ChannelService {
             }
         });
     }
+
+    async acceptInvite(sender_id: number, receiver_id: number, channel_id: number) {
+        this.db.channelAccess.create({
+            data: {
+                user_id: receiver_id,
+                channel_id: channel_id
+            }
+        })
+        return this.db.channelInvites.delete({
+            where: {
+                sender_id_receiver_id_channel_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                    channel_id: channel_id,
+                }
+            }
+        });
+    }
 }
