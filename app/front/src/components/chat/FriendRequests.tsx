@@ -118,30 +118,7 @@ const SentRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequests
 
 const FriendRequests: React.FC = () => {
     const { user, socket } = useUser();
-    const { friendRequests, setFriendRequests } = useChat();
-    const [sentRequests, setSentRequests] = React.useState<FriendRequest[]>([]);
-    const [receivedRequests, setReceivedRequests] = React.useState<FriendRequest[]>([]);
-
-
-    React.useEffect(() => {
-        if (!socket) { return; }
-        socket.on("friendRequestDeleted", (request: FriendRequest) => {
-            setFriendRequests((requests) => requests.filter((r) => r.sender_id !== request.sender_id || r.receiver_id !== request.receiver_id));
-        });
-        socket.on("friendRequestAdded", (request: FriendRequest) => {
-            setFriendRequests((requests) => [...requests, request]);
-        });
-
-        return () => {
-            socket.off("friendRequestDeleted");
-            socket.off("friendRequestAdded");
-        }
-    }, []);
-
-    React.useEffect(() => {
-        setSentRequests(friendRequests.filter((request) => request.sender_id === user.id));
-        setReceivedRequests(friendRequests.filter((request) => request.receiver_id === user.id));
-    }, [friendRequests]);
+    const { friendRequests, setFriendRequests, receivedRequests, sentRequests } = useChat();
 
     if (friendRequests.length === 0) {
         return <></>;
