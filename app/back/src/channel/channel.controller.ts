@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
@@ -33,6 +33,13 @@ class ChannelPasswordDto {
     @Type(() => String)
     @Length(2, 100)
     password: string;
+}
+
+class GenericIdDto {
+    @Type(() => Number)
+    @IsNumber()
+    @IsPositive()
+    id: number;
 }
 
 @Controller('channel')
@@ -157,5 +164,28 @@ export class ChannelController {
         } else {
             throw new HttpException('You are already in this channel', 400);
         }
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Post(':channel_id/invite')
+    async inviteUser(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
+        const senderId = req.user['id'];
+        const receiverId = body.id;
+        if (senderId === receiverId) {
+            throw new BadRequestException("You cannot invite yourself to a channel");
+        }
+        const channel = await this.channelService.getChannel(dto.channel_id);
+        if (!channel) {
+            throw new NotFoundException("Unknown channel");
+        }
+        if (!channel.private || channel.password !== null) {
+            throw new BadRequestException("You cannot invite someone to a public channel, or a private channel with a password");
+        }
+        // No special permission is required to invite someone to a private channel
+        return this.channelService.inviteToChannel(
+            senderId,
+            receiverId,
+            dto.channel_id,
+        )
     }
 }
