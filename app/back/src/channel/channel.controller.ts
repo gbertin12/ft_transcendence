@@ -1,13 +1,14 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException, Put, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException, Put, ForbiddenException, NotImplementedException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
-import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, Length, Matches } from 'class-validator';
 import ChatGateway from '../chat/chat.gateway';
-import { Channel, Message } from '@prisma/client';
+import { Channel, Message, User } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import * as argon2 from 'argon2';
 import { MessageData } from '../interfaces/chat.interfaces';
 import { PunishmentsService } from '../punishments/punishments.service';
+import { UserService } from '../user/user.service';
 
 class ChannelDto {
     @Type(() => Number)
@@ -42,12 +43,31 @@ class GenericIdDto {
     id: number;
 }
 
+class OwnershipTransferDto {
+    @Type(() => Number)
+    @IsNumber()
+    @IsPositive()
+    new_owner: number
+
+    // Optionnal 2FA code
+    @Type(() => String)
+    @Matches(/^[0-9]{6}$/) // Only 6 digits
+    @IsOptional() // The user might not always have 2FA enabled
+    code: string;
+
+    // Optionnal password (if the user has 2FA setup, we're using the 2FA instead)
+    @Type(() => String)
+    @Length(2, 100)
+    password: string;
+}
+
 @Controller('channel')
 export class ChannelController {
     constructor(
         private channelService: ChannelService,
         private chatGateway: ChatGateway,
         private punishmentsService: PunishmentsService,
+        private userService: UserService,
     ) { }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -257,5 +277,56 @@ export class ChannelController {
                 channel_id: dto.channel_id,
             });
         }
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Patch(':channel_id/transfer')
+    async transferOwnership(@Param() dto: ChannelDto, @Body() body: OwnershipTransferDto, @Req() req) {
+        if (!body.password && !body.code) {
+            throw new BadRequestException("Missing authentication fields");
+        }
+        const userId = req.user['id'];
+        const channel = await this.channelService.getChannel(dto.channel_id);
+        if (!channel) {
+            throw new NotFoundException("Unknown channel");
+        }
+        if (channel.owner_id !== userId) {
+            throw new ForbiddenException("You are not the owner of this channel");
+        }
+
+        // Get new owner data for system message
+        let user = await this.userService.getUserById(body.new_owner);
+
+        if (!user) {
+            throw new NotFoundException("Unknown user");
+        }
+
+        if (body.password) {
+            if (!await argon2.verify(channel.password, body.password)) {
+                throw new HttpException('Invalid password', 401);
+            }
+        }
+
+        if (body.code) {
+            throw new NotImplementedException("2FA code validation is not implemented yet");
+        }
+
+        // Update ownership
+        this.channelService.setOwner(body.new_owner, dto.channel_id);
+
+        // Send a system message and a socket ping to the channel to update roles / badges
+        let systemPayload = {
+            // custom system message
+            content: `${req.user['name']} transferred its ownership to ${user.name}`,
+            message_id: Math.floor(Math.random() * 1000000000), // todo: use service's systemMessageStack
+            sender: { avatar: null, id: -1, username: "System", },
+            timestamp: new Date(),
+        };
+
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('message', systemPayload);
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('updateOwner', {
+            channel_id: dto.channel_id,
+            new_owner: body.new_owner,
+        });
     }
 }
