@@ -311,4 +311,15 @@ export class ChannelService {
             }
         })
     }
+
+    async setOwner(new_owner_id: number, channel_id: number) {
+        return this.db.channel.update({
+            where: {
+                id: channel_id
+            },
+            data: {
+                owner_id: new_owner_id
+            }
+        })
+    }
 }
