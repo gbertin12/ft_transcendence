@@ -16,6 +16,10 @@ interface ChatContextType {
     setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
     blockedUsers: Set<number>;
     setBlockedUsers: React.Dispatch<React.SetStateAction<Set<number>>>;
+    sentRequests: FriendRequest[];
+    setSentRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
+    receivedRequests: FriendRequest[]
+    setReceivedRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
 }
 
 const ChatContext = createContext<ChatContextType>({
@@ -31,6 +35,10 @@ const ChatContext = createContext<ChatContextType>({
     setFriendRequests: () => { },
     blockedUsers: new Set<number>(),
     setBlockedUsers: () => { },
+    sentRequests: [],
+    setSentRequests: () => { },
+    receivedRequests: [],
+    setReceivedRequests: () => { },
 });
 
 export const useChat = () => useContext(ChatContext);
@@ -42,6 +50,9 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
     const [blockedUsers, setBlockedUsers] = useState<Set<number>>(new Set<number>());
+    const [sentRequests, setSentRequests] = React.useState<FriendRequest[]>([]);
+    const [receivedRequests, setReceivedRequests] = React.useState<FriendRequest[]>([]);
+
     const { user } = useUser();
 
     useEffect(() => {
@@ -64,7 +75,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 if (Array.isArray(relationships.friends)) {
                     const friends: Friend[] = relationships.friends.map((friend) => {
                         // if user id is self, use user2 instead
-                        if (friend.user.id === user.id) {
+                        if (friend.friend_id === user.id) {
                             return {
                                 id: friend.user2.id,
                                 name: friend.user2.name,
@@ -171,6 +182,12 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 }
                 setFriends((friends) => [...friends, newFriend]);
             });
+            socket.on("friendRequestDeleted", (request: FriendRequest) => {
+                setFriendRequests((requests) => requests.filter((r) => r.sender_id !== request.sender_id || r.receiver_id !== request.receiver_id));
+            });
+            socket.on("friendRequestAdded", (request: FriendRequest) => {
+                setFriendRequests((requests) => [...requests, request]);
+            });
             socket.on("online", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isPlaying: false } : f));
                 socket.emit("onlineAnswer", friend_id);
@@ -221,6 +238,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("editChannel");
                 socket.off("deleteFriend");
                 socket.off("friendRequestAccepted");
+                socket.off("friendRequestDeleted");
+                socket.off("friendRequestAdded");
                 socket.off("online");
                 socket.off("typing");
                 socket.off("playing");
@@ -232,6 +251,11 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             }
         }
     }, [socket]);
+
+    React.useEffect(() => {
+        setSentRequests(friendRequests.filter((request) => request.sender_id === user.id));
+        setReceivedRequests(friendRequests.filter((request) => request.receiver_id === user.id));
+    }, [friendRequests]);
 
     return (
         <ChatContext.Provider value={{
@@ -247,6 +271,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             setFriendRequests,
             blockedUsers,
             setBlockedUsers,
+            sentRequests,
+            setSentRequests,
+            receivedRequests,
+            setReceivedRequests,
         }}>
             {children}
         </ChatContext.Provider>
