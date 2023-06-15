@@ -250,29 +250,36 @@ export class ChannelService {
     }
 
     async inviteToChannel(sender_id: number, receiver_id: number, channel_id: number) {
-        return this.db.channelInvites.create({
-            data: {
-                receiver_id: receiver_id,
+        return this.db.channelInvites.upsert({
+            where: {
+                sender_id_receiver_id_channel_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                    channel_id: channel_id,
+                }
+            },
+            create: {
                 sender_id: sender_id,
+                receiver_id: receiver_id,
                 channel_id: channel_id,
             },
-            include: {
-                channel: {
-                    select: {
-                        name: true,
-                    }
-                },
-                sender: {
-                    select: { // Useful data for avatar tooltip and front redering
-                        avatar: true,
-                        name: true,
-                        elo: true,
-                        wins: true,
-                        losses: true,
-                        id: true,
-                    }
-                }   
-            },
+            update: {
+                sender_id: sender_id,
+                receiver_id: receiver_id,
+                channel_id: channel_id,
+            }
+        });
+    }
+
+    async revokeInvite(sender_id: number, receiver_id: number, channel_id: number) {
+        return this.db.channelInvites.delete({
+            where: {
+                sender_id_receiver_id_channel_id: {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                    channel_id: channel_id,
+                }
+            }
         });
     }
 }

@@ -188,4 +188,14 @@ export class ChannelController {
             dto.channel_id,
         )
     }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Delete(':channel_id/invite')
+    async cancelInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
+        return this.channelService.revokeInvite(
+            req.user['id'],
+            body.id,
+            dto.channel_id,
+        )
+    }
 }
