@@ -5,9 +5,8 @@ import { Text, Avatar, Container, Grid, Row, Card, Spacer, Col } from '@nextui-o
 import Image from 'next/image'
 import { useUser } from '@/contexts/user.context';
 import { User } from '../../interfaces/user.interface'
-import { PlayerEndGame } from '@/interfaces/pong.interface';
+import { PlayerEndGame, BallPosition, BallVectorSpeed } from '@/interfaces/pong.interface';
 import { headers } from 'next/dist/client/components/headers';
-
 
 
 function Player({ x, y, canvasHeight }: { x: number, y: number, canvasHeight: number }) {
@@ -42,10 +41,16 @@ const convertToPixel = (value: number, maxValue: number) => {
 
 export default function Pong({ roomName, who, handleSetEndGame }: { roomName: string, who: number, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
     const [score, setScore] = useState({ scorePlayer1: 0, scorePlayer2: 0 });
-    const [ball, setBall] = useState({ x: 0, y: 0 });
     const [playerOnePosition, setPlayerOnePosition] = useState<number>(0);
     const [playerTwoPosition, setPlayerTwoPosition] = useState<number>(0);
-
+	const [ballPosition, setBallPosition] = useState<BallPosition>({
+		x: 0,
+		y: 0,
+	})
+    const [BallVectorSpeed, setBallVectorSpeed]  = useState<BallVectorSpeed>({
+        speedX : 0,
+        speedY : 0
+    })
     const [canvas, setCanvas] = useState({ height: 0, width: 0, speedPlayer: 0 });
     const [powers, setPowers] = useState([
         { isActive: false, x: 0, y: 0, id: 0, type: 0 },
@@ -116,27 +121,11 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         let newPosPixel: number = -1;
         switch (keyState) {
             case 1: // up
-                console.table({
-                    "type": "newPos UP",
-                    "newPos": newPos,
-                    "playerPos": playerPos,
-                    "keyState": keyState,
-                    "speedPlayer": canvas.speedPlayer,
-                    "height": canvas.height,
-                })
                 newPos = (playerPos - canvas.speedPlayer) * 100 / canvas.height;
                 newPos = (newPos < 0) ? 0 : newPos;
                 newPosPixel = convertToPixel(newPos, canvas.height);
                 break;
             case -1: // down
-                console.table({
-                    "type": "newPos DOWN",
-                    "newPos": newPos,
-                    "playerPos": playerPos,
-                    "keyState": keyState,
-                    "speedPlayer": canvas.speedPlayer,
-                    "height": canvas.height,
-                })
                 newPos = (playerPos + canvas.speedPlayer) * 100 / canvas.height;
                 newPos = (newPos > 87.5) ? 87.5 : newPos;
                 newPosPixel = convertToPixel(newPos, canvas.height);
@@ -145,6 +134,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 newPos = -1;
                 break;
         }
+		setBallPosition({ x : ballPosition.x + BallVectorSpeed.speedX, y : ballPosition.y + BallVectorSpeed.speedY });
+		// update paddle position
         if (newPos && newPos !== -1 && newPos !== playerPos) {
             socket.emit('playerMove',
                 {
@@ -158,8 +149,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
             else
                 setPlayerTwoPosition(newPosPixel);
         }
-        setBall({ x: ball.x, y: ball.y });
-    }, [ball, callBackSetCanvasProperties]);
+    }, [ballPosition, callBackSetCanvasProperties]);
 
     // =================================================================================================================
 
@@ -179,16 +169,24 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         setScore({ scorePlayer1, scorePlayer2 });
     }
 
-    const handleUpdateBall = ({ x, y }: { x: number, y: number }) => {
+	// set x & y position of ball 
+    const handleUpdateBallPosition = ({ x, y }: { x: number, y: number }) => {
         x = convertToPixel(x, canvas.width);
         y = convertToPixel(y, canvas.height);
-        setBall({ x, y });
+		setBallPosition({x : x, y : y});
+    }
+
+	// set xSpeed & ySpeed of ball 
+    const handleUpdateVectorBall = ({ speedX, speedY }: { speedX: number, speedY: number }) => {
+        speedX = convertToPixel(speedX, canvas.width);
+        speedY = convertToPixel(speedY, canvas.height);
+        console.log("Update Vector", speedX, speedY);
+		setBallVectorSpeed({speedX : speedX, speedY : speedY});
     }
 
     const handleNewPowers = ({ x, y, id, type }: { x: number, y: number, id: number, type: number }) => {
         const PixelX = convertToPixel(x, canvas.width);
         const PixelY = convertToPixel(y, canvas.height);
-        var i = 0;
         console.log("new power id", id, PixelX, PixelY);
         setPowers(prevPowers => {
             return prevPowers.map((power) => {
@@ -199,7 +197,6 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 }
             });
         });
-        console.log("after ", powers, id);
     }
 
     const handleRemovePower = ({ id }: { id: number }) => {
@@ -246,7 +243,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
     useEffect(() => {
         socket.on('playerMove', handleMovePlayer);
         socket.on('updateScore', handleUpdateScore);
-        socket.on('updateBall', handleUpdateBall);
+        socket.on('updateBallPosition', handleUpdateBallPosition);
+		socket.on('updateBallVector', handleUpdateVectorBall);
         socket.on('resetPlayers', handleResetPlayer);
         socket.on('newPower', handleNewPowers);
         socket.on('removePower', handleRemovePower);
@@ -255,7 +253,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         return () => {
             socket.off('playerMove', handleMovePlayer);
             socket.off('updateScore', handleUpdateScore);
-            socket.off('updateBall', handleUpdateBall);
+            socket.off('updateBallPosition', handleUpdateBallPosition);
+			socket.off('updateBallVector', handleUpdateVectorBall);
             socket.off('newPower', handleNewPowers);
             socket.off('resetPlayers', handleResetPlayer);
             socket.off('removePower', handleRemovePower);
@@ -323,7 +322,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
                 <DisplayScore scorePlayer1={score.scorePlayer1} scorePlayer2={score.scorePlayer2} />
                 <div>
                     <div ref={ref} id="pong" className={styles.board}>
-                        <Ball x={ball.x} y={ball.y} />
+                        <Ball x={ballPosition.x} y={ballPosition.y} />
                         <Player x={canvas.width * 5 / 100 - 12} y={playerOnePosition} canvasHeight={canvas.height} />
                         <Player x={canvas.width - canvas.width * 5 / 100} y={playerTwoPosition} canvasHeight={canvas.height} />
                         <Power x={powers[0].x} y={powers[0].y} isActive={powers[0].isActive} type={powers[0].type} />

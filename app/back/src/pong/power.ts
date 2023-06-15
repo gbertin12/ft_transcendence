@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
 import { roomInterface, PowerInterface, obstaclesInterface, powerAvailables } from '../../src/interfaces/pong.interface';
-import { convertToPixel } from './game.service';
+import { convertToPixel, sendBallVector } from './game.service';
 import { getType, createObstacle } from './obstacles'
 import { get } from 'http';
+
 
 // set playground value
 const canvasHeight = 300;
@@ -94,6 +95,7 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 					room.pongState.ball.speedY -= 0.3;
 				else
 					room.pongState.ball.speedY += 0.3;
+				sendBallVector(room, server);
 			}
 			else if (power.type === 1) {
 				// bounce bonus
@@ -103,6 +105,7 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 				else
 					newSpeedY += 0.2;
 				room.pongState.ball.speedY = newSpeedY;
+				sendBallVector(room, server);
 			} else if (power.type === 2) {
 				// spawn obstacles bonus
 				createObstacle(server, room, obstacles);
