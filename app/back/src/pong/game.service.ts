@@ -47,8 +47,8 @@ export const sendBallVector = (room: roomInterface, server: Server) => {
     const speedX = convertToPercent(room.pongState.ball.speedX, canvasWidth);
     const speedY = convertToPercent(room.pongState.ball.speedY, canvasHeight);
     server.to(room.name).emit('updateBallVector', {
-        speedX: speedX,
-        speedY: speedY,
+        speedX: room.pongState.ball.speedX,
+        speedY: room.pongState.ball.speedY,
     });
     sendBallPosition(room, server);
 }; 
@@ -152,6 +152,7 @@ export class GameService {
         room.pongState.player1.y = canvasHeight / 3;
         room.pongState.player2.y = canvasHeight / 3;
         let timeToNewPower = 0;
+        let timeToSendBallPosition = 0;
         const obstacles: obstaclesInterface[] = [];
         const powersAvailables: powerAvailables[] = [
             { id: 0, isActive: false, type: -1, x: 20, y: 20 },
@@ -188,6 +189,12 @@ export class GameService {
                 handleColisionWithPower(room, server, obstacles, powersAvailables);
                 handleColisionWithObstacle(room, server, obstacles);
             }
+            timeToSendBallPosition++;
+            if (timeToSendBallPosition === 5)
+            {
+                timeToSendBallPosition = 0;
+                sendBallPosition(room, server);
+            }
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
             room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
@@ -199,7 +206,7 @@ export class GameService {
 
                 handleResetPlayerPosition(room, server);
             }
-        }, 75);
+        }, 70);
 
     }
 
