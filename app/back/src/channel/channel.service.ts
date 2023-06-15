@@ -322,4 +322,38 @@ export class ChannelService {
             }
         })
     }
+
+    async setRole(user_id: number, channel_id: number, power_level: number) {
+        let role = "invalid";
+        switch (power_level) {
+            case 0: // user, remove from administrators
+                await this.db.channelAdmin.delete({
+                    where: {
+                        channel_id_user_id: {
+                            channel_id: channel_id,
+                            user_id: user_id
+                        }
+                    }
+                });
+            case 1:
+                await this.db.channelAdmin.upsert({
+                    where: {
+                        channel_id_user_id: {
+                            channel_id: channel_id,
+                            user_id: user_id
+                        }
+                    },
+                    create: {
+                        channel_id: channel_id,
+                        user_id: user_id
+                    },
+                    update: {
+                        channel_id: channel_id,
+                        user_id: user_id
+                    }
+                });
+            default:
+                throw new Error("Invalid power level passed");
+        }
+    }
 }
