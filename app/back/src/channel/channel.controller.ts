@@ -9,6 +9,7 @@ import * as argon2 from 'argon2';
 import { MessageData } from '../interfaces/chat.interfaces';
 import { PunishmentsService } from '../punishments/punishments.service';
 import { UserService } from '../user/user.service';
+import { AuthService } from '../auth/auth.service';
 
 class ChannelDto {
     @Type(() => Number)
@@ -68,6 +69,7 @@ export class ChannelController {
         private chatGateway: ChatGateway,
         private punishmentsService: PunishmentsService,
         private userService: UserService,
+        private authService: AuthService,
     ) { }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -307,8 +309,8 @@ export class ChannelController {
             }
         }
 
-        if (body.code) {
-            throw new NotImplementedException("2FA code validation is not implemented yet");
+        if (body.code && !await this.authService.verifyOTP(req.user['id'], body.code)) {
+            throw new HttpException('Invalid code', 401);
         }
 
         // Update ownership
