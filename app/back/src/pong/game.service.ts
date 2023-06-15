@@ -43,21 +43,27 @@ const updateBallSpeedY = (room: roomInterface, player: number) => {
     return newSpeed;
 };
 
+export const sendBallVector = (room: roomInterface, server: Server) => {
+    console.log("Update vector", room.pongState.ball.speedX, room.pongState.ball.speedY)
+    const speedX = convertToPercent(room.pongState.ball.speedX, canvasWidth);
+    const speedY = convertToPercent(room.pongState.ball.speedY, canvasHeight);
+    server.to(room.name).emit('updateBallVector', {
+        speedX: speedX,
+        speedY: speedY,
+    });
+    sendBallPosition(room, server);
+}; 
+
 const sendBallPosition = (room: roomInterface, server: Server) => {
     const x = convertToPercent(room.pongState.ball.x, canvasWidth);
     const y = convertToPercent(room.pongState.ball.y, canvasHeight);
-
-    server.to(room.name).emit('updateBall', {
+    server.to(room.name).emit('updateBallPosition', {
         x: x,
         y: y,
     });
 };
 
-const handleCheckCollision = (room: roomInterface) => {
-    if (room.pongState.ball.x - radiusBall < spaceBetweenPlayerAndWall) {
-        console.log("Ball", room.pongState.ball);
-        console.log("Player1", room.pongState.player1);
-    }
+const handleCheckCollision = (room: roomInterface, server: Server) => {
     // check collision with player 1
     if (room.pongState.ball.x - radiusBall <= spaceBetweenPlayerAndWall &&
         room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
@@ -70,6 +76,7 @@ const handleCheckCollision = (room: roomInterface) => {
             );
             room.pongState.ball.x -= 5;
             room.pongState.ball.speedY = updateBallSpeedY(room, 1);
+            sendBallVector(room, server);
         }
     }
     // check collision with player 2
@@ -85,6 +92,7 @@ const handleCheckCollision = (room: roomInterface) => {
             room.pongState.ball.x += 5;
         }
         room.pongState.ball.speedY = updateBallSpeedY(room, 2);
+        sendBallVector(room, server);
     }
     // check collision with top and bottom
     if (room.pongState.ball.y <= radiusBall || room.pongState.ball.y >= canvasHeight - radiusBall) {
@@ -92,6 +100,7 @@ const handleCheckCollision = (room: roomInterface) => {
         room.pongState.ball.speedX = updateBallSpeedX(
             room.pongState.ball.speedX,
         );
+        sendBallVector(room, server);
     }
 }
 
@@ -102,30 +111,23 @@ const sendScore = (room: roomInterface, server: Server) => {
     });
 };
 
-const initPosition = (
+const resetBallPosition = (
     room: roomInterface,
     server: Server) => {
     // set players && ball on server side 
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
     const randY: number = 100 * Math.random();
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
+    room.pongState.ball.speedX = 0.5;
+    room.pongState.ball.speedY = 0.5;
     sendBallPosition(room, server);
-    // room.pongState.player1.y = 38.5;
-    // room.pongState.player2.y = 38.5;
-    // // send players position to client side
-    // server.to(room.pongState.player1.id).emit('resetPlayers', { percentP1: 38.5, percentP2: 38.5 });
-    // server.to(room.pongState.player2.id).emit('resetPlayers', { percentP1: 38.5, percentP2: 38.5 });
+    sendBallVector(room, server);
 }
 
 const handleResetPlayerPosition = (
     room: roomInterface,
     server: Server) => {
-    // check who lose round
-    room.pongState.ball.speedX = 0;
-    room.pongState.ball.speedY = 0;
-    // room.pongState.ball.x = 50;
-    // room.pongState.ball.y = 10000;
-    sendBallPosition(room, server);
+    // Check who win round
     if (room.pongState.ball.x <= radiusBall) {
         room.pongState.player2.score++;
         room.pongState.ball.speedX = 1;
@@ -135,7 +137,7 @@ const handleResetPlayerPosition = (
         room.pongState.ball.speedX = -1;
         room.pongState.ball.speedY = -1;
     }
-    initPosition(room, server);
+    resetBallPosition(room, server);
     sendScore(room, server);
 }
 
@@ -160,16 +162,24 @@ export class GameService {
             { id: 4, isActive: false, type: -1, x: 75, y: 50 },
             { id: 5, isActive: false, type: -1, x: 80, y: 80 },
         ]
-        server.to(room.name).emit('resetPlayers', { percentP1: 38.5, percentP2: 38.5 });
-        sendBallPosition(room, server);
-        initPosition(room, server);
+        let firstReset : Boolean = true;
+
+        // set information for all players
+        // Start loop of game
         const interval = setInterval(() => {
+            if (firstReset)
+            {
+                firstReset = false;
+                resetBallPosition(room, server);
+
+            }
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
                 clearInterval(interval);
                 this.handleEndGame(room, server, false);
                 return;
             }
+            // check if modes is active
             if (room.pongState.modes) {
                 timeToNewPower += 1;
                 // return 1 if a new power was create
@@ -177,35 +187,37 @@ export class GameService {
                 if (timeToNewPower === 100)
                     timeToNewPower = 0;
                 handleColisionWithPower(room, server, obstacles, powersAvailables);
-                handleColisionWithObstacle(room, obstacles);
+                handleColisionWithObstacle(room, server, obstacles);
             }
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
             room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
             // check collision with players && walls
-            handleCheckCollision(room);
-            // send ball position
-            sendBallPosition(room, server);
+            handleCheckCollision(room, server);
             // check if someone loose the round
             if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
+            {
+
                 handleResetPlayerPosition(room, server);
-        }, 40);
+            }
+        }, 75);
+
     }
 
     async handleEndGame(room: roomInterface, server: Server, forfeit: boolean) {
-        console.log("SCORE1", room.pongState.player1.score);
-        console.log("SCORE2", room.pongState.player2.score);
         let eloDiff = 0;
         if (room.pongState.player1.score > room.pongState.player2.score) {
+            // increment Wins / Looses in DB
             await this.userService.incrementWin(room.pongState.player1.name);
             await this.userService.incrementLoose(room.pongState.player2.name);
+            // Update Elo for each player
             const [eloWinner, eloLooser] = this.calcElo(room.pongState.player1, room.pongState.player2);
             await this.userService.updateElo(room.pongState.player1.name, eloWinner);
             await this.userService.updateElo(room.pongState.player2.name, eloLooser);
             eloDiff = eloWinner - room.pongState.player1.userInfos.elo;
             room.pongState.player1.userInfos.elo = eloWinner;
             room.pongState.player2.userInfos.elo = eloLooser;
-
+            // Add Game in MatchHistory
             await this.userService.addGame(
                 room.pongState.player1.userId,
                 room.pongState.player1.score,
@@ -217,15 +229,17 @@ export class GameService {
                 room.pongState.modes
             );
         } else {
+             // increment Wins / Looses in DB
             await this.userService.incrementWin(room.pongState.player2.name);
             await this.userService.incrementLoose(room.pongState.player1.name);
+            // Update Elo for each player
             const [eloWinner, eloLooser] = this.calcElo(room.pongState.player2, room.pongState.player1);
             await this.userService.updateElo(room.pongState.player2.name, eloWinner);
             await this.userService.updateElo(room.pongState.player1.name, eloLooser);
             eloDiff = eloWinner - room.pongState.player2.userInfos.elo;
             room.pongState.player2.userInfos.elo = eloWinner;
             room.pongState.player1.userInfos.elo = eloLooser;
-
+            // Add Game in MatchHistory
             await this.userService.addGame(
                 room.pongState.player2.userId,
                 room.pongState.player2.score,
@@ -237,6 +251,7 @@ export class GameService {
                 room.pongState.modes
             );
         }
+
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);
         const user2 = await this.userService.getUserByName(room.pongState.player2.name);
         server.to(room.pongState.player1.id).emit('updateUser', user1, forfeit);

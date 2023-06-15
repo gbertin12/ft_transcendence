@@ -3,7 +3,8 @@
 
 import { Server } from 'socket.io';
 import {roomInterface, PowerInterface,  obstaclesInterface, powerAvailables} from '../../src/interfaces/pong.interface';
-import { convertToPixel } from './game.service';
+import { convertToPixel, sendBallVector } from './game.service';
+
 
 const canvasHeight = 300;
 const canvasWidth = 500;
@@ -22,7 +23,7 @@ const obstacle2 = {
     id: 1,
 }
 
-export const handleColisionWithObstacle = (room: roomInterface, obstacles: obstaclesInterface[]) => {
+export const handleColisionWithObstacle = (room: roomInterface, server: Server, obstacles: obstaclesInterface[]) => {
     for (let i = 0; i < obstacles.length; i++)
 {
         if (room.pongState.ball.x > convertToPixel(obstacles[i].x, canvasWidth) &&
@@ -32,16 +33,18 @@ export const handleColisionWithObstacle = (room: roomInterface, obstacles: obsta
             room.pongState.ball.y < convertToPixel(obstacles[i].y, canvasHeight) + convertToPixel(obstacles[i].size, canvasHeight)) {
 
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
+                sendBallVector(room, server);
             }
-
             else if (obstacles[i].y === 0 && room.pongState.ball.y <= convertToPixel(obstacles[i].size, canvasHeight)) {
 
                 room.pongState.ball.speedY = -room.pongState.ball.speedY;
+                sendBallVector(room, server);
             } 
 
             else if (obstacles[i].y !== 0 && room.pongState.ball.y <= convertToPixel(obstacles[i].y, canvasHeight)) {
 
                 room.pongState.ball.speedY = -room.pongState.ball.speedY;
+                sendBallVector(room, server);
             } 
         }
     }

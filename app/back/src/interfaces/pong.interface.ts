@@ -9,6 +9,16 @@ export interface BallData {
     speedY: number;
 }
 
+export interface BallPosition {
+    x : number;
+    y : number;
+}
+
+export interface BallVectorSpeed {
+    speedX : number;
+    speedY : number;
+}
+
 // interface du player
 // player state : 0 = not in game, 1 = searching for game, 2 = in game, 3 = watching game
 export interface PlayerInterface {
