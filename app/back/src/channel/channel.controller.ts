@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException, Put } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
@@ -193,6 +193,16 @@ export class ChannelController {
     @Delete(':channel_id/invite')
     async cancelInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
         return this.channelService.revokeInvite(
+            req.user['id'],
+            body.id,
+            dto.channel_id,
+        )
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Put(':channel_id/invite')
+    async acceptInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
+        return this.channelService.acceptInvite(
             req.user['id'],
             body.id,
             dto.channel_id,
