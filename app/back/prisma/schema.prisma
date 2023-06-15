@@ -27,6 +27,7 @@ model User {
     BlockedUser       BlockedUser[]
     friend            Friend[]         @relation("friend")
     friend2           Friend[]         @relation("friend2")
+    ChannelInvites    ChannelInvites[]
     PrivateMessage    PrivateMessage[]
 }
 
@@ -97,6 +98,15 @@ model ChannelAccess {
     channel    Channel @relation(fields: [channel_id], references: [id])
 
     @@id([channel_id, user_id])
+}
+
+model ChannelInvites {
+    sender_id   Int
+    receiver_id Int
+    invited_at  DateTime @default(now()) @db.Timestamp(6)
+    sender      User     @relation(fields: [sender_id], references: [id])
+
+    @@id([sender_id, receiver_id])
 }
 
 model ChannelAdmin {
