@@ -9,7 +9,7 @@ import ModalSign from "./auth/ModalSign";
 export function TranscendenceNavbar() {
 
 	return (
-		<Navbar maxWidth="fluid" variant="static" color="backgroundAlpha" css={{margin: "15px"}}>
+		<Navbar maxWidth="fluid" variant="static" color="backgroundAlpha" css={{margin: "12px"}}>
 			<Navbar.Brand >
 				<Text h1 size={20} color="primary">ft_pong</Text>
 			</Navbar.Brand >
@@ -25,7 +25,7 @@ export function TranscendenceNavbar() {
 				</Navbar.Link>
 
 			</Navbar.Content>
-			<Navbar.Content color="primary">
+			<Navbar.Content>
 				<ModalSign />
 			</Navbar.Content>
 		</Navbar>

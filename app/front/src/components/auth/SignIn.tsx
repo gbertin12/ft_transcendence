@@ -1,6 +1,7 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button, Grid, Text, Image } from "@nextui-org/react";
+import React, {FormEvent, useState } from 'react';
+import { Input, Spacer, Button, Grid, Text, Image, FormElement } from "@nextui-org/react";
 
 async function login42() {
 	const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
@@ -18,6 +19,25 @@ async function loginDiscord() {
 	window.location.href = 'http://localhost:3000/auth/discord/callback';
 }
 export default function SignIn() {
+
+	const [ Username, setUsername ] = useState<string>("");
+    const [ Password, setPassword ] = useState<string>("");
+
+	function handleUsername(event: FormEvent<FormElement>) {
+		const target = event.target as HTMLInputElement;
+        setUsername(target.value);
+    }
+
+	function handlePassword(event: FormEvent<FormElement>) {
+		const target = event.target as HTMLInputElement;
+		setPassword(target.value);
+	}
+
+	function ConnectAccount() 
+	{
+// ft_transcendence/app/back/src/auth/auth.controller.ts (register)
+	}
+	
 	return (
 		<Grid>
 			<Text h4>Sign in</Text>
@@ -25,11 +45,11 @@ export default function SignIn() {
 			<Grid.Container direction="column" >
 				<Grid>
 
-					<Input placeholder="Username" label="Username" />
+					<Input placeholder="Username" value={Username} onInput={handleUsername} label="Username" />
 				</Grid>
 				<Spacer y={1} />
 				<Grid>
-					<Input.Password placeholder="Password" label="Password" />
+					<Input.Password placeholder="Password" value={Password} onInput={handlePassword} label="Password" />
 				</Grid>
 				<Spacer y={1} />
 				<Grid.Container justify='flex-end'>

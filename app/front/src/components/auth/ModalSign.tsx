@@ -24,7 +24,7 @@ export default function ModalSign() {
 			{
 			!userId ?
 				<Button auto onPress={handler}>
-					<Text bold color="secondary">Se connecter </Text>
+					<Text color="secondary">Se connecter </Text>
 				</Button>
 				:
 				<ConnectedButton/>
@@ -32,12 +32,11 @@ export default function ModalSign() {
 			<Modal closeButton
 				blur
 				aria-labelledby="SignIn"
-				width="80%"
+				width="60%"
 				open={visible}
 				onClose={closeHandler}
 			>
 				<Modal.Body>
-					<Grid direction="row" >
 						<Grid.Container justify='center' gap={4} >
 							<Grid>
 								<SignIn />
@@ -46,7 +45,6 @@ export default function ModalSign() {
 								<SignUp />
 							</Grid>
 						</Grid.Container>
-					</Grid>
 				</Modal.Body>
 			</Modal>
 		</div>
