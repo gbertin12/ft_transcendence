@@ -26,6 +26,7 @@ import { LocalStrategy } from './strategies/local.strategy'
             secret: process.env.JWT_SIGN_KEY,
             signOptions: { expiresIn: '7d' },
         }),
-    ]
+    ],
+    exports: [AuthService],
 })
 export class AuthModule {}
