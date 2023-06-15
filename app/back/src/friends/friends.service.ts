@@ -267,7 +267,6 @@ export class FriendsService {
     }
 
     async getFriendRequest(sender_id: number, receiver_id: number) {
-        console.log("receiver_id", receiver_id, "sender_id", sender_id);
         return this.dbService.friendRequest.findUnique({
             where: {
                 sender_id_receiver_id: {
