@@ -62,6 +62,17 @@ class OwnershipTransferDto {
     password: string;
 }
 
+class RoleUpdateDto {
+    @Type(() => Number)
+    @IsNumber()
+    @IsPositive()
+    user_id: number;
+
+    @Type(() => String)
+    @Matches(/^(admin|user)$/i)
+    role: string;
+}
+
 @Controller('channel')
 export class ChannelController {
     constructor(
@@ -329,6 +340,47 @@ export class ChannelController {
         this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('updateOwner', {
             channel_id: dto.channel_id,
             new_owner: body.new_owner,
+        });
+    }
+    
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Patch(":channel_id/update_role")
+    async updateRole(@Param() dto: ChannelDto, @Body() body: RoleUpdateDto, @Req() req) {
+        let channelStaff = await this.channelService.getChannelStaff(dto.channel_id);
+        let powerStatus = (channelStaff.owner_id === req.user.id ? 2 : channelStaff.administrators.includes(req.user.id) ? 1 : 0);
+        let targetStatus = (channelStaff.owner_id === body.user_id ? 2 : channelStaff.administrators.includes(body.user_id) ? 1 : 0);
+        let targetRole: number = -1;
+        switch (body.role) {
+            case "admin":
+                targetRole = 1;
+                break;
+            case "user":
+                targetRole = 0;
+            default:
+                throw new BadRequestException("Invalid role");
+        }
+        if (targetRole == powerStatus) {
+            throw new BadRequestException("No-op update");
+        } else if (targetRole > powerStatus)  {
+            throw new ForbiddenException("You don't have enough privileges to update a user's role");
+        } else if (targetStatus >= powerStatus) {
+            throw new ForbiddenException("Target user's privileges are too high")
+        }
+        this.channelService.setRole(body.user_id, dto.channel_id, targetRole);
+        let targetName: string = (await this.userService.getUserById(body.user_id)).name;
+        // Send system message
+        let systemPayload = {
+            // custom system message
+            content: `${req.user['name']} ${targetStatus > targetRole ? "demoted" : "promoted"} ${targetName} to ${body.role}`,
+            message_id: Math.floor(Math.random() * 1000000000), // todo: use service's systemMessageStack
+            sender: { avatar: null, id: -1, username: "System", },
+            timestamp: new Date(),
+        };
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('message', systemPayload);
+        // Send promotion socket
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit((targetStatus > targetRole ? 'removeStaff' : 'addStaff'), {
+            channel_id: dto.channel_id,
+            target_id: body.user_id,
         });
     }
 }
