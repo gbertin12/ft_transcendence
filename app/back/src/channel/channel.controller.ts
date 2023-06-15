@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, Delete, Patch, UseGuards, Req, BadRequestException, NotFoundException, Put, ForbiddenException } from '@nestjs/common';
 import { ChannelService } from './channel.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive, Length, Matches } from 'class-validator';
@@ -233,5 +233,29 @@ export class ChannelController {
                 });
             }
         });
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Put(':channel_id/leave')
+    async leaveChannel(@Param() dto: ChannelDto, @Req() req) {
+        // User cannot leave if he's the owner, he must delete the channel OR transfer ownership
+        const userId = req.user['id'];
+        const channel = await this.channelService.getChannel(dto.channel_id);
+        if (!channel) {
+            throw new NotFoundException("Unknown channel");
+        }
+        if (!channel.private) {
+            throw new BadRequestException("You cannot leave a public channel");
+        }
+        if (channel.owner_id === userId) {
+            throw new ForbiddenException("You cannot leave a channel you own, delete it instead or transfer ownership");
+        }
+        await this.channelService.leaveChannel(dto.channel_id, userId);
+        // Send a socket message
+        if (this.chatGateway.usersClients[userId]) {
+            this.chatGateway.usersClients[userId].emit('leaveChannel', {
+                channel_id: dto.channel_id,
+            });
+        }
     }
 }
