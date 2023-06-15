@@ -11,7 +11,6 @@ export default function SignIn() {
 			<Text h4 color="primaryLightContrast">Sign up</Text>
 			<Grid.Container direction="column">
 				<Grid>
-
 					<Input placeholder="Username" label="Username" color="primaryLightContrast" />
 				</Grid>
 				<Spacer y={1} />
