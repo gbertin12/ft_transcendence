@@ -75,9 +75,9 @@ export default function EditPlayerInfo(
             <Card.Divider/>
 
             <Card.Body>
-                <Input aria-label="edit username" labelLeft="Username" value={name} onInput={handleOnInput}/>
+                <Input bordered aria-label="edit username" labelLeft="Username" value={name} onInput={handleOnInput}/>
                 <Spacer y={2}/>
-                <input type="file" onChange={handleOnChange}/>
+                <input type="file" onChange={handleOnChange} />
                 <Spacer y={2}/>
                 <Text h4 color="error">{error}</Text>
                 <Spacer y={1}/>
@@ -88,8 +88,8 @@ export default function EditPlayerInfo(
 
             <Card.Footer>
                 <Row wrap="wrap" justify="space-evenly" align="center">
-                    <Button bordered onPress={handleShowEdit}>Cancel</Button>
-                    <Button onPress={updateProfile}>Update</Button>
+                    <Button auto bordered onPress={handleShowEdit} css={{margin: "10px"}}>Cancel</Button>
+                    <Button auto onPress={updateProfile}>Update</Button>
                 </Row>
             </Card.Footer>
         </Card>

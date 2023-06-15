@@ -4,8 +4,9 @@ import { useUser } from '@/contexts/user.context';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 
 function redirMyProfile() {
-	window.location.href = 'http://localhost:8000/profile';
+    window.location.href = 'http://localhost:8000/profile';
 }
+// if (window.location.href == 'http://localhost:8000/profile')
 
 // window.location.href = `http://localhost:8000/user/${user.name}`;
 // window.location.href = `http://localhost:8000/auth/${user.name}`;

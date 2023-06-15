@@ -132,11 +132,11 @@ export default function MFAButton() {
         );
     } else if (otp) {
         return (
-            <Button color="error" onPress={() => setShowInput(true)}>Disable 2FA</Button>
+            <Button auto color="error" onPress={() => setShowInput(true)}>Disable 2FA</Button>
         );
     } else {
         return (
-            <Button color="error" onPress={enable2FA}>Enable 2FA</Button>
+            <Button auto color="error" onPress={enable2FA}>Enable 2FA</Button>
         );
     }
 }
