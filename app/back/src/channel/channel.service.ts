@@ -300,4 +300,15 @@ export class ChannelService {
             }
         });
     }
+
+    async leaveChannel(user_id: number, channel_id: number) {
+        return this.db.channelAccess.delete({
+            where: {
+                channel_id_user_id: {
+                    channel_id: channel_id,
+                    user_id: user_id
+                }
+            }
+        })
+    }
 }
