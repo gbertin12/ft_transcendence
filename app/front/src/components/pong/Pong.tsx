@@ -8,6 +8,8 @@ import { User } from '../../interfaces/user.interface'
 import { PlayerEndGame, BallPosition, BallVectorSpeed } from '@/interfaces/pong.interface';
 import { headers } from 'next/dist/client/components/headers';
 
+const canvasHeightServerSide : number = 300;
+const canvasWidthServerSide : number = 500;
 
 function Player({ x, y, canvasHeight }: { x: number, y: number, canvasHeight: number }) {
     return (
@@ -178,10 +180,10 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
 	// set xSpeed & ySpeed of ball 
     const handleUpdateVectorBall = ({ speedX, speedY }: { speedX: number, speedY: number }) => {
-        speedX = convertToPixel(speedX, canvas.width);
-        speedY = convertToPixel(speedY, canvas.height);
-        console.log("Update Vector", speedX, speedY);
-		setBallVectorSpeed({speedX : speedX, speedY : speedY});
+        const ratioX = canvasHeightServerSide / canvas.height;
+        const ratioY = canvasWidthServerSide / canvas.width;
+
+		setBallVectorSpeed({speedX : speedX * ratioX, speedY : speedY * ratioY});
     }
 
     const handleNewPowers = ({ x, y, id, type }: { x: number, y: number, id: number, type: number }) => {
