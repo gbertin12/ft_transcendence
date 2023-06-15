@@ -182,30 +182,56 @@ export class ChannelController {
             throw new BadRequestException("You cannot invite someone to a public channel, or a private channel with a password");
         }
         // No special permission is required to invite someone to a private channel
-        return this.channelService.inviteToChannel(
+        this.channelService.inviteToChannel(
             senderId,
             receiverId,
             dto.channel_id,
         )
+        let users: number[] = [senderId, receiverId]
+        users.forEach((userId) => {
+            if (this.chatGateway.usersClients[userId]) {
+                this.chatGateway.usersClients[userId].emit('invite', {
+                    channel: channel,
+                    channel_id: dto.channel_id,
+                    sender: req.user,
+                });
+            }
+        })
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Delete(':channel_id/invite')
     async cancelInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
-        return this.channelService.revokeInvite(
+        this.channelService.revokeInvite(
             req.user['id'],
             body.id,
             dto.channel_id,
         )
+        let users: number[] = [req.user['id'], body.id]
+        users.forEach((userId) => {
+            if (this.chatGateway.usersClients[userId]) {
+                this.chatGateway.usersClients[userId].emit('cancelInvite', {
+                    channel_id: dto.channel_id,
+                });
+            }
+        });
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Put(':channel_id/invite')
     async acceptInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
-        return this.channelService.acceptInvite(
+        this.channelService.acceptInvite(
             req.user['id'],
             body.id,
             dto.channel_id,
         )
+        let users: number[] = [req.user['id'], body.id]
+        users.forEach((userId) => {
+            if (this.chatGateway.usersClients[userId]) {
+                this.chatGateway.usersClients[userId].emit('acceptInvite', {
+                    channel_id: dto.channel_id,
+                });
+            }
+        }
     }
 }
