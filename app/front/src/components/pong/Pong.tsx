@@ -182,8 +182,8 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
     const handleUpdateVectorBall = ({ speedX, speedY }: { speedX: number, speedY: number }) => {
         const ratioX = canvasHeightServerSide / canvas.height;
         const ratioY = canvasWidthServerSide / canvas.width;
-
-		setBallVectorSpeed({speedX : speedX * ratioX, speedY : speedY * ratioY});
+        console.log("update ball vector ", speedX / ratioX, speedY / ratioY)
+		setBallVectorSpeed({speedX : speedX / ratioX, speedY : speedY / ratioY});
     }
 
     const handleNewPowers = ({ x, y, id, type }: { x: number, y: number, id: number, type: number }) => {
