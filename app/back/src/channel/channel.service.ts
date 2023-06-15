@@ -248,4 +248,31 @@ export class ChannelService {
             }
         });
     }
+
+    async inviteToChannel(sender_id: number, receiver_id: number, channel_id: number) {
+        return this.db.channelInvites.create({
+            data: {
+                receiver_id: receiver_id,
+                sender_id: sender_id,
+                channel_id: channel_id,
+            },
+            include: {
+                channel: {
+                    select: {
+                        name: true,
+                    }
+                },
+                sender: {
+                    select: { // Useful data for avatar tooltip and front redering
+                        avatar: true,
+                        name: true,
+                        elo: true,
+                        wins: true,
+                        losses: true,
+                        id: true,
+                    }
+                }   
+            },
+        });
+    }
 }

@@ -79,16 +79,17 @@ model FriendRequest {
 }
 
 model Channel {
-    id             Int             @id @default(autoincrement())
-    name           String          @db.VarChar(64)
-    topic          String          @db.VarChar(128)
-    private        Boolean         @default(false) @db.Boolean
-    creation_date  DateTime        @default(now()) @db.Timestamp(6)
+    id             Int              @id @default(autoincrement())
+    name           String           @db.VarChar(64)
+    topic          String           @db.VarChar(128)
+    private        Boolean          @default(false) @db.Boolean
+    creation_date  DateTime         @default(now()) @db.Timestamp(6)
     owner_id       Int
-    password       String?         @db.VarChar(128)
-    owner          User            @relation(fields: [owner_id], references: [id])
+    password       String?          @db.VarChar(128)
+    owner          User             @relation(fields: [owner_id], references: [id])
     channel_access ChannelAccess[]
     admins         ChannelAdmin[]
+    ChannelInvites ChannelInvites[]
 }
 
 model ChannelAccess {
@@ -102,8 +103,10 @@ model ChannelAccess {
 model ChannelInvites {
     sender_id   Int
     receiver_id Int
+    channel_id  Int
     invited_at  DateTime @default(now()) @db.Timestamp(6)
     sender      User     @relation(fields: [sender_id], references: [id])
+    channel     Channel  @relation(fields: [channel_id], references: [id])
 
     @@id([sender_id, receiver_id])
 }
