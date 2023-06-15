@@ -232,6 +232,6 @@ export class ChannelController {
                     channel_id: dto.channel_id,
                 });
             }
-        }
+        });
     }
 }
