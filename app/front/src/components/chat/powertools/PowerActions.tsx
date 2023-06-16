@@ -18,24 +18,6 @@ interface PowerActionsProps {
     blocked: boolean;
 }
 
-function emitPowerActionDM(
-    interlocutor: User,
-    action: PowerAction,
-    socket: Socket,
-    targetMessage?: MessageData,
-) {
-    if (!targetMessage) {
-        return;
-    }
-
-    return socket.emit('powerAction', {
-        interlocutor: interlocutor.id,
-        action: action,
-        targetMessage: targetMessage,
-        dm: true,
-    });
-}
-
 function emitPowerAction(
     channel: Channel,
     action: PowerAction,
@@ -205,7 +187,10 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconTrash />}
                         color="default"
                         render={isAuthor || isAdmin || isOwner}
-                        onPress={() => emitPowerActionDM(interlocutor, "deleted", socket, message)}
+                        onPress={() => socket.emit('dmDelete', {
+                            interlocutor: interlocutor.id,
+                            message_id: message.message_id,
+                        })}
                     />
                 </Grid>
             </Grid.Container>
