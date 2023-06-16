@@ -45,10 +45,6 @@ export default function Profile() {
             </Row>
 
             <Row justify='center'>
-                <AvatarTooltip user={user} placement="top"/>
-            </Row>
-
-            <Row justify='center'>
                 <Grid xs={8}>
                     <MatchHistory user={user}/>
                 </Grid>
