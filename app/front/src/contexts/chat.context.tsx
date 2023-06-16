@@ -68,6 +68,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 })
         };
         const fetchFriends = async () => {
+            if (user.id === undefined) return;
             axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
                 .then((res) => {
                     if (res.status !== 200) return ;
@@ -114,6 +115,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 });
         };
         const fetchBans = async () => {
+            if (user.id === undefined) return;
             try {
                 axios.get("http://localhost:3000/punishments/active", 
                     {
@@ -137,6 +139,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             }
         }
         const fetchFriendRequests = async () => {
+            if (user.id === undefined) return;
             axios.get("http://localhost:3000/friends/requests", {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -151,7 +154,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         fetchFriends();
         fetchBans();
         fetchFriendRequests();
-    }, []);
+    }, [user]);
 
     // Listen for new friends / channels
     const { socket } = useUser();
