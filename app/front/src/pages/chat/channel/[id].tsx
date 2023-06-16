@@ -13,6 +13,7 @@ const ChannelChat: React.FC = () => {
     const channelId: number = typeof id === "string" ? parseInt(id) : -1;
     const channel: Channel | undefined = channels.find((channel) => channel.id === channelId);
 
+    // TODO: fix 404 that is displayed when loading the channel
     if (!channel) {
         return (
             <ChatLayout>

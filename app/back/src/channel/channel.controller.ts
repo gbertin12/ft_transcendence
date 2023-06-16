@@ -245,6 +245,8 @@ export class ChannelController {
             if (this.chatGateway.usersClients[userId]) {
                 this.chatGateway.usersClients[userId].emit('cancelInvite', {
                     channel_id: dto.channel_id,
+                    receiver_id: body.id,
+                    sender_id: req.user['id'],
                 });
             }
         });
@@ -263,6 +265,8 @@ export class ChannelController {
             if (this.chatGateway.usersClients[userId]) {
                 this.chatGateway.usersClients[userId].emit('acceptInvite', {
                     channel_id: dto.channel_id,
+                    receiver_id: body.id,
+                    sender_id: req.user['id'],
                 });
             }
         });
