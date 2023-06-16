@@ -49,7 +49,7 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned
                     content={unreadMessages > 9 ? "9+" : unreadMessages.toString()}
                     placement="bottom-right"
                     color="error"
-                    css={{ display: (unreadMessages === 0) ? "none" : "block" }}
+                    css={{ display: (unreadMessages === 0) ? "none" : "" }}
                 >
                     <Text
                         span
