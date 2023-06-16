@@ -33,14 +33,11 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
 }
 
 const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, isTyping, isPlaying, unreadMessages, children }) => {
-    if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
-
     const [isHovered, setIsHovered] = React.useState(false);
 
     return (
         <Grid.Container
             gap={0.5}
-            as="a"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             css={{
@@ -48,6 +45,7 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, i
                 borderRadius: "5px",
                 padding: "5px",
                 transition: "background-color 0.05s ease-in-out",
+                cursor: "pointer",
             }}
         >
             <Grid xs={2}>

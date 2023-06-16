@@ -1,4 +1,4 @@
-import { Channel, Friend, FriendRequest, Relationships } from '@/interfaces/chat.interfaces';
+import { Channel, Friend, FriendRequest, Message, Relationships } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -235,6 +235,15 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     return newBlockedUsers;
                 });
             });
+            socket.on("dmMessage", (payload: any) => {
+                // If the href is not in the good dm, increment the unread messages
+                if (!window.location.href.includes(`/dm/${payload.sender_id}`) && !window.location.href.includes(`/dm/${payload.receiver_id}`)) {
+                    setFriends(
+                        (friends) => friends.map((f) => f.id === payload.sender_id ? { ...f, unreadMessages: f.unreadMessages + 1 } : f)
+                    );
+                }
+            });
+
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
@@ -251,6 +260,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("unbanned");
                 socket.off("unmuted");
                 socket.off("blocked");
+                socket.off("unblocked");
+                socket.off("dmMessage");
             }
         }
     }, [socket]);

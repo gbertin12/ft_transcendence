@@ -15,12 +15,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     const [messages, setMessages] = useState<MessageData[]>([]);
     const { socket, user } = useUser();
     const {
-        bannedChannels,
-        setBannedChannels,
-        mutedChannels,
-        setMutedChannels,
-        blockedUsers,
-        setBlockedUsers,
+        blockedUsers, friends, setFriends
     } = useChat();
 
     const fetchMessages = useCallback(async (interlocutor: User): Promise<MessageData[]> => {
@@ -48,12 +43,14 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         return data;
     }, []);
 
+    const handleNewMessage = useCallback(async (message: MessageData): Promise<void> => {
+        // parse the timestamp
+        message.timestamp = new Date(message.timestamp);
+        setMessages((messages) => [message, ...messages]);
+    }, []);
+
     useEffect(() => {
-        socket.on('dmMessage', (payload: MessageData) => {
-            // parse the timestamp
-            payload.timestamp = new Date(payload.timestamp);
-            setMessages((messages) => [payload, ...messages]);
-        });
+        socket.on('dmMessage', handleNewMessage);
         socket.on('messageDeleted', (payload: MessageData) => {
             // find the message in the list and remove it
             setMessages((messages) => {
@@ -67,13 +64,21 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         fetchMessages(interlocutor).then((messages) => {
             setMessages(messages);
         });
+        // reset unread messages
+        setFriends((friends) => {
+            const index = friends.findIndex((friend) => friend.id === interlocutor.id);
+            if (index !== -1) {
+                friends[index].unreadMessages = 0;
+            }
+            return [...friends];
+        });
         return () => {
-            socket.off('dmMessage');
+            socket.off('dmMessage', handleNewMessage);
             socket.off('messageDeleted');
         }
     }, [socket, user]);
 
-    const handleNewMessage = useCallback((message: string) => {
+    const handlePostMessage = useCallback((message: string) => {
         try {
             axios.post(`http://localhost:3000/dms/${interlocutor.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
@@ -134,7 +139,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                                         let message: string = e.target.value;
                                         message = message.trim();
                                         if (message.length > 0) {
-                                            handleNewMessage(message);
+                                            handlePostMessage(message);
                                             e.target.value = "";
                                         }
                                     }
