@@ -51,10 +51,10 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
 
     useEffect(() => {
         socket.on('dmMessage', handleNewMessage);
-        socket.on('messageDeleted', (payload: MessageData) => {
+        socket.on('messageDeleted', (message_id: number) => {
             // find the message in the list and remove it
             setMessages((messages) => {
-                const index = messages.findIndex((message) => message.message_id === payload.message_id);
+                const index = messages.findIndex((message) => message.message_id === message_id);
                 if (index !== -1) {
                     messages.splice(index, 1);
                 }

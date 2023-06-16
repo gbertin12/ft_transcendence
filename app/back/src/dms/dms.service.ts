@@ -82,4 +82,26 @@ export class DmsService {
             }
         })
     }
+
+    async getMessage(message_id: number) {
+        return this.db.privateMessage.findUnique({
+            where: {
+                message_id: message_id,
+            },
+            select: {
+                sender: {
+                    select: {
+                        avatar: true,
+                        name: true,
+                        id: true
+                    }
+                },
+                content: true,
+                message_id: true,
+                receiver_id: true,
+                sender_id: true,
+                timestamp: true,
+            }
+        })
+    }
 }
