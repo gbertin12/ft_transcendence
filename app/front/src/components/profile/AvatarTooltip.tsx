@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
 import { Friend, FriendRequest } from "@/interfaces/chat.interfaces";
 import { IconUserX } from "@tabler/icons-react";
+import { useUser } from "@/contexts/user.context";
 
 function handleAddFriend(id: number) {
     axios.post('http://localhost:3000/friends/add', { to: id }, {
@@ -21,9 +22,28 @@ function handleRemoveFriend(id: number) {
     });
 }
 
-function friendInteractionButton(user: User, requests: FriendRequest[], isFriend: boolean): JSX.Element {
-    // Return the remove button if the user is a friend
-    let pendingFriendRequest = requests.find((request) => request.sender_id == user.id);
+function handleCancelFriendRequest(id: number) {
+    axios.delete(`http://localhost:3000/friends/requests/cancel/${id}`, {
+        withCredentials: true,
+        validateStatus: () => true,
+    });
+}
+
+function handleAcceptFriendRequest(id: number) {
+    axios.post(`http://localhost:3000/friends/requests/${id}/accept`, {}, {
+        withCredentials: true,
+        validateStatus: () => true,
+    });
+}
+
+function friendInteractionButton(
+    user: User,
+    sentRequests: FriendRequest[],
+    receivedRequests: FriendRequest[],
+    isFriend: boolean
+): JSX.Element {
+    const sent = sentRequests.some((request) => request.sender_id === user.id);
+    const recieved = receivedRequests.some((request) => request.receiver_id === user.id);
 
     if (isFriend) {
         return (
@@ -37,24 +57,24 @@ function friendInteractionButton(user: User, requests: FriendRequest[], isFriend
         );
     }
     // Return the cancel button if the user has sent a request and is the sender
-    else if (pendingFriendRequest && pendingFriendRequest.sender_id == user.id) {
+    else if (sent) {
         return (
             <Button
                 size="sm"
                 auto
-                onPress={() => handleRemoveFriend(user.id)}
+                onPress={() => handleCancelFriendRequest(user.id)}
                 color="warning">
                 <IconUserX/>
             </Button>
         );
     }
     // Return a decline button if the user has sent a request and is the receiver
-    else if (pendingFriendRequest && pendingFriendRequest.receiver_id == user.id) {
+    else if (recieved) {
         return (
             <Button
                 size="sm"
                 auto
-                onPress={() => handleRemoveFriend(user.id)}
+                onPress={() => handleAcceptFriendRequest(user.id)}
                 color="error">
                 <IconUserOff />
             </Button>
@@ -75,9 +95,10 @@ function friendInteractionButton(user: User, requests: FriendRequest[], isFriend
 }
 
 function ProfileTooltip({ user }: { user: User }) {
-    const { friends, friendRequests } = useChat();
+    const { friends, friendRequests, receivedRequests, sentRequests } = useChat();
     const [ winrate, setWinrate ] = useState<number>(-1);
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
+    const me = useUser().user;
 
     useEffect(() => {
         if (user.wins + user.losses > 0) {
@@ -86,7 +107,7 @@ function ProfileTooltip({ user }: { user: User }) {
     }, [user.wins, user.losses]);
 
     useEffect(() => {
-        if (friends.some((friend) => friend.userId == user.id)) {
+        if (friends.some((friend) => friend.userId === user.id)) {
             setIsFriend(true);
         } else {
             setIsFriend(false);
@@ -112,14 +133,14 @@ function ProfileTooltip({ user }: { user: User }) {
                 <Text>{winrate}%</Text>
             </Row>)}
 
-            <Row justify="space-evenly">
+            {(me.id !== user.id) && (<Row justify="space-evenly">
                 <Grid>
-                    {friendInteractionButton(user, friendRequests, isFriend)}
+                    {friendInteractionButton(user, sentRequests, receivedRequests, isFriend)}
                 </Grid>
                 <Grid>
                     <Button size="sm" color="error" auto><IconSwords/></Button>
                 </Grid>
-            </Row>
+            </Row>)}
         </Grid.Container>
     );
 }

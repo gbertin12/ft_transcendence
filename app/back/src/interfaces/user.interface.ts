@@ -10,8 +10,6 @@ export interface User {
 
 export interface RowLeaderboard {
     rank: number;
-    avatar: string;
-    name: string;
+    user: User;
     winrate: number;
-    elo: number;
 }

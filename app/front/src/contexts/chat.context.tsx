@@ -58,79 +58,79 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     useEffect(() => {
         const fetchChannels = async () => {
             axios.get("http://localhost:3000/channel/all", 
-            {
-				withCredentials: true,
-				validateStatus: () => true,
-			})
-            .then((res) => {
-                if (res.status !== 200) return ;
-                setChannels(res.data);
-            })
-        };
-        const fetchFriends = async () => {
-            axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
-            .then((res) => {
-                if (res.status !== 200) return ;
-                const relationships: Relationships = res.data;
-                if (Array.isArray(relationships.friends)) {
-                    const friends: Friend[] = relationships.friends.map((friend) => {
-                        // if user id is self, use user2 instead
-                        if (friend.friend_id === user.id) {
-                            return {
-                                id: friend.user2.id,
-                                name: friend.user2.name,
-                                avatar: friend.user2.avatar,
-                                userId: friend.user2.id,
-                                isOnline: false,
-                                isTyping: false,
-                                isPlaying: false,
-                                unreadMessages: 0,
-                            };
-                        } else {
-                            return {
-                                id: friend.user.id,
-                                name: friend.user.name,
-                                avatar: friend.user.avatar,
-                                userId: friend.user.id,
-                                isOnline: false,
-                                isTyping: false,
-                                isPlaying: false,
-                                unreadMessages: 0,
-                            };
-                        }
-                    });
-                    const blockedUsers: Set<number> = new Set<number>();
-                    if (Array.isArray(relationships.blocked)) {
-                        relationships.blocked.forEach((blocked) => {
-                            blockedUsers.add(blocked.blocked_id);
-                        });
-                    }
-                    setBlockedUsers(blockedUsers);
-                    setFriends(friends);
-                    socket.emit("updateStatus", {"status": "online"});
-                }
-            }).catch((err) => {
-                return ;
-            });
-        };
-        const fetchBans = async () => {
-            try {
-                axios.get("http://localhost:3000/punishments/active", 
                 {
                     withCredentials: true,
                     validateStatus: () => true,
                 })
                 .then((res) => {
-                    if (res.status === 200) {
-                        // TODO: handle durations too
-                        if (res.data.hasOwnProperty("banned")) {
-                            setBannedChannels(new Set<number>(res.data.banned));
+                    if (res.status !== 200) return ;
+                    setChannels(res.data);
+                })
+        };
+        const fetchFriends = async () => {
+            axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
+                .then((res) => {
+                    if (res.status !== 200) return ;
+                    const relationships: Relationships = res.data;
+                    if (Array.isArray(relationships.friends)) {
+                        const friends: Friend[] = relationships.friends.map((friend) => {
+                            // if user id is self, use user2 instead
+                            if (friend.friend_id === user.id) {
+                                return {
+                                    id: friend.user2.id,
+                                    name: friend.user2.name,
+                                    avatar: friend.user2.avatar,
+                                    userId: friend.user2.id,
+                                    isOnline: false,
+                                    isTyping: false,
+                                    isPlaying: false,
+                                    unreadMessages: 0,
+                                };
+                            } else {
+                                return {
+                                    id: friend.user.id,
+                                    name: friend.user.name,
+                                    avatar: friend.user.avatar,
+                                    userId: friend.user.id,
+                                    isOnline: false,
+                                    isTyping: false,
+                                    isPlaying: false,
+                                    unreadMessages: 0,
+                                };
+                            }
+                        });
+                        const blockedUsers: Set<number> = new Set<number>();
+                        if (Array.isArray(relationships.blocked)) {
+                            relationships.blocked.forEach((blocked) => {
+                                blockedUsers.add(blocked.blocked_id);
+                            });
                         }
-                        if (res.data.hasOwnProperty("muted")) {
-                            setMutedChannels(new Set<number>(res.data.muted));
-                        }
+                        setBlockedUsers(blockedUsers);
+                        setFriends(friends);
+                        socket.emit("updateStatus", {"status": "online"});
                     }
+                }).catch((err) => {
+                    return ;
                 });
+        };
+        const fetchBans = async () => {
+            try {
+                axios.get("http://localhost:3000/punishments/active", 
+                    {
+                        withCredentials: true,
+                        validateStatus: () => true,
+                    })
+                    .then((res) => {
+                        if (res.status === 200) {
+                            // TODO: handle durations too
+                            if (res.data.hasOwnProperty("banned")) {
+                                setBannedChannels(new Set<number>(res.data.banned));
+                            }
+                            if (res.data.hasOwnProperty("muted")) {
+                                setMutedChannels(new Set<number>(res.data.muted));
+                            }
+                        }
+                    });
             }
             catch (err) {
                 return ;
@@ -141,10 +141,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 withCredentials: true,
                 validateStatus: () => true,
             }).then((response) => {
-                if (response.status === 200) {
-                    setFriendRequests(response.data);
-                }
-            });
+                    if (response.status === 200) {
+                        setFriendRequests(response.data);
+                    }
+                });
         };
 
         fetchChannels();
