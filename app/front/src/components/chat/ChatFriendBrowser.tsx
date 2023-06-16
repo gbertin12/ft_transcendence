@@ -46,7 +46,7 @@ const ChatFriendBrowser: React.FC = () => {
                             content={friend.unreadMessages > 9 ? "9+" : friend.unreadMessages.toString()}
                             placement="bottom-right"
                             color="error"
-                            css={{ display: (friend.unreadMessages === 1) ? "none" : "" }}
+                            css={{ display: (friend.unreadMessages === 0) ? "none" : "" }}
                         >
                             <Link href={`/chat/dm/${friend.userId}`}>
                                 <IconMessageCircle />
