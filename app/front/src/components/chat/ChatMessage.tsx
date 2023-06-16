@@ -77,7 +77,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, i
                             />
                         </div>
                         <Text className="overflow-hidden block relative">
-                            <Text span color="$black" className="mr-1 text-lg font-medium">
+                            <Text span color="primary" className="mr-1 text-lg font-medium">
                                 {data.sender.name + (blocked ? " (blocked)" : "")}
                                 {senderOwner && (
                                     <Text color="$error" css={{ display: "inline-flex" }}>
