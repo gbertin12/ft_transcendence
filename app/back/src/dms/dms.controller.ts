@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DmsService } from './dms.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive } from 'class-validator';
@@ -29,6 +29,9 @@ export class DmsController {
 		// Check if user are friends
 		const requester_id = req.user.id;
 		const interlocutor_id = dto.id;
+		if (requester_id === interlocutor_id) {
+			throw new BadRequestException("You can't be your own interlocutor");
+		}
 		const areFriends = await this.friendsService.areFriends(requester_id, interlocutor_id);
 		if (!areFriends) {
 			throw new ForbiddenException("Users are not friends");
@@ -59,8 +62,8 @@ export class DmsController {
 		const requester_id = req.user.id;
 		const interlocutor_id = dto.id;
 		let message = await this.dmsService.createMessage(requester_id, interlocutor_id, req.body.content);
-		this.chatGateway.usersClients[requester_id].emit('message', message);
-		this.chatGateway.usersClients[interlocutor_id].emit('message', message);
+		this.chatGateway.usersClients[requester_id].emit('dmMessage', message);
+		this.chatGateway.usersClients[interlocutor_id].emit('dmMessage', message);
 	};
 }
 
