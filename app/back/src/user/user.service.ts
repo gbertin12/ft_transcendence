@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { DbService } from '../db/db.service';
 
+const fs = require('fs');
+const http = require('node:https');
+
 function generateRandomString(len: number) {
     const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
     const randomArray = Array.from(
@@ -13,6 +16,27 @@ function generateRandomString(len: number) {
     return randomString;
 };
 
+/**
+ * @returns path to an AI generated avatar from pepe.mana.rip, defaults to default.jpg
+ */
+async function getPepeAvatar(): Promise<string> {
+    try {
+        const randomPepe = generateRandomString(24) + ".png";
+        const file = fs.createWriteStream("files/static/avatars/" + randomPepe);
+        let fileValid = true;
+        http.get("https://pepe.mana.rip", function(response) {
+            if (response.statusCode === 200) {
+                response.pipe(file);
+            } else {
+                fileValid = false;
+            }
+        });
+        return fileValid ? randomPepe : 'default.jpg';
+    } catch (error) {
+        console.log(error);
+        return 'default.jpg';
+    }
+}
 @Injectable()
 export class UserService {
     constructor(private db: DbService) {}
@@ -48,7 +72,7 @@ export class UserService {
         });
         return user;
     }
- 
+
     async getUserByIdFull(id: number) {
         const user = await this.db.user.findUnique({
             where: { id },
@@ -119,21 +143,24 @@ export class UserService {
 
     // create a new user if it doesn't already exist
     async createUser(name: string, password: string = null): Promise<User> {
+        let avatarPath: string = await getPepeAvatar();
+        console.log(avatarPath)
         const user = await this.db.user.upsert({
             where: { name },
             update: {},
-            create: { name, password },
+            create: { name, password, avatar: avatarPath },
         });
         return user;
     }
 
     async createDummyUser(): Promise<User> {
+        let avatarPath: string = await getPepeAvatar();
         const name = generateRandomString(8);
         const password = 'password';
         const user = await this.db.user.upsert({
             where: { name },
             update: {},
-            create: { name, password },
+            create: { name, password, avatar: avatarPath },
         });
         return user;
     }
