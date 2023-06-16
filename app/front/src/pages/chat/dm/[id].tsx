@@ -11,6 +11,13 @@ function getErrorCode(status: number): JSX.Element {
     switch (status) {
         case -1:
             return <Loading size="lg" />;
+        case 400:
+            return (
+                <>
+                    <h1 className="text-3xl font-bold">Bad request</h1>
+                    <p className="text-xl">You cannot talk to yourself.</p>
+                </>
+            )
         case 401:
             return (
                 <>

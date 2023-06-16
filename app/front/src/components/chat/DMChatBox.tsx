@@ -49,7 +49,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     }, []);
 
     useEffect(() => {
-        socket.on('message', (payload: MessageData) => {
+        socket.on('dmMessage', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
             setMessages((messages) => [payload, ...messages]);
@@ -68,7 +68,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             setMessages(messages);
         });
         return () => {
-            socket.off('message');
+            socket.off('dmMessage');
             socket.off('messageDeleted');
         }
     }, [socket, user]);
