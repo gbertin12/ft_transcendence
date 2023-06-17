@@ -21,32 +21,62 @@ interface PowerActionsProps {
 function emitPowerAction(
     channel: Channel,
     action: PowerAction,
-    socket: Socket,
     targetSender?: SenderData,
     targetMessage?: MessageData,
+    duration: number = -1,
 ) {
     if (!targetSender && !targetMessage || targetSender && targetMessage) {
         return;
     }
 
     if (targetMessage) {
-        return socket.emit('powerAction', {
-            channel: channel.id,
-            action: action,
-            targetMessage: targetMessage,
-            dm: false,
-        });
+        switch (action) {
+            case 'deleted':
+                axios.delete(`http://localhost:3000/channel/${channel.id}/${targetMessage.message_id}`,
+                {
+                    withCredentials: true,
+                    validateStatus: () => true // The front won't display buttons if the user
+                })                             // is not allowed to use them anyway 
+                break;
+            default: // ?
+                return;
+        }
     }
+
+    let durationSeconds: number = (duration > 0) ? duration : 365 * 24 * 60 * 60 * 5; // 5 years (permanent)
 
     if (targetSender) {
-        return socket.emit('powerAction', {
-            channel: channel.id,
-            action: action,
-            targetSender: targetSender,
-            dm: false,
-        });
+        switch (action) {
+            case 'banned':
+                axios.put(`http://localhost:3000/channel/${channel.id}/ban/${targetSender.id}`,
+                {
+                    duration: durationSeconds,
+                }, {
+                    withCredentials: true,
+                    validateStatus: () => true // The front won't display buttons if the user
+                })                             // is not allowed to use them anyway
+                break;
+            case 'kicked':
+                axios.put(`http://localhost:3000/channel/${channel.id}/kick/${targetSender.id}`,
+                null,
+                {
+                    withCredentials: true,
+                    validateStatus: () => true // The front won't display buttons if the user
+                })                             // is not allowed to use them anyway
+                break;
+            case 'muted':
+                axios.put(`http://localhost:3000/channel/${channel.id}/mute/${targetSender.id}`,
+                {
+                    duration: durationSeconds,
+                }, {
+                    withCredentials: true,
+                    validateStatus: () => true // The front won't display buttons if the user
+                })                             // is not allowed to use them anyway
+                break;
+            default:
+                break;
+        }
     }
-
 }
 
 const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, message, sender, isAuthor, isAdmin, isOwner, blocked }) => {
@@ -100,7 +130,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconTrash />}
                         color="default"
                         render={isAuthor || isAdmin || isOwner}
-                        onPress={() => emitPowerAction(channel, "deleted", socket, undefined, message)}
+                        onPress={() => emitPowerAction(channel, "deleted", undefined, message)}
                     />
                 </Grid>
                 <Grid>
@@ -111,7 +141,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconVolume3 />}
                         color="error"
                         render={isOwner || isAdmin}
-                        onPress={() => emitPowerAction(channel, "muted", socket, sender)}
+                        onPress={() => emitPowerAction(channel, "muted", sender)}
                     />
                 </Grid>
                 <Grid>
@@ -122,7 +152,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconBan />}
                         color="error"
                         render={isOwner || isAdmin}
-                        onPress={() => emitPowerAction(channel, "banned", socket, sender)}
+                        onPress={() => emitPowerAction(channel, "banned", sender)}
                     />
                 </Grid>
                 <Grid>
@@ -133,7 +163,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconDoorExit />}
                         color="error"
                         render={isOwner || isAdmin}
-                        onPress={() => emitPowerAction(channel, "kicked", socket, sender)}
+                        onPress={() => emitPowerAction(channel, "kicked", sender)}
                     />
                 </Grid>
             </Grid.Container>
