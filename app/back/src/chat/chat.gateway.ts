@@ -62,6 +62,16 @@ export class ChatGateway
         //console.log('Init');
     }
 
+    async sendSystemMessage(channelId: number, message: string) {
+        this.server.to(`channel-${channelId}`).emit('message', {
+            // custom system message
+            content: message,
+            message_id: systemMessageStack--,
+            sender: { avatar: null, id: -1, username: "System", },
+            timestamp: new Date(),
+        });
+    }
+
     async handleConnection(client: Socket) {
         // verify user with 'session' cookie
         const cookies = cookie.parse(client.handshake.headers.cookie || '');
@@ -134,64 +144,6 @@ export class ChatGateway
                 client.leave(room);
             }
         });
-    }
-
-    @SubscribeMessage('powerAction')
-    async handlePowerAction(client: Socket, payload: PowerActionData) {
-        // Check if channel's owner_id is the user, or if the user's id is in ChannelAdmin
-        let staff: ChannelStaff = await this.channelService.getChannelStaff(payload.channel);
-        if (payload.action == "deleted") {
-            let senderRole: number = powerLevel(staff, client['user'].id, payload.targetMessage);
-            // user must be owner, admin or author of the message
-            if (senderRole == 0) {
-                throw new ForbiddenException("You are not allowed to delete this message");
-            }
-            // remove message from database
-            try {
-                await this.channelService.deleteMessage(payload.targetMessage.message_id);
-                // emit a messageDeleted event to all clients in the channel
-                this.server.to(`channel-${payload.channel}`).emit('messageDeleted', payload.targetMessage);
-            } catch (e) {
-                throw new BadRequestException('Failed to delete message');
-            } finally {
-                return;
-            }
-        }
-        let senderRole: number = powerLevel(staff, client['user'].id);
-        let targetRole: number = powerLevel(staff, payload.targetSender.id, payload.targetMessage);
-        if (senderRole == 0 || senderRole < targetRole) { // TODO: Check permissions for ban, mute, kick and delete, not blocking
-            throw new ForbiddenException("You are not allowed to perform this action");
-        }
-        // TODO: implement and check if user is staff in the channel, otherwise ignore
-        let systemPayload = {
-            // custom system message
-            content: client['user'].name + ` ${payload.action} ` + `${payload.targetSender.name}`,
-            message_id: systemMessageStack--,
-            sender: { avatar: null, id: -1, username: "System", },
-            timestamp: new Date(),
-        };
-        // insert punishment in database (TODO: treat durations)
-        let punishment: any = await this.punishmentsService.applyPunishment(
-            payload.targetSender.id,
-            client['user'].id,
-            payload.channel,
-            -1, // payload.duration || -1,
-            payload.action,
-        );
-
-        if (!punishment) {
-            throw new Error('Failed to apply punishment');
-        }
-
-        this.server.to(`channel-${payload.channel}`).emit('message', systemPayload);
-        // send punishment to the target user        // TODO: Fallback if user is not connected
-        if (this.usersClients[payload.targetSender.id]) { // TODO: Implement duration
-            this.usersClients[payload.targetSender.id].emit('punishment', {
-                punishment_type: payload.action,
-                channel_id: payload.channel,
-                // duration: 3, // no duration is permanent
-            });
-        }
     }
 
     @SubscribeMessage('dmDelete')
