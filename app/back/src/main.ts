@@ -17,6 +17,7 @@ async function bootstrap() {
         exceptionFactory: (validationErrors: ValidationError[] = []) => {
             return new BadRequestException(validationErrors);
         },
+        transform: true,
     }
     )); // Use class-validator
 
