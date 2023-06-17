@@ -1,6 +1,5 @@
 import { IconMedal } from '@tabler/icons-react';
 import { IconMessageCircle2 } from '@tabler/icons-react';
-import Link from 'next/link';
 import { IconDeviceGamepad } from '@tabler/icons-react';
 import { Navbar, Button, Link, Modal, Text, Input, Spacer, Grid } from "@nextui-org/react";
 import ModalSign from "./auth/ModalSign";

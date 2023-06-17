@@ -2,7 +2,7 @@
 /* eslint-disable prettier/prettier */
 
 import { Server } from 'socket.io';
-import {roomInterface, PowerInterface,  obstaclesInterface, powerAvailables} from '../../src/interfaces/pong.interface';
+import {roomInterface, PowerInterface,  obstaclesInterface, powerAvailables} from '../interfaces/pong.interface';
 import { convertToPixel, sendBallVector } from './game.service';
 
 

@@ -7,10 +7,10 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { roomInterface, PlayerInterface, PlayerEndGame } from '../../src/interfaces/pong.interface';
+import { roomInterface, PlayerInterface, PlayerEndGame } from '../interfaces/pong.interface';
 import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../../src/user/user.service';
+import { UserService } from '../user/user.service';
 import * as cookie from 'cookie';
 import { v4 as uuidv4 } from 'uuid';
 

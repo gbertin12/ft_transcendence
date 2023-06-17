@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { User } from "../interfaces/user.interface"
+import { User } from "./user.interface"
 // interface de la ball
 
 export interface BallData {
