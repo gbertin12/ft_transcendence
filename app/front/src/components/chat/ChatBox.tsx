@@ -44,6 +44,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         setMutedChannels,
         blockedUsers,
         setBlockedUsers,
+        channels,
+        setChannels,
     } = useChat();
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
@@ -111,6 +113,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     });
                     break;
                 case "kicked":
+                    // remove the channel from the list of channels
+                    setChannels((channels) => {
+                        const index = channels.findIndex((channel) => channel.id === punishment.channel_id);
+                        if (index !== -1) {
+                            channels.splice(index, 1);
+                        }
+                        return [...channels];
+                    });
                     break;
             }
         });
