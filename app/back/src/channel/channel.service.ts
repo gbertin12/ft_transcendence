@@ -186,6 +186,9 @@ export class ChannelService {
         return await this.db.channel.findUnique({
             where: {
                 id: channelId
+            },
+            include: {
+                admins: true,
             }
         });
     }
@@ -243,6 +246,14 @@ export class ChannelService {
 
     async deleteMessage(messageId: number) {
         return await this.db.message.delete({
+            where: {
+                message_id: messageId
+            }
+        });
+    }
+
+    async getMessage(messageId: number) {
+        return await this.db.message.findUnique({
             where: {
                 message_id: messageId
             }
@@ -355,5 +366,16 @@ export class ChannelService {
             default:
                 throw new Error("Invalid power level passed");
         }
+    }
+
+    async isUserInChannel(user_id: number, channel_id: number) {
+        return await this.db.channelAccess.findUnique({
+            where: {
+                channel_id_user_id: {
+                    channel_id: channel_id,
+                    user_id: user_id
+                }
+            }
+        });
     }
 }
