@@ -109,6 +109,68 @@ export class ChannelService {
         });
     }
 
+    async getHistory(channel_id: number, user: User, last_message_id: number) {
+        // Check if the user has access to the channel
+        let channel = await this.db.channel.findUnique({
+            where: {
+                id: channel_id
+            },
+            select: {
+                id: true,
+                private: true,
+                password: true
+            }
+        });
+
+        if (!channel) {
+            throw new HttpException('Channel not found', 404);
+        }
+
+        if (channel.private || channel.password !== null) {
+            // Check if the user has access to the channel
+            let channel = await this.db.channelAccess.findUnique({
+                where: {
+                    channel_id_user_id: {
+                        channel_id: channel_id,
+                        user_id: user.id
+                    }
+                },
+                select: {
+                    channel_id: true
+                }
+            });
+
+            if (!channel) {
+                throw new HttpException('You do not have access to this channel', 401);
+            }
+        }
+
+        return await this.db.message.findMany({
+            where: {
+                channel_id: channel_id,
+                message_id: {
+                    lt: last_message_id
+                }
+            },
+            orderBy: { // sort from oldest to newest (front-end will reverse it)
+                timestamp: 'desc'
+            },
+            select: {
+                sender: {
+                    select: {
+                        avatar: true,
+                        name: true,
+                        id: true
+                    }
+                },
+                message_id: true,
+                content: true,
+                timestamp: true
+            },
+            take: 50 // limit to 50 messages
+        });
+    }
+
     async createMessage(senderId: number, id: number, content: string): Promise<Message> {
         return await this.db.message.create({
             data: {

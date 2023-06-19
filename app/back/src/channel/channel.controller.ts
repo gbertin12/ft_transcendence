@@ -16,6 +16,12 @@ class ChannelDto {
     @IsNumber()
     @IsPositive()
     channel_id: number;
+
+    @Type(() => Number)
+    @IsNumber()
+    @IsOptional()
+    @IsPositive()
+    last_message_id: number;
 }
 
 class ChannelUpdateDto {
@@ -166,6 +172,20 @@ export class ChannelController {
             throw new HttpException('You are banned from this channel', 403);
         }
         return await this.channelService.getMessages(dto.channel_id, req.user);
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Get(':channel_id/:last_message_id')
+    async channelHistory(@Param() dto: ChannelDto, @Req() req) {
+        if (!dto.last_message_id) { throw new HttpException('Invalid last_message_id', 400); }
+        // Check if user is banned
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
+
+        let a = await this.channelService.getHistory(dto.channel_id, req.user, dto.last_message_id);
+        console.log(a.length)
+        return a;
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))

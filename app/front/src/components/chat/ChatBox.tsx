@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
 import { Button, Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
@@ -36,6 +36,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [powerModalOpen, setPowerModalOpen] = useState<boolean>(false);
     const [ownerId, setOwnerId] = useState<number>(-1);
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
+    const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+    const [endOfHistory, setEndOfHistory] = useState<boolean>(false);
     const { socket, user } = useUser();
     const {
         bannedChannels,
@@ -47,6 +49,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         channels,
         setChannels,
     } = useChat();
+
+    const messagesRef = useRef<HTMLUListElement>(null);
+
+    function handleScroll() {
+        if (messagesRef.current) {
+            // Get height of the scrollable area
+            const posY = Math.abs(messagesRef.current.scrollTop);
+            const height = messagesRef.current.clientHeight;
+            if (posY / height > 0.10 && !loadingHistory && !endOfHistory) { // If we are 70% of the way up the <ul> load more messages
+                setLoadingHistory(true);
+                // Get the last message id
+                const lastMessageId = messages[messages.length - 1].message_id;
+                fetchHistory(channel, lastMessageId).then((history) => {
+                    // preappend the messages to the list the messages that are not already in the list
+                    setMessages((messages) => {
+                        const newMessages = history.filter((message) => !messages.some((m) => m.message_id === message.message_id)).reverse();
+                        if (newMessages.length < 50) {
+                            setEndOfHistory(true);
+                        }
+                        return [...messages, ...newMessages];
+                    });
+                });
+            }
+        }
+    }
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
         let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
@@ -73,6 +100,32 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         return data;
     }, []);
 
+    const fetchHistory = useCallback(async (channel: Channel, lastMessageId: number): Promise<MessageData[]> => {
+        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/${lastMessageId}`,
+            {
+                withCredentials: true,
+                validateStatus: () => true,
+            }
+        ).then((res) => {
+            if (res.status === 401) {
+                setMissingPermissions(true);
+                return [];
+            } else if (res.status === 403) {
+                return [];
+            } else {
+                setMissingPermissions(false);
+            }
+            return res.data;
+        }).catch((err) => {
+            throw Error("UNEXPECTED ERROR: " + err);
+        })
+        data.forEach((message: Message) => {
+            message.timestamp = new Date(message.timestamp);
+        });
+        setLoadingHistory(false);
+        return data.reverse();
+    }, []);
+
     useEffect(() => {
         socket.emit('join', channel.id);
         socket.on('message', (payload: MessageData) => {
@@ -88,11 +141,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     messages.splice(index, 1);
                 }
                 return [...messages];
-            });
-        });
-        socket.on('joinChannel', (payload: any) => {
-            fetchMessages(channel).then((messages) => {
-                setMessages(messages);
             });
         });
         socket.on('staff', (staff: ChannelStaff) => {
@@ -129,7 +177,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         });
         return () => {
             socket.off('message');
-            socket.off('joinChannel');
             socket.off('staff');
             socket.off('punishment');
             socket.off('messageDeleted');
@@ -182,6 +229,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                 </Button>
                             </Container>
                             <ul
+                                ref={messagesRef}
+                                onScroll={handleScroll}
                                 style={{
                                     listStyle: "none",
                                     padding: 0,
@@ -221,13 +270,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                     disabled={mutedChannels.has(channel.id)}
                                     placeholder={
                                         !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
-                                        :
-                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
+                                            :
+                                            generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     aria-label={
                                         !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
-                                        :
-                                        generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
+                                            :
+                                            generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
                                     }
                                     minLength={1}
                                     maxLength={2000}
