@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Channel, ChannelStaff, Message, MessageData, PunishmentData, User } from "@/interfaces/chat.interfaces";
-import { Button, Container, Grid, Text, Textarea } from "@nextui-org/react";
+import { Button, Container, Grid, Text, Textarea, Tooltip } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useUser } from '@/contexts/user.context';
 import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
-import { IconShieldCog } from "@tabler/icons-react";
+import { IconDoorExit, IconShieldCog } from "@tabler/icons-react";
 import PowerModal from "./powertools/PowerModal";
 
 interface ChatBoxProps {
@@ -147,6 +147,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             setOwnerId(staff.owner_id);
             setAdmins(new Set(staff.administrators));
         });
+        socket.on('leaveChannel', (channelId: number) => {
+            // remove the channel from the list of channels
+            setChannels((channels) => {
+                const index = channels.findIndex((channel) => channel.id === channelId);
+                if (index !== -1) {
+                    channels.splice(index, 1);
+                }
+                return [...channels];
+            });
+        });
         socket.on("punishment", (punishment: PunishmentData) => {
             // TODO: handle the punishment
             switch (punishment.punishment_type) {
@@ -222,11 +232,33 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 <Grid xs={12}>
                     <Grid.Container>
                         <Grid css={{ w: "stretch" }}>
-                            <Container direction="row" justify="space-between" alignItems="center" display="flex">
+                            <Container direction="row" display="flex">
                                 <Text h3>{channel.name.replace(/^/, '# ')}</Text>
-                                <Button auto light onPress={() => setPowerModalOpen(true)}>
-                                    <IconShieldCog />
-                                </Button>
+                                <Container justify="flex-end" alignItems="center" display="flex" css={{ flex: 1 }}>
+                                    {channel.private && (
+                                        /* TODO: Open modal for confirmation, disallow if owner */
+                                        <Tooltip content="Leave channel" color="error">
+                                            <Button auto light onPress={() => {
+                                                axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
+                                                    {
+                                                        withCredentials: true,
+                                                        validateStatus: () => true,
+                                                    }
+                                                ).then((res) => {
+
+                                                })
+                                            }}>
+                                                <IconDoorExit />
+                                            </Button>
+                                        </Tooltip>
+                                    )}
+                                    {/* Hide if not admin / owner */}
+                                    <Tooltip content="Channel settings" color="warning">
+                                        <Button auto light onPress={() => setPowerModalOpen(true)}>
+                                            <IconShieldCog />
+                                        </Button>
+                                    </Tooltip>
+                                </Container>
                             </Container>
                             <ul
                                 ref={messagesRef}

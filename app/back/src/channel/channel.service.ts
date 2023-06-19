@@ -20,7 +20,7 @@ export class ChannelService {
                     owner_id: true,
                     topic: true,
                     password: true,
-                    private: false,
+                    private: true,
                 },
                 where: {
                     // check access if the channel is private

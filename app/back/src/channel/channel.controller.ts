@@ -373,12 +373,10 @@ export class ChannelController {
         if (channel.owner_id === userId) {
             throw new ForbiddenException("You cannot leave a channel you own, delete it instead or transfer ownership");
         }
-        await this.channelService.leaveChannel(dto.channel_id, userId);
+        await this.channelService.leaveChannel(userId, dto.channel_id);
         // Send a socket message
         if (this.chatGateway.usersClients[userId]) {
-            this.chatGateway.usersClients[userId].emit('leaveChannel', {
-                channel_id: dto.channel_id,
-            });
+            this.chatGateway.usersClients[userId].emit('leaveChannel', dto.channel_id);
         }
     }
 
