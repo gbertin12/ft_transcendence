@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pong from './Pong'
+import Pong2 from './Pong2';
 import {Container, Row, Spacer, Text, Checkbox } from '@nextui-org/react'
 import CardPlayerInformation from './CardPlayerInformation';
 import ButtonStart  from './ButtonStart'
@@ -55,6 +56,7 @@ export default function GameBody() {
     //return <Pong socket={socket} roomName={roomName} handleSetEndGame={handleSetEndGame} />
     //return <CardEndGame win={true} score1={10} score2={3} handleCloseCardEndGame={handleCloseCardEndGame} />
     const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
+    //return <Pong2 />
     if (!playGame && !endGame)
     {
         return <>
@@ -82,9 +84,9 @@ export default function GameBody() {
     }
     else if (playGame) {
         return <>
-            <Pong roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
+            <Pong2 roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
         </>
     }
     else
-    return <></>
+        return <></>
 }

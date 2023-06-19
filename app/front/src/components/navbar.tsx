@@ -26,7 +26,6 @@ export default function myNavbar() {
                     <IconMessageCircle2 size={50} strokeWidth={1.5}/>
                 </Link>
             </Navbar.Content>
-
             <Navbar.Content color="primarySolidContrast">
                 <ModalSign/>
             </Navbar.Content>
