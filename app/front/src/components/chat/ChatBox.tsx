@@ -236,17 +236,18 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                 <Text h3>{channel.name.replace(/^/, '# ')}</Text>
                                 <Container justify="flex-end" alignItems="center" display="flex" css={{ flex: 1 }}>
                                     {channel.private && (
-                                        /* TODO: Open modal for confirmation, disallow if owner */
-                                        <Tooltip content="Leave channel" color="error">
-                                            <Button auto light onPress={() => {
+                                        <Tooltip content={`Leave channel ${channel.owner_id === user.id ? "(transfer ownership first)" : ""}`} color="error">
+                                            <Button
+                                                auto
+                                                light
+                                                disabled={channel.owner_id === user.id}
+                                                onPress={() => {
                                                 axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
                                                     {
                                                         withCredentials: true,
                                                         validateStatus: () => true,
                                                     }
-                                                ).then((res) => {
-
-                                                })
+                                                )
                                             }}>
                                                 <IconDoorExit />
                                             </Button>
