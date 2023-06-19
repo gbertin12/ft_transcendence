@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, ForbiddenException, Get, HttpException, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DmsService } from './dms.service';
 import { Type } from 'class-transformer';
 import { IsNumber, IsPositive } from 'class-validator';
@@ -12,6 +12,18 @@ class GenericUserIdDto {
 	@IsNumber()
 	@IsPositive()
 	id: number;
+}
+
+class HistoryDto {
+	@Type(() => Number)
+	@IsNumber()
+	@IsPositive()
+	interlocutor_id: number;
+
+	@Type(() => Number)
+	@IsNumber()
+	@IsPositive()
+	last_message_id: number;
 }
 
 @Controller('dms')
@@ -55,6 +67,12 @@ export class DmsController {
 		}
 		return this.dmsService.getDMMessages(requester_id, interlocutor_id);
 	}
+
+	@UseGuards(AuthGuard('jwt-2fa'))
+    @Get(':interlocutor_id/:last_message_id')
+    async dmsHistory(@Param() dto: HistoryDto, @Req() req) {
+        return await this.dmsService.getDmsHistory(req.user.id, dto.interlocutor_id, dto.last_message_id);
+    }
 
 	@UseGuards(AuthGuard('jwt-2fa'))
 	@Post('/:id/message')

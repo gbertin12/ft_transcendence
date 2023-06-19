@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Message, MessageData, User } from "@/interfaces/chat.interfaces";
 import { Container, Grid, Text, Textarea } from "@nextui-org/react";
 import ChatMessage from "@/components/chat/ChatMessage";
@@ -13,10 +13,36 @@ interface DMChatBoxProps {
 const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     const [missingPermissions, setMissingPermissions] = useState<boolean>(false); // Used to prevent the user from sending messages if they're not friends
     const [messages, setMessages] = useState<MessageData[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+    const [endOfHistory, setEndOfHistory] = useState<boolean>(false);
     const { socket, user } = useUser();
     const {
         blockedUsers, friends, setFriends
     } = useChat();
+    const messagesRef = useRef<HTMLUListElement>(null);
+
+    function handleScroll() {
+        if (messagesRef.current) {
+            // Get height of the scrollable area
+            const posY = Math.abs(messagesRef.current.scrollTop);
+            const height = messagesRef.current.clientHeight;
+            if (posY / height > 0.10 && !loadingHistory && !endOfHistory) { // If we are 70% of the way up the <ul> load more messages
+                setLoadingHistory(true);
+                // Get the last message id
+                const lastMessageId = messages[messages.length - 1].message_id;
+                fetchHistory(interlocutor, lastMessageId).then((history) => {
+                    // preappend the messages to the list the messages that are not already in the list
+                    setMessages((messages) => {
+                        const newMessages = history.filter((message) => !messages.some((m) => m.message_id === message.message_id)).reverse();
+                        if (newMessages.length < 50) {
+                            setEndOfHistory(true);
+                        }
+                        return [...messages, ...newMessages];
+                    });
+                });
+            }
+        }
+    }
 
     const fetchMessages = useCallback(async (interlocutor: User): Promise<MessageData[]> => {
         let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/messages`,
@@ -41,6 +67,32 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             message.timestamp = new Date(message.timestamp);
         });
         return data;
+    }, []);
+
+    const fetchHistory = useCallback(async (interlocutor: User, lastMessageId: number): Promise<MessageData[]> => {
+        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/${lastMessageId}`,
+            {
+                withCredentials: true,
+                validateStatus: () => true,
+            }
+        ).then((res) => {
+            if (res.status === 401) {
+                setMissingPermissions(true);
+                return [];
+            } else if (res.status === 403) {
+                return [];
+            } else {
+                setMissingPermissions(false);
+            }
+            return res.data;
+        }).catch((err) => {
+            throw Error("UNEXPECTED ERROR: " + err);
+        })
+        data.forEach((message: Message) => {
+            message.timestamp = new Date(message.timestamp);
+        });
+        setLoadingHistory(false);
+        return data.reverse();
     }, []);
 
     const handleNewMessage = useCallback(async (message: MessageData): Promise<void> => {
@@ -98,6 +150,8 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                                 <Text h3>{interlocutor.name}</Text>
                             </Container>
                             <ul
+                                ref={messagesRef}
+                                onScroll={handleScroll}
                                 style={{
                                     listStyle: "none",
                                     padding: 0,

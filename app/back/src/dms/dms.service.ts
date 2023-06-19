@@ -104,4 +104,40 @@ export class DmsService {
             }
         })
     }
+
+    async getDmsHistory(requester_id: number, interlocutor_id: number, last_message_id: number) {
+        return this.db.privateMessage.findMany({
+            where: {
+                OR: [
+                    {
+                        sender_id: requester_id,
+                        receiver_id: interlocutor_id,
+                    },
+                    {
+                        sender_id: interlocutor_id,
+                        receiver_id: requester_id,
+                    }
+                ],
+                message_id: {
+                    lt: last_message_id
+                }
+            },
+            orderBy: {
+                timestamp: 'desc',
+            },
+            select: {
+                sender: {
+                    select: {
+                        avatar: true,
+                        name: true,
+                        id: true
+                    }
+                },
+                message_id: true,
+                content: true,
+                timestamp: true
+            },
+            take: 50 // limit to 50 messages
+        })
+    }
 }

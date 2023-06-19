@@ -182,10 +182,7 @@ export class ChannelController {
         if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
             throw new HttpException('You are banned from this channel', 403);
         }
-
-        let a = await this.channelService.getHistory(dto.channel_id, req.user, dto.last_message_id);
-        console.log(a.length)
-        return a;
+        return await this.channelService.getHistory(dto.channel_id, req.user, dto.last_message_id);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
