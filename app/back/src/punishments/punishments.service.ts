@@ -89,18 +89,6 @@ export class PunishmentsService {
                 channel_id: true,
                 expires_at: true,
             }
-        }).then((punishments: Punishment[]) => {
-            let result: Record<any, any> = {};
-            punishments.forEach((punishment: Punishment) => {
-                // key = type
-                // value = channel id
-                let type: string = parseActionTypeToString(punishment.type);
-                if (result[type] === undefined) {
-                    result[type] = [];
-                }
-                result[type].push(punishment.channel_id);
-            });
-            return result;
         });
     }
 
