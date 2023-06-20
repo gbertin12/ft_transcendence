@@ -96,7 +96,7 @@ class ChannelPunishmentDto {
     @IsNumber()
     @IsPositive()
     @Min(60) // 1 minute
-    seconds: number;
+    duration: number;
 }
 
 class UserActionDto {
@@ -500,16 +500,16 @@ export class ChannelController {
             dto.user_id,
             req.user['id'],
             dto.channel_id,
-            body.seconds,
+            body.duration,
             "banned"
         );
-        this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} banned ${user.name} from the channel ${formatPunishmentDuration(body.seconds)}`);
+        this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} banned ${user.name} from the channel ${formatPunishmentDuration(body.duration)}`);
         // send socket to punished
         if (this.chatGateway.usersClients[dto.user_id]) {
             this.chatGateway.usersClients[dto.user_id].emit('punishment', {
                 punishment_type: 'banned',
                 channel_id: dto.channel_id,
-                duration: body.seconds || null,
+                duration: body.duration || null,
             });
         };
     }
@@ -531,16 +531,16 @@ export class ChannelController {
             dto.user_id,
             req.user['id'],
             dto.channel_id,
-            body.seconds,
+            body.duration,
             "muted"
         );
-        this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} muted ${user.name} in the channel ${formatPunishmentDuration(body.seconds)}`);
+        this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} muted ${user.name} in the channel ${formatPunishmentDuration(body.duration)}`);
         // send socket to punished
         if (this.chatGateway.usersClients[dto.user_id]) {
             this.chatGateway.usersClients[dto.user_id].emit('punishment', {
                 punishment_type: 'muted',
                 channel_id: dto.channel_id,
-                duration: body.seconds || null,
+                duration: body.duration || null,
             });
         };
     }
