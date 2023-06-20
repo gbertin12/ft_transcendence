@@ -155,19 +155,35 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			if (p5lib.keyIsDown(p5lib.UP_ARROW)) {
 				if (who === 0)
 				{
-					paddlePlayer1Y -= speedPaddle;
+					if (paddlePlayer1Y - speedPaddle < 0)
+						paddlePlayer1Y = 0;
+					else
+						paddlePlayer1Y -= speedPaddle;
+
 					percent = paddlePlayer1Y / p5lib.height * 100;
 				} else {
-					paddlePlayer2Y -= speedPaddle;
+					if (paddlePlayer2Y - speedPaddle < 0)
+						paddlePlayer2Y = 0;
+					else
+						paddlePlayer2Y -= speedPaddle;
+
 					percent = paddlePlayer2Y / p5lib.height * 100;
 				}
 			} else if (p5lib.keyIsDown(p5lib.DOWN_ARROW)) {
 				if (who === 0)
 				{
-					paddlePlayer1Y += speedPaddle;
+					if(paddlePlayer1Y + speedPaddle > p5lib.height)
+						paddlePlayer1Y = p5lib.height;
+					else
+						paddlePlayer1Y += speedPaddle;
+
 					percent = paddlePlayer1Y / p5lib.height * 100;
 				} else {
-					paddlePlayer2Y += speedPaddle;
+					if (paddlePlayer2Y + speedPaddle > p5lib.height)
+						paddlePlayer2Y = 0;
+					else
+						paddlePlayer2Y += speedPaddle;
+
 					percent = paddlePlayer2Y / p5lib.height * 100;
 				}
 			}

@@ -117,8 +117,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           ball: {
             x: 50,
             y: 50,
-            speedX: 1,
-            speedY: 1,
+            speedX: 1.5,
+            speedY: 1.5,
           },
           player1: waitingPlayer,
           player2: player,

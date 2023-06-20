@@ -10,8 +10,9 @@ import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables, Pl
 const canvasHeight = 700;
 const canvasWidth = 1000;
 const playerHeight = canvasHeight / 8;
-const radiusBall = canvasWidth * 0.02;
 const playerWidth = canvasWidth / 80;
+const ballSize = canvasWidth * 0.02;
+const radiusBall = ballSize / 2;
 
 let frameCount : number = 0;
 
@@ -46,8 +47,6 @@ const updateBallSpeedY = (room: roomInterface, player: number) => {
 };
 
 export const sendBallVector = (room: roomInterface, server: Server) => {
-    console.log("Update vector", room.pongState.ball.speedX, room.pongState.ball.speedY)
-    console.log("frame", frameCount);
     const speedX = convertToPercent(room.pongState.ball.speedX, canvasWidth);
     const speedY = convertToPercent(room.pongState.ball.speedY, canvasHeight);
     server.to(room.name).emit('updateBallVector', {
@@ -68,37 +67,45 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 
 const handleCheckCollision = (room: roomInterface, server: Server) => {
     // check collision with player 1
-    if (room.pongState.ball.x - 20 <= playerWidth &&
-        room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
-        room.pongState.ball.y <= convertToPixel(room.pongState.player1.y, canvasHeight) + playerHeight
-    ) {
-        if (room.pongState.ball.speedX < 0) {
-            room.pongState.ball.speedX = -room.pongState.ball.speedX;
-            room.pongState.ball.speedX = updateBallSpeedX(
-                room.pongState.ball.speedX,
-            );
-            room.pongState.ball.x -= 5;
-            room.pongState.ball.speedY = updateBallSpeedY(room, 1);
-            sendBallVector(room, server);
+   
+    if (room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
+    room.pongState.ball.y <= convertToPixel(room.pongState.player1.y, canvasHeight) + playerHeight)
+    {
+        if (room.pongState.ball.x <= playerWidth + radiusBall && room.pongState.ball.x > 0)
+        {
+            console.log("COLLISION2 p1")
+            if (room.pongState.ball.speedX < 0) {
+                room.pongState.ball.speedX = -room.pongState.ball.speedX;
+                room.pongState.ball.speedX = updateBallSpeedX(
+                    room.pongState.ball.speedX,
+                );
+                //room.pongState.ball.x -= 5;
+                room.pongState.ball.speedY = updateBallSpeedY(room, 1);
+                sendBallVector(room, server);
+            }
         }
     }
     // check collision with player 2
-    if (room.pongState.ball.x + 20 >= canvasWidth - playerWidth &&
-        room.pongState.ball.y >= convertToPixel(room.pongState.player2.y, canvasHeight) &&
-        room.pongState.ball.y <= convertToPixel(room.pongState.player2.y, canvasHeight) + playerHeight
-    ) {
-        if (room.pongState.ball.speedX > 0) {
-            room.pongState.ball.speedX = -room.pongState.ball.speedX;
-            room.pongState.ball.speedX = updateBallSpeedX(
-                room.pongState.ball.speedX,
-            );
-            room.pongState.ball.x += 5;
+    
+    if (room.pongState.ball.y >= convertToPixel(room.pongState.player2.y, canvasHeight) &&
+    room.pongState.ball.y <= convertToPixel(room.pongState.player2.y, canvasHeight) + playerHeight)
+    {
+        if (room.pongState.ball.x >= canvasWidth - playerWidth - radiusBall && room.pongState.ball.x < canvasWidth)
+        {
+            console.log("COLLISION2 p2")
+            if (room.pongState.ball.speedX > 0) {
+                room.pongState.ball.speedX = -room.pongState.ball.speedX;
+                room.pongState.ball.speedX = updateBallSpeedX(
+                    room.pongState.ball.speedX,
+                );
+                //room.pongState.ball.x += 5;
+            }
+            room.pongState.ball.speedY = updateBallSpeedY(room, 2);
+            sendBallVector(room, server);
         }
-        room.pongState.ball.speedY = updateBallSpeedY(room, 2);
-        sendBallVector(room, server);
     }
     // check collision with top and bottom
-    if (room.pongState.ball.y <= 0 || room.pongState.ball.y >= canvasHeight - radiusBall) {
+    if (room.pongState.ball.y - radiusBall <= 0 || room.pongState.ball.y + radiusBall >= canvasHeight) {
         room.pongState.ball.speedY = -room.pongState.ball.speedY;
         room.pongState.ball.speedX = updateBallSpeedX(room.pongState.ball.speedX);
         sendBallVector(room, server);
@@ -119,8 +126,8 @@ const resetBallPosition = (
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
     const randY: number = 100 * Math.random();
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
-    room.pongState.ball.speedX = 0.5;
-    room.pongState.ball.speedY = 0.5;
+    room.pongState.ball.speedX = 1.5;
+    room.pongState.ball.speedY = 1.5;
     sendBallPosition(room, server);
     sendBallVector(room, server);
 }
@@ -173,7 +180,6 @@ export class GameService {
             frameCount++;
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
-                console.log("END FRAME", frameCount);
                 frameCount = 0;
                 this.handleEndGame(room, server, false);
                 return;
@@ -202,7 +208,7 @@ export class GameService {
             // check if someone loose the round
             if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
             {
-                console.log("player Y", convertToPixel(room.pongState.player1.y, canvasHeight), "playerX", convertToPixel(room.pongState.player2.y, canvasHeight), "ballX", room.pongState.ball.x, "ballY", room.pongState.ball.y, playerHeight, playerWidth);
+                //console.log("player 1y", convertToPixel(room.pongState.player1.y, canvasHeight), room.pongState.player1.y, "player2y", convertToPixel(room.pongState.player1.y, canvasHeight), room.pongState.player2.y, "ballX", room.pongState.ball.x, "ballY", room.pongState.ball.y, playerHeight, playerWidth);
                 handleResetPlayerPosition(room, server);
             }
             await sleep(120);
