@@ -6,6 +6,7 @@ import React from 'react';
 import { Socket } from 'socket.io-client';
 import PowerButton from './PowerButton';
 import axios from 'axios';
+import PowerModal from './PowerModal';
 
 interface PowerActionsProps {
     channel?: Channel;
@@ -23,7 +24,6 @@ function emitPowerAction(
     action: PowerAction,
     targetSender?: SenderData,
     targetMessage?: MessageData,
-    duration: number = -1,
 ) {
     if (!targetSender && !targetMessage || targetSender && targetMessage) {
         return;
@@ -42,45 +42,13 @@ function emitPowerAction(
                 return;
         }
     }
-
-    let durationSeconds: number = (duration > 0) ? duration : 365 * 24 * 60 * 60 * 5; // 5 years (permanent)
-
-    if (targetSender) {
-        switch (action) {
-            case 'banned':
-                axios.put(`http://localhost:3000/channel/${channel.id}/ban/${targetSender.id}`,
-                {
-                    duration: durationSeconds,
-                }, {
-                    withCredentials: true,
-                    validateStatus: () => true // The front won't display buttons if the user
-                })                             // is not allowed to use them anyway
-                break;
-            case 'kicked':
-                axios.put(`http://localhost:3000/channel/${channel.id}/kick/${targetSender.id}`,
-                null,
-                {
-                    withCredentials: true,
-                    validateStatus: () => true // The front won't display buttons if the user
-                })                             // is not allowed to use them anyway
-                break;
-            case 'muted':
-                axios.put(`http://localhost:3000/channel/${channel.id}/mute/${targetSender.id}`,
-                {
-                    duration: durationSeconds,
-                }, {
-                    withCredentials: true,
-                    validateStatus: () => true // The front won't display buttons if the user
-                })                             // is not allowed to use them anyway
-                break;
-            default:
-                break;
-        }
-    }
 }
 
 const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, message, sender, isAuthor, isAdmin, isOwner, blocked }) => {
-    const { socket } = useUser();
+    const { user, socket } = useUser();
+    const [powerModalOpen, setPowerModalOpen] = React.useState(false);
+    const [powerAction, setPowerAction] = React.useState<PowerAction>("banned");
+
     if (channel) { // Private / public channels
         return (
             <Grid.Container
@@ -141,7 +109,10 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconVolume3 />}
                         color="error"
                         render={(isOwner || isAdmin) && !isAuthor}
-                        onPress={() => emitPowerAction(channel, "muted", sender)}
+                        onPress={() => {
+                            setPowerAction("muted");
+                            setPowerModalOpen(true);
+                        }}
                     />
                 </Grid>
                 <Grid>
@@ -152,7 +123,10 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconBan />}
                         color="error"
                         render={(isOwner || isAdmin) && !isAuthor}
-                        onPress={() => emitPowerAction(channel, "banned", sender)}
+                        onPress={() => {
+                            setPowerAction("banned");
+                            setPowerModalOpen(true);
+                        }}
                     />
                 </Grid>
                 <Grid>
@@ -163,9 +137,20 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         icon={<IconDoorExit />}
                         color="error"
                         render={(isOwner || isAdmin) && !isAuthor}
-                        onPress={() => emitPowerAction(channel, "kicked", sender)}
+                        onPress={() => {
+                            setPowerAction("kicked");
+                            setPowerModalOpen(true);
+                        }}
                     />
                 </Grid>
+
+                <PowerModal
+                    open={powerModalOpen}
+                    onClose={() => setPowerModalOpen(false)}
+                    punished={sender}
+                    channel={channel}
+                    type={powerAction}
+                />
             </Grid.Container>
         );
     } else if (interlocutor) { // DM mode
