@@ -42,12 +42,11 @@ export class PunishmentsService {
             throw new HttpException('Invalid punishment type', 400);
         }
         let expiration_date: Date = new Date();
-        if (duration > 0) {
+        if (duration > 0 && duration < 365 * 24 * 60 * 60 * 1000 * 5) { // 5 years max
             expiration_date = new Date(Date.now() + duration);
         } else {
             expiration_date = new Date(2038, 0, 1, 0, 0, 0, 0);
         }
-        // TODO: Check if the user already has a punishment of the same type, if so, update it to the new expiration date
         return await this.db.punishment.upsert({
             where: {
                 issuer_id_punished_id_channel_id: {
