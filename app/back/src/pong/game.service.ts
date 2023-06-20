@@ -7,8 +7,8 @@ import { UserService } from '../user/user.service';
 import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables, PlayerEndGame } from '../interfaces/pong.interface';
 
 // set playground value
-const canvasHeight = 300;
-const canvasWidth = 500;
+const canvasHeight = 700;
+const canvasWidth = 1000;
 const playerHeight = canvasHeight / 8;
 const radiusBall = canvasWidth * 0.02;
 const playerWidth = canvasWidth / 80;

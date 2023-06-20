@@ -24,8 +24,8 @@ interface Obstacle {
 	size: number;
 }
 
-const canvasHeightServerSide : number = 300;
-const canvasWidthServerSide : number = 500;
+const canvasHeightServerSide : number = 500;
+const canvasWidthServerSide : number = 1000;
 
 //#region setup variables game
 // images
@@ -87,7 +87,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	}
 	
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
-		p5.createCanvas(p5.windowWidth * 0.6, p5.windowHeight * 0.6).parent(canvasParentRef);
+		p5.createCanvas(p5.windowWidth * 0.6, p5.windowWidth * 0.6 * 0.7).parent(canvasParentRef);
 		p5lib = p5;
 		// set paddles
 		paddleWidth = p5.width / 80;
@@ -145,7 +145,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 
 	const handleWindowResize = () => {
 		if (p5lib)
-			p5lib.resizeCanvas(p5lib.windowWidth * 0.6, p5lib.windowHeight * 0.6);
+			p5lib.createCanvas(p5lib.windowWidth * 0.6, p5lib.windowWidth * 0.6* 0.7);
 	};
 
 	const handlePaddleMove = () => {
