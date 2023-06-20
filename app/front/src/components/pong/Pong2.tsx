@@ -243,11 +243,41 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			console.log("frameEND", p5lib.frameCount);
 			handleSetEndGame(endGame);
 		});
+		// socket.on('newPower', ({x, y, id, type} : {x: number, y : number, id : number, type : number}) => {
+		// 	console.log("newPower");
+		// 	for (let i = 0; i < mapPowers.length; i++)
+		// 	{
+		// 		if (mapPowers[i].id == id)
+		// 		{
+		// 			mapPowers[i].isActive = true;
+		// 			mapPowers[i].y = y;
+		// 			mapPowers[i].x = x;
+		// 			mapPowers[i].type = type;
+		// 			break ;
+		// 		}
+		// 	}
+		// });
+		// socket.on('removePower', ({id} : {id : number}) => {
+		// 	console.log("removePower");
+		// 	for (let i = 0; i < mapPowers.length; i++)
+		// 	{
+		// 		if (mapPowers[i].id == id)
+		// 		{
+		// 			mapPowers[i].isActive = false;
+		// 			mapPowers[i].y = 0;
+		// 			mapPowers[i].x = 0;
+		// 			mapPowers[i].type = -1;
+		// 			break ;
+		// 		}
+		// 	}
+		// });
 		return () => {
 			socket.off('playerMove');
 			socket.off('updateScore');
 			socket.off('updateBallVector');
 			socket.off('endGame');
+			socket.off('newPower');
+			socket.off('removePower');
 		}
 	}, [socket, roomName]);
 
