@@ -66,12 +66,12 @@ const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned
                     size="$xl"
                     weight="bold"
                 >
-                    {banned && (
+                    {(banned) && (
                         <Badge color="error" css={{"mr": "$2"}}>
                             BANNED
                         </Badge>
                     )}
-                    {muted && (
+                    {(muted && !banned) && (
                         <Badge color="warning" css={{"mr": "$2"}}>
                             MUTED
                         </Badge>
