@@ -48,8 +48,22 @@ export class PunishmentsService {
             expiration_date = new Date(2038, 0, 1, 0, 0, 0, 0);
         }
         // TODO: Check if the user already has a punishment of the same type, if so, update it to the new expiration date
-        return await this.db.punishment.create({
-            data: {
+        return await this.db.punishment.upsert({
+            where: {
+                issuer_id_punished_id_channel_id: {
+                    issuer_id: punisher,
+                    punished_id: punished,
+                    channel_id: channel
+                }
+            },
+            update: {
+                punished_id: punished,
+                issuer_id: punisher,
+                channel_id: channel,
+                expires_at: expiration_date,
+                type: punishment_type
+            },
+            create: {
                 punished_id: punished,
                 issuer_id: punisher,
                 channel_id: channel,
