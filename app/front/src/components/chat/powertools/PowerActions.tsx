@@ -93,7 +93,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                 alignItems='center'
             >
                 <Grid>
-                {!blocked && (
+                {!isAuthor && !blocked && (
                         <PowerButton
                             tooltip="Block user"
                             ariaLabel="Block the sender of this message"
@@ -107,7 +107,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                                 })
                             }}
                         />
-                    ) || (
+                    ) || blocked && (
                         <PowerButton
                             tooltip="Unblock user"
                             ariaLabel="Unblock the sender of this message"
@@ -140,7 +140,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconVolume3 />}
                         color="error"
-                        render={isOwner || isAdmin}
+                        render={(isOwner || isAdmin) && !isAuthor}
                         onPress={() => emitPowerAction(channel, "muted", sender)}
                     />
                 </Grid>
@@ -151,7 +151,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconBan />}
                         color="error"
-                        render={isOwner || isAdmin}
+                        render={(isOwner || isAdmin) && !isAuthor}
                         onPress={() => emitPowerAction(channel, "banned", sender)}
                     />
                 </Grid>
@@ -162,7 +162,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconDoorExit />}
                         color="error"
-                        render={isOwner || isAdmin}
+                        render={(isOwner || isAdmin) && !isAuthor}
                         onPress={() => emitPowerAction(channel, "kicked", sender)}
                     />
                 </Grid>
