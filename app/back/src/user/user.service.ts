@@ -163,6 +163,12 @@ export class UserService {
         });
     }
 
+    async wait(ms: number): Promise<void> {
+        return new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+    }
+
     async getMatchHistoryById(id: number) {
         const playerMatchHistory = await this.db.user.findUnique({
             where: { id },

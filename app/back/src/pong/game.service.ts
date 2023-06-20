@@ -142,6 +142,10 @@ const handleResetPlayerPosition = (
     sendScore(room, server);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class GameService {
     constructor(
@@ -165,11 +169,12 @@ export class GameService {
             { id: 5, isActive: false, type: -1, x: 80, y: 80 },
         ]
         // Start loop of game
-        const interval = setInterval(() => {
+        while (1) {
             frameCount++;
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
-                clearInterval(interval);
+                console.log("END FRAME", frameCount);
+                frameCount = 0;
                 this.handleEndGame(room, server, false);
                 return;
             }
@@ -200,8 +205,8 @@ export class GameService {
                 console.log("player Y", convertToPixel(room.pongState.player1.y, canvasHeight), "playerX", convertToPixel(room.pongState.player2.y, canvasHeight), "ballX", room.pongState.ball.x, "ballY", room.pongState.ball.y, playerHeight, playerWidth);
                 handleResetPlayerPosition(room, server);
             }
-        }, 60);
-
+            await sleep(120);
+        }
     }
 
     async handleEndGame(room: roomInterface, server: Server, forfeit: boolean) {

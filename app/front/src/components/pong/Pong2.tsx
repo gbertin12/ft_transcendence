@@ -209,6 +209,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		socket.on('updateBallVector', ({ speedX, speedY } : { speedX: number, speedY: number }) => {
 			if (p5lib)
 			{
+				console.log("frame", p5lib.frameCount)
 				const ratioX = canvasHeightServerSide / p5lib.height;
 				const ratioY = canvasWidthServerSide / p5lib.width;
 				ballSpeedX = speedX / ratioX;
@@ -223,6 +224,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			}
 		});
 		socket.on('endGame', (endGame: PlayerEndGame) => {
+			console.log("frameEND", p5lib.frameCount);
 			handleSetEndGame(endGame);
 		});
 		return () => {
