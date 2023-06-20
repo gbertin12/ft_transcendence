@@ -129,7 +129,7 @@ function privilegesCheck(channel, punisher, punished) {
  * @param seconds The duration in seconds
  */
 function formatPunishmentDuration(seconds): string {
-    if (seconds > 31536000 * 5) { return "forever" }
+    if (seconds >= 31536000 * 5) { return "forever" }
     let output: string = "";
     let years: number = Math.floor(seconds / 31536000);
     let months: number = Math.floor((seconds % 31536000) / 2592000);
