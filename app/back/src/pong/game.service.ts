@@ -10,7 +10,7 @@ import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables, Pl
 const canvasHeight = 350;
 const canvasWidth = 500;
 const playerHeight = canvasHeight / 8;
-const playerWidth = canvasWidth / 80;
+const playerWidth = canvasWidth / 50;
 const ballSize = canvasWidth * 0.02;
 const radiusBall = ballSize / 2;
 
@@ -88,43 +88,45 @@ const collisionWithPlayer2 = (room: roomInterface) : boolean => {
 
 const handleCheckCollision = (room: roomInterface, server: Server) => {
     // check collision with player 1
-   
     if (room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
     room.pongState.ball.y <= convertToPixel(room.pongState.player1.y, canvasHeight) + playerHeight)
     {
         if (collisionWithPlayer1(room))
         {
-            console.log("COLLISION2 p1")
+            //console.log("COLLISION2 p1")
             if (room.pongState.ball.speedX < 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
-                room.pongState.ball.speedX = updateBallSpeedX(
-                    room.pongState.ball.speedX,
-                );
+                // room.pongState.ball.speedX = updateBallSpeedX(
+                //     room.pongState.ball.speedX,
+                // );
                 //room.pongState.ball.x -= 5;
-                room.pongState.ball.speedY = updateBallSpeedY(room, 1);
-                sendBallVector(room, server);
+                // room.pongState.ball.speedY = updateBallSpeedY(room, 1);
+                //room.pongState.ball.speedY = -room.pongState.ball.speedY;
             }
+            sendBallVector(room, server);
         }
     }
+
     // check collision with player 2
-    
     if (room.pongState.ball.y >= convertToPixel(room.pongState.player2.y, canvasHeight) &&
     room.pongState.ball.y <= convertToPixel(room.pongState.player2.y, canvasHeight) + playerHeight)
     {
         if (collisionWithPlayer2(room))
         {
-            console.log("COLLISION2 p2")
+            //console.log("COLLISION2 p2")
             if (room.pongState.ball.speedX > 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
-                room.pongState.ball.speedX = updateBallSpeedX(
-                    room.pongState.ball.speedX,
-                );
+                // room.pongState.ball.speedX = updateBallSpeedX(
+                //     room.pongState.ball.speedX,
+                // );
                 //room.pongState.ball.x += 5;
             }
-            room.pongState.ball.speedY = updateBallSpeedY(room, 2);
+            //room.pongState.ball.speedY = -room.pongState.ball.speedY;
+            //room.pongState.ball.speedY = updateBallSpeedY(room, 2);
             sendBallVector(room, server);
         }
     }
+
     // check collision with top and bottom
     if (room.pongState.ball.y - radiusBall <= 0 || room.pongState.ball.y + radiusBall >= canvasHeight) {
         room.pongState.ball.speedY = -room.pongState.ball.speedY;
@@ -214,7 +216,7 @@ export class GameService {
                 handleColisionWithObstacle(room, server, obstacles);
             }
             timeToSendBallPosition++;
-            if (timeToSendBallPosition === 5)
+            if (timeToSendBallPosition === 3)
             {
                 timeToSendBallPosition = 0;
                 sendBallPosition(room, server);

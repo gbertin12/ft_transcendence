@@ -52,19 +52,9 @@ let score1 : number = 0;
 let score2 : number = 0;
 //#endregion
 
-let mapPowers : Power[] = [
-	{ isActive: false, x : 0, y : 0, id : 0, type : -1 },
-	{ isActive: false, x : 0, y : 0, id : 1, type : -1 },
-	{ isActive: true, x : 0, y : 0, id : 2, type : -1 },
-	{ isActive: false, x : 0, y : 0, id : 3, type : -1 },
-	{ isActive: true, x : 0, y : 0, id : 4, type : -1 },
-	{ isActive: true, x : 0, y : 0, id : 5, type : -1 }
-];
+let mapPowers : Power[];
 
-let mapObstacles : Obstacle[] = [
-	{ isActive: false, x : 0, y : 0, id : 0, size : 0 },
-	{ isActive: false, x : 0, y : 0, id : 1, size : 0 },
-];
+let mapObstacles : Obstacle[];
 
 const convertToPixel = (value: number, maxValue: number) => {
     return (value * maxValue) / 100;
@@ -89,9 +79,10 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
 		p5.createCanvas(p5.windowWidth * 0.6, p5.windowWidth * 0.6 * 0.7).parent(canvasParentRef);
+		console.log("width", p5.width, "height", p5.height);
 		p5lib = p5;
 		// set paddles
-		paddleWidth = p5.width / 80;
+		paddleWidth = p5.width / 50;
 		paddleHeight = p5.height / 8;
 		paddlePlayer1Y = p5.height / 2 - paddleHeight / 2;
 		paddlePlayer2Y = p5.height / 2 - paddleHeight / 2;
@@ -107,9 +98,25 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		ballSpeedY = 2 / ratioY;
 
 		// resize images
-		bounce.resize(50, 50);
-		power.resize(50, 50);
-		fence.resize(50, 50);
+		bounce.resize(p5.width / 12, p5.width / 12);
+		power.resize(p5.width / 12 / 1.5, p5.width / 12);
+		fence.resize(p5.width / 12, p5.width / 12);
+
+		mapPowers = [
+			{ isActive: false, x : 0, y : 0, id : 0, type : 0 },
+			{ isActive: false, x : 0, y : 0, id : 1, type : 0 },
+			{ isActive: false, x : 0, y : 0, id : 2, type : 0 },
+			{ isActive: false, x : 0, y : 0, id : 3, type : 0 },
+			{ isActive: false, x : 0, y : 0, id : 4, type : 0 },
+			{ isActive: false, x : 0, y : 0, id : 5, type : 0 }
+		]
+		mapObstacles = [
+			{ isActive: false, x : 0, y : 0, id : 0, size : 0 },
+			{ isActive: false, x : 0, y : 0, id : 1, size : 0 },
+		];
+
+		score1 = 0;
+		score2 = 0;
 
 		p5.frameRate(60);
 	}
@@ -133,6 +140,29 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			ballX = p5.width / 2 - ballSize / 2;
 			ballY = p5.height / 2 - ballSize / 2;	
 		}
+
+		// draw powers
+		let halfWidthPower = p5.width / 12 / 2;
+		for (let i = 0; i < mapPowers.length; i++) {
+			if (mapPowers[i].isActive) {
+				if (mapPowers[i].type == 0)
+					p5.image(power, mapPowers[i].y, mapPowers[i].x);
+				else if (mapPowers[i].type == 1)
+					p5.image(bounce, mapPowers[i].y, mapPowers[i].x);
+				else if (mapPowers[i].type == 2)
+					p5.image(fence, mapPowers[i].y, mapPowers[i].x);
+			}
+		}
+
+		// draw obstacles
+		for (let i = 0; i < mapObstacles.length; i++) {
+			if (mapObstacles[i].isActive) {
+				console.log("draw obstacle", mapObstacles[i].x, mapObstacles[i].y, mapObstacles[i].size)
+				p5.rect( mapObstacles[i].y, mapObstacles[i].x, p5.width / 50, mapObstacles[i].size);
+			}
+
+		}
+
 		// handle paddle movement
 		handlePaddleMove();
 		// draw ball
@@ -146,7 +176,23 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 
 	const handleWindowResize = () => {
 		if (p5lib)
-			p5lib.createCanvas(p5lib.windowWidth * 0.6, p5lib.windowWidth * 0.6* 0.7);
+		{
+			p5lib.createCanvas(p5lib.windowWidth * 0.6, p5lib.windowWidth * 0.6 * 0.7);
+			bounce.resize(p5lib.width / 12, p5lib.width / 12);
+			fence.resize(p5lib.width / 12, p5lib.width / 12);
+			power.resize(p5lib.width / 12 / 1.5, p5lib.width / 12);
+		}
+		// set paddles
+		paddleWidth = p5lib.width / 80;
+		paddleHeight = p5lib.height / 8;
+		paddlePlayer1Y = p5lib.height / 2 - paddleHeight / 2;
+		paddlePlayer2Y = p5lib.height / 2 - paddleHeight / 2;
+		speedPaddle = p5lib.height / 50;
+		
+		// set ball
+		ballSize = p5lib.width * 0.02;
+		ballX = p5lib.width / 2 - ballSize / 2;
+		ballY = p5lib.height / 2 - ballSize / 2;
 	};
 
 	const handlePaddleMove = () => {
@@ -222,7 +268,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		socket.on('updateBallVector', ({ speedX, speedY } : { speedX: number, speedY: number }) => {
 			if (p5lib)
 			{
-				console.log("frame", p5lib.frameCount)
 				const ratioX = canvasHeightServerSide / p5lib.height;
 				const ratioY = canvasWidthServerSide / p5lib.width;
 				ballSpeedX = speedX / ratioX;
@@ -237,37 +282,55 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			}
 		});
 		socket.on('endGame', (endGame: PlayerEndGame) => {
-			console.log("frameEND", p5lib.frameCount);
 			handleSetEndGame(endGame);
 		});
-		// socket.on('newPower', ({x, y, id, type} : {x: number, y : number, id : number, type : number}) => {
-		// 	console.log("newPower");
-		// 	for (let i = 0; i < mapPowers.length; i++)
-		// 	{
-		// 		if (mapPowers[i].id == id)
-		// 		{
-		// 			mapPowers[i].isActive = true;
-		// 			mapPowers[i].y = y;
-		// 			mapPowers[i].x = x;
-		// 			mapPowers[i].type = type;
-		// 			break ;
-		// 		}
-		// 	}
-		// });
-		// socket.on('removePower', ({id} : {id : number}) => {
-		// 	console.log("removePower");
-		// 	for (let i = 0; i < mapPowers.length; i++)
-		// 	{
-		// 		if (mapPowers[i].id == id)
-		// 		{
-		// 			mapPowers[i].isActive = false;
-		// 			mapPowers[i].y = 0;
-		// 			mapPowers[i].x = 0;
-		// 			mapPowers[i].type = -1;
-		// 			break ;
-		// 		}
-		// 	}
-		// });
+		socket.on('newPower', ({x, y, id, type} : {x: number, y : number, id : number, type : number}) => {
+			let newX = convertToPixel(x, p5lib.width);
+			let newY = convertToPixel(y, p5lib.height);
+			console.log("newPower", newX, newY, id, type);
+			for (let i = 0; i < mapPowers.length; i++)
+			{
+				if (mapPowers[i].id == id)
+				{
+					mapPowers[i].isActive = true;
+					mapPowers[i].y = newX;
+					mapPowers[i].x = newY;
+					mapPowers[i].type = type;
+					break ;
+				}
+			}
+		});
+		socket.on('removePower', ({id} : {id : number}) => {
+			console.log("removePower");
+			for (let i = 0; i < mapPowers.length; i++)
+			{
+				if (mapPowers[i].id == id)
+				{
+					mapPowers[i].isActive = false;
+					mapPowers[i].y = 0;
+					mapPowers[i].x = 0;
+					mapPowers[i].type = -1;
+					break ;
+				}
+			}
+		});
+		socket.on('addObstacle', ({x, y, id, size} : {x: number, y : number, id : number, size : number}) => {
+			let sizePixels = convertToPixel(size, p5lib.width);
+			let newX = convertToPixel(x, p5lib.width);
+			let newY = convertToPixel(y, p5lib.height);
+			console.log("addObstacle", newX, newY, id, sizePixels);
+			for (let i = 0; i < mapObstacles.length; i++)
+			{
+				if (mapObstacles[i].id == id)
+				{
+					mapObstacles[i].isActive = true;
+					mapObstacles[i].y = newX;
+					mapObstacles[i].x = newY;
+					mapObstacles[i].size = sizePixels;
+					break ;
+				}
+			}
+		});
 		return () => {
 			socket.off('playerMove');
 			socket.off('updateScore');
@@ -275,6 +338,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			socket.off('endGame');
 			socket.off('newPower');
 			socket.off('removePower');
+			socket.off('addObstacle');
 		}
 	}, [socket, roomName]);
 
