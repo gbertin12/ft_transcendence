@@ -20,7 +20,7 @@ interface MutePunishment {
 
 function generateMutedMessage(talkPowerTimer: number): string {
     if (talkPowerTimer < 0 || talkPowerTimer > 31536000 * 5) { // Negative or 5 years
-        return "You are permanently muted.";
+        return "You are muted.";
     } else {
         const hours = Math.floor(talkPowerTimer / 3600);
         const minutes = Math.floor((talkPowerTimer % 3600) / 60);
