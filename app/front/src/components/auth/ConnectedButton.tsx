@@ -1,21 +1,5 @@
-import { Link , Dropdown, User, defaultTheme} from "@nextui-org/react";
-// import { User } from "@/interfaces/user.interface";
+import { Link , Dropdown, User } from "@nextui-org/react";
 import { useUser } from '@/contexts/user.context';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-
-function redirMyProfile() {
-	window.location.href = 'http://localhost:8000/profile';
-}
-
-// window.location.href = `http://localhost:8000/user/${user.name}`;
-// window.location.href = `http://localhost:8000/auth/${user.name}`;
-
-
-// function changeTheme() {
-// 	ThemeProviderProps.value == "light" ?
-//     ThemeProviderProps.value == "dark" :
-//     ThemeProviderProps.value == "light";
-// }
 
 export default function ConnectedButton() {
     const { user } = useUser();
@@ -36,10 +20,10 @@ export default function ConnectedButton() {
           </Dropdown.Trigger>
             <Dropdown.Menu aria-label="Connected Menu">
                 <Dropdown.Item key="profile">
-                    <Link href='http://localhost:8000/profile' color="text">View profile</Link>
+                    <Link href='/profile' color="text">View profile</Link>
                     </Dropdown.Item>
                 <Dropdown.Item key="Logout" color="error">
-                    Logout
+                    <Link href="http://localhost:3000/auth/logout" color="error">Logout</Link>
                 </Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>

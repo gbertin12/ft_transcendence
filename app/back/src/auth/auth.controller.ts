@@ -161,4 +161,11 @@ export class AuthController {
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
+
+    @Get('/logout')
+    @UseGuards(AuthGuard('jwt'))
+    async logout(@Res() res: any) {
+        res.clearCookie('session');
+        res.redirect(307, process.env.FRONT_URL);
+    }
 }
