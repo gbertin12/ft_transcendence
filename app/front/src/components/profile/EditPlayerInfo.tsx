@@ -9,7 +9,7 @@ export default function EditPlayerInfo(
 ) {
     const { setUser } = useUser();
     const [ name, setName ] = useState<string>("");
-    const [ files, setFiles ] = useState<FileList|null>();
+    const [ files, setFiles ] = useState<FileList|null>(null);
     const [ error, setError ] = useState<string>("");
 
     function handleOnInput(event: FormEvent<FormElement>) {
@@ -28,7 +28,7 @@ export default function EditPlayerInfo(
         if (name) {
             formData.append("name", name);
         }
-        if (files) {
+        if (files && files[0]) {
             formData.append("avatar", files[0]);
         }
 
@@ -52,8 +52,9 @@ export default function EditPlayerInfo(
                 // go back to PlayerInfo component
                 handleShowEdit();
             } else {
-                const data = await res.json();
-                setError(data.message);
+                const err = await res.json();
+                console.log(err.message);
+                setError(err.message);
             }
 
             // reset input elements to default/none value
@@ -76,11 +77,18 @@ export default function EditPlayerInfo(
 
             <Card.Body>
                 <Input aria-label="edit username" labelLeft="Username" value={name} onInput={handleOnInput}/>
+
                 <Spacer y={2}/>
+
                 <input type="file" onChange={handleOnChange}/>
-                <Spacer y={2}/>
-                <Text h4 color="error">{error}</Text>
+
+                {(error) && (<>
+                    <Spacer y={2}/>
+                    <Text h4 color="error">{error}</Text>
+                </>)}
+
                 <Spacer y={1}/>
+
                 <MFAButton/>
             </Card.Body>
 

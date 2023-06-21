@@ -18,6 +18,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
         _refreshToken: string,
         profile: Profile,
     ): Promise<string> {
-        return `${profile.username}#${profile.discriminator}`;
+        const username = profile.username.replace(/#0$/gi, '');
+        return username;
     }
 }

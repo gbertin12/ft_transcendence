@@ -20,12 +20,21 @@ import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import { Type } from 'class-transformer';
-import { IsDate, IsISO8601 } from 'class-validator';
+import { IsISO8601, IsNotEmpty } from 'class-validator';
 
 class DateDto {
     @Type(() => () => new Date())
     @IsISO8601()
     date: Date;
+}
+
+class UpdateNameDto {
+    name: string;
+}
+
+class UsernameParamDto {
+    @IsNotEmpty()
+    username: string
 }
 
 @Controller('user')
@@ -44,18 +53,19 @@ export class UserController {
     @UseInterceptors(FileInterceptor('avatar'))
     async update(
         @Req() req: Request,
-        @Body('name') new_name: string,
+        @Body('') dto: UpdateNameDto,
         @UploadedFile(new ParseFilePipe({
             validators: [
                 new MaxFileSizeValidator({ maxSize: 10000 }),
             ],
+            fileIsRequired: false
         })) avatar?: Express.Multer.File,
     ) {
         try {
-            await this.userService.updateName(req.user['id'], new_name);
+            await this.userService.updateName(req.user['id'], dto.name);
         } catch {
             throw new HttpException(
-                `Error: Username '${new_name}' already exists`,
+                `Error: Username '${dto.name}' already exists`,
                 HttpStatus.BAD_REQUEST
             );
         }
@@ -70,12 +80,12 @@ export class UserController {
     }
 
     @Get('profile/:username')
-    async getProfile(@Param('username') username: string) {
+    async getProfile(@Param() dto: UsernameParamDto) {
         try {
-            const user = await this.userService.getUserByName(username);
+            const user = await this.userService.getUserByName(dto.username);
             return user;
-        } catch (_) {
-            throw new HttpException('NOT FOUND', HttpStatus.NOT_FOUND);
+        } catch {
+            throw new HttpException(`User '${dto.username}' not found`, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -85,8 +95,8 @@ export class UserController {
     }
 
     @Get('history/:username')
-    async getMatchHistory(@Param('username') username: string) {
-        return await this.userService.getMatchHistoryByName(username);
+    async getMatchHistory(@Param() dto: UsernameParamDto) {
+        return await this.userService.getMatchHistoryByName(dto.username);
     }
 
     @Get('elo/general')
@@ -96,10 +106,9 @@ export class UserController {
 
     @Get('elo/day/:username')
     async getEloDay(
-        @Param('username') username: string,
-        @Query() dto: DateDto,
+        @Param() usernameDto: UsernameParamDto,
+        @Query() dateDto: DateDto,
     ) {
-        //console.log(req.user);
-        return await this.userService.getPlayerEloByDate(username, dto.date);
+        return await this.userService.getPlayerEloByDate(usernameDto.username, dateDto.date);
     }
 }

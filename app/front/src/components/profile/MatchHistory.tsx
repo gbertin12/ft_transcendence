@@ -46,12 +46,11 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
 
 function setDataRows(gamesWon: GameData[], gamesLost: GameData[]) {
     let rows: MatchHistoryRow[] = [];
-
-
     let w = 0, l = 0;
     let id = 0;
-    while (w < gamesWon.length && l < gamesLost.length) {
-        if (gamesWon[w].id > gamesLost[l].id) {
+
+    while (w < gamesWon.length || l < gamesLost.length) {
+        if (gamesWon[w] && ((gamesWon[w] && !gamesLost[l]) || gamesWon[w].id > gamesLost[l].id)) {
             const row = generateRow(gamesWon[w], true, id++);
             rows.push(row);
             w++; 
@@ -61,7 +60,6 @@ function setDataRows(gamesWon: GameData[], gamesLost: GameData[]) {
             l++;
         }
     }
-
     return (rows);
 }
 
