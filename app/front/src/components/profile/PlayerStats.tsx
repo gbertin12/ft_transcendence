@@ -16,6 +16,14 @@ function EloLabel({ elo }: { elo: number }) {
 }
 
 export default function PlayerStats({ user }: { user: User }) {
+    const [ winrate, setWinrate ] = useState<number>(-1);
+
+    useEffect(() => {
+        if (user.wins + user.losses > 0) {
+            setWinrate(Math.round(user.wins / (user.wins + user.losses) * 100));
+        }
+    }, [user.wins, user.losses]);
+
 
     return (
         <Grid>
@@ -28,6 +36,11 @@ export default function PlayerStats({ user }: { user: User }) {
                 <Text h4>Losses</Text>
                 <Text h4>{user.losses}</Text>
             </Row>
+
+            {(winrate !== -1) && (<Row justify="space-between" align="center">
+                <Text h4>Winrate</Text>
+                <Text h4>{winrate}</Text>
+            </Row>)}
 
             <Row justify="space-between" align="center">
                 <Text h4>Elo</Text>

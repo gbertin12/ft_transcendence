@@ -1,31 +1,32 @@
-import { IconMedal } from '@tabler/icons-react';
-import { IconMessageCircle2 } from '@tabler/icons-react';
-import { IconDeviceGamepad } from '@tabler/icons-react';
-import { Navbar, Button, Link, Modal, Text, Input, Spacer, Grid } from "@nextui-org/react";
+import { IconMedal,  IconMessageCircle2, IconDeviceGamepad } from '@tabler/icons-react';
+import { Navbar, Text } from "@nextui-org/react";
 import ModalSign from "./auth/ModalSign";
+import Link from 'next/link';
 
-export function TranscendenceNavbar() {
+export default function myNavbar() {
+    return (
+        <Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
+            <Navbar.Brand >
+                <Text color="primary">ft_pong</Text>
+            </Navbar.Brand >
 
-	return (
-		<Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
-			<Navbar.Brand >
-				<Text h1 size={20} color="primary">ft_pong</Text>
-			</Navbar.Brand >
-			<Navbar.Content gap={50} >
-				<Navbar.Link href="/leaderboard" color="primary">
-					<IconMedal size={50} strokeWidth={1.5} />
-				</Navbar.Link>
-				<Navbar.Link href="/game" color="primary">
-					<IconDeviceGamepad size={50} strokeWidth={1.5} />
-				</Navbar.Link>
-				<Navbar.Link href="/chat" color="primary">
-					<IconMessageCircle2 size={50} strokeWidth={1.5} />
-				</Navbar.Link>
+            <Navbar.Content gap={50} >
+                <Link href="/leaderboard">
+                    <IconMedal size={50} strokeWidth={1.5}/>
+                </Link>
 
-			</Navbar.Content>
-			<Navbar.Content color="primary">
-				<ModalSign />
-			</Navbar.Content>
-		</Navbar>
-	)
+                <Link href="/game">
+                    <IconDeviceGamepad size={50} strokeWidth={1.5}/>
+                </Link>
+
+                <Link href="/chat">
+                    <IconMessageCircle2 size={50} strokeWidth={1.5}/>
+                </Link>
+            </Navbar.Content>
+
+            <Navbar.Content>
+                <ModalSign/>
+            </Navbar.Content>
+        </Navbar>
+    )
 }

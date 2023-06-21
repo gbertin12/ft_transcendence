@@ -14,6 +14,28 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
+import { IsNotEmpty } from 'class-validator';
+
+class LocalAuthDto {
+    @IsNotEmpty()
+    username: string;
+
+    @IsNotEmpty()
+    password: string;
+}
+
+class FtCallbackDto {
+    @IsNotEmpty()
+    code: string;
+
+    @IsNotEmpty()
+    state: string;
+}
+
+class VerifyOtpDto {
+    @IsNotEmpty()
+    otp: string;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -24,13 +46,12 @@ export class AuthController {
 
     @Get('42/callback')
     async ftCallback(
-        @Query('code') auth_code: string,
-        @Query('state') state_param: string,
+        @Query() dto: FtCallbackDto,
         @Req() req: Request,
         @Res() res: Response,
     ) {
         const state_cookie = req.cookies['state'];
-        const user = await this.authService.ftCallback(auth_code, state_param, state_cookie);
+        const user = await this.authService.ftCallback(dto.code, dto.state, state_cookie);
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
@@ -63,11 +84,13 @@ export class AuthController {
 
     @Post('register')
     async register(
-        @Body('username') username: string,
-        @Body('password') password: string
+        @Body() dto: LocalAuthDto,
     ) {
-        if (!await this.authService.register(username, password)) {
-            throw new HttpException('user already exists', HttpStatus.FORBIDDEN);
+        if (!await this.authService.register(dto.username, dto.password)) {
+            throw new HttpException(
+                `Username '${dto.username}' already exists`,
+                HttpStatus.FORBIDDEN
+            );
         }
     }
 
@@ -79,7 +102,7 @@ export class AuthController {
     ) {
         const token = await this.authService.generateJWT(req.user['id']);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+        res.send('/profile');
     }
 
     // before starting the OAuth flow, we hit this endpoint
@@ -120,9 +143,9 @@ export class AuthController {
     async verifyOTP(
         @Req() req: Request,
         @Res() res: Response,
-        @Body('code') code: string,
+        @Body() dto: VerifyOtpDto,
     ) {
-        if (!await this.authService.verifyOTP(req.user['id'], code)) {
+        if (!await this.authService.verifyOTP(req.user['id'], dto.otp)) {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);

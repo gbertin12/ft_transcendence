@@ -1,72 +1,111 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button, Grid, Text, Image } from "@nextui-org/react";
+import { Input, Spacer, Button , Grid, Text, Row, FormElement } from "@nextui-org/react";
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import { FormEvent, useState } from 'react';
 
-async function login42() {
-	const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
-	const state_token = await res.text();
-	//document.cookie = `state=${state_token};SameSite=None`;
-	//const payload = jwtDecode<JwtPayload>(state_token);
-	window.location.href = `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`;
-}
+export default function SignIn({ closeModal }: { closeModal: () => void }) {
+    const [ username, setUsername ] = useState<string>("");
+    const [ password, setPassword] = useState<string>("");
+    const [ error, setError ] = useState<string>("");
+    const router = useRouter();
 
-async function loginGithub() {
-	window.location.href = 'http://localhost:3000/auth/github/callback';
-}
+    async function userPassLogin() {
+        if (username && password) {
+            axios.post("http://localhost:3000/auth/login", { username, password }, {  withCredentials: true })
+                .then((res) => {
+                    closeModal();
+                    router.push(res.data);
+                })
+                .catch((_err) => {
+                    setError("login failed");
+                })
+        }
+    }
 
-async function loginDiscord() {
-	window.location.href = 'http://localhost:3000/auth/discord/callback';
-}
-export default function SignIn() {
-	return (
-		<Grid>
-			<Text h4>Sign in</Text>
+    async function ftLogin() {
+        const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
+        const state_token = await res.text();
+        router.push(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`);
+    }
 
-			<Grid.Container direction="column" >
-				<Grid>
+    function discordLogin() {
+        router.push('http://localhost:3000/auth/discord/callback');
+    }
 
-					<Input placeholder="Username" label="Username" />
-				</Grid>
-				<Spacer y={1} />
-				<Grid>
-					<Input.Password placeholder="Password" label="Password" />
-				</Grid>
-				<Spacer y={1} />
-				<Grid.Container justify='flex-end'>
-					<Grid >
-						<Button bordered color="$white" auto>
-							<Text >Sign in</Text>
-						</Button>
-					</Grid>
-				</Grid.Container>
-			</Grid.Container>
-			<Spacer x={0.5} />
-			<hr />
-			<Spacer x={0.5} />
-			<Grid.Container justify='center' gap={1}>
-				<Grid>
-					<Button
-						auto bordered
-						color="$white"
-						icon={<IconBrandDiscordFilled fill="$white" />}
-						onClick={loginDiscord}
+    function githubLogin() {
+        router.push('http://localhost:3000/auth/github/callback');
+    }
 
-					/>
-				</Grid>
-				<Grid>
-					<Button bordered onClick={login42} color="$white" auto
-						icon="42">
-					</Button>
-				</Grid>
-				<Grid>
-					<Button
-						auto bordered
-						color="$white"
-						icon={<IconBrandGithubFilled />}
-						onClick={loginGithub}
-					/>
-				</Grid>
-			</Grid.Container>
-		</Grid>
-	)
+    function handleOnInputUsername(event: FormEvent<FormElement>) {
+        const target = event.target as HTMLInputElement;
+        setUsername(target.value);
+    }
+
+    function handleOnInputPassword(event: FormEvent<FormElement>) {
+        const target = event.target as HTMLInputElement;
+        setPassword(target.value);
+    }
+
+    return (
+        <Grid>
+            <Text h4>Sign in</Text>
+            <Grid.Container direction="column" >
+                <Row>
+                    <Input bordered onInput={handleOnInputUsername} value={username} placeholder="Username" label="Username"/>
+                </Row>
+
+                <Spacer y={1} />
+
+                <Row>
+                    <Input.Password bordered onInput={handleOnInputPassword} value={password} placeholder="Password" label="Password"/>
+                </Row>
+
+                <Spacer y={1}/>
+
+                {(error) && (<>
+                    <Spacer y={1}/>
+                    <Text color="error">{error}</Text>
+                </>)}
+
+                <Grid.Container justify='flex-end'>
+                    <Grid >
+                        <Button bordered onPress={userPassLogin} auto color="primarySolidContrast">
+                            <Text >Sign in</Text>
+                        </Button>
+                    </Grid>
+                </Grid.Container>
+            </Grid.Container>
+
+            <Spacer x={0.5}/>
+            <hr/>
+            <Spacer x={0.5}/>
+
+            <Grid.Container justify='center' gap={1}>
+                <Grid>
+                    <Button bordered color="primarySolidContrast" onPress={ftLogin} auto icon="42">
+                    </Button>
+                </Grid>
+
+                <Grid>
+                    <Button
+                        auto bordered
+                        color="primarySolidContrast"
+                        onPress={discordLogin}
+                        icon={<IconBrandDiscordFilled fill="$white" />}
+                    />
+                </Grid>
+
+                <Grid>
+                    <Button
+                        auto bordered
+                        color="primarySolidContrast"
+                        onPress={githubLogin}
+                        icon={<IconBrandGithubFilled/>}
+                    />
+                </Grid>
+            </Grid.Container>
+        </Grid>
+    )
 }

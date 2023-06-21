@@ -18,7 +18,7 @@ export default function PlayerInfo(
                         <Button
                         onPress={handleShowEdit}
                         iconRight={<IconPencil/>}
-                        auto >
+                        auto>
                         </Button>
                     )}
                 </Row>

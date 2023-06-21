@@ -11,13 +11,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(username: string, password: string) {
-        console.log(`username:\t${username}\npassword:\t${password}`);
         try {
-            const user = await this.userService.getUserByName(username);
-            //if (await argon2.verify(user.password, password)) {
+            const user = await this.userService.getUserByNameFull(username);
+            if (await argon2.verify(user.password, password)) {
                 return { id: user.id };
-            //}
-        } catch (_) {
+            }
+        } catch {
             throw new HttpException('user does not exist', HttpStatus.NOT_FOUND);
         }
     }

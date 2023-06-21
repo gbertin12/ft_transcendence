@@ -84,4 +84,3 @@ export class DmsController {
 		this.chatGateway.usersClients[interlocutor_id].emit('dmMessage', message);
 	};
 }
-

@@ -48,8 +48,8 @@ function friendInteractionButton(
     receivedRequests: FriendRequest[],
     isFriend: boolean
 ): JSX.Element {
-    const sent = sentRequests.find((request) => request.receiver_id === user.id);
-    const recieved = receivedRequests.find((request) => request.sender_id === user.id);
+    const sent = sentRequests.some((request) => request.receiver_id === user.id);
+    const recieved = receivedRequests.some((request) => request.sender_id === user.id);
 
     if (isFriend) {
         return (

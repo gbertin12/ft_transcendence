@@ -8,14 +8,14 @@ import { Type } from 'class-transformer';
 import { ChatGateway } from '../chat/chat.gateway';
 
 class FriendRequestDto {
-@Type(() => Number)
+    @Type(() => Number)
     @IsNumber()
     @IsPositive()
     to: number;
 }
 
 class FriendReqIdDto {
-@Type(() => Number)
+    @Type(() => Number)
     @IsNumber()
     @IsPositive()
     id: number;
