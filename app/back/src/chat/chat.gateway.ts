@@ -123,6 +123,17 @@ export class ChatGateway
                 client.leave(room);
             }
         });
+        // Check if user is allowed to join channel or is banned
+        const channel = await this.channelService.getChannel(channelId);
+        if (!channel) {
+            throw new NotFoundException('Channel not found');
+        }
+        if (await this.punishmentsService.hasActiveBan(client['user'].id, channelId)) {
+            throw new ForbiddenException('You are banned from this channel');
+        }
+        if (!await this.channelService.isUserInChannel(client['user'].id, channelId)) {
+            throw new ForbiddenException('You are not allowed to join this channel');
+        }
         await client.join(`channel-${channelId}`);
         let staff: ChannelStaff = await this.channelService.getChannelStaff(channelId);
         client.emit('staff', staff);
