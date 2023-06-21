@@ -280,9 +280,9 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 
 	return (
 		<div>
-			<Sketch preload={preload} setup={setup} draw={draw} />;
+			<Sketch preload={preload} setup={setup} draw={draw} />
 		</div>
-	);
+	)
 }
 
 export default Pong2;

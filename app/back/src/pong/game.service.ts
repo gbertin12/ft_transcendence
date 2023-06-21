@@ -62,9 +62,9 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 };
 
 const collisionWithPlayer1 = (room: roomInterface) : boolean => { 
-    if (room.pongState.ball.x < 20)
+    if (room.pongState.ball.x < 30)
     {
-        for (let i = 0; i > room.pongState.ball.speedX - 1; i -= 1)
+        for (let i = 0; i > room.pongState.ball.speedX - 1; i -= 0.5)
         {
             if (room.pongState.ball.x - i <= playerWidth + radiusBall ||
                 room.pongState.ball.x - room.pongState.ball.speedX - i <= playerWidth + radiusBall)
@@ -77,7 +77,7 @@ const collisionWithPlayer1 = (room: roomInterface) : boolean => {
 const collisionWithPlayer2 = (room: roomInterface) : boolean => {
     if (room.pongState.ball.x > canvasWidth - 20)
     {
-        for (let i = 0; i < room.pongState.ball.speedX + 1; i += 1)
+        for (let i = 0; i < room.pongState.ball.speedX + 1; i += 0.5)
         {
             if (room.pongState.ball.x + i >= canvasWidth - playerWidth - radiusBall ||
                 room.pongState.ball.x + room.pongState.ball.speedX + i >= canvasWidth - playerWidth - radiusBall)
@@ -147,8 +147,8 @@ const resetBallPosition = (
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
     const randY: number = 100 * Math.random();
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
-    room.pongState.ball.speedX = 1.5;
-    room.pongState.ball.speedY = 1.5;
+    room.pongState.ball.speedX = 2;
+    room.pongState.ball.speedY = 2;
     sendBallPosition(room, server);
     sendBallVector(room, server);
 }
@@ -159,12 +159,12 @@ const handleResetPlayerPosition = (
     // Check who win round
     if (room.pongState.ball.x <= radiusBall) {
         room.pongState.player2.score++;
-        room.pongState.ball.speedX = 1;
-        room.pongState.ball.speedY = 1;
+        room.pongState.ball.speedX = 2;
+        room.pongState.ball.speedY = 2;
     } else {
         room.pongState.player1.score++;
-        room.pongState.ball.speedX = -1;
-        room.pongState.ball.speedY = -1;
+        room.pongState.ball.speedX = -2;
+        room.pongState.ball.speedY = -2;
     }
     resetBallPosition(room, server);
     sendScore(room, server);
