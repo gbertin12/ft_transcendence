@@ -24,8 +24,8 @@ interface Obstacle {
 	size: number;
 }
 
-const canvasHeightServerSide : number = 500;
-const canvasWidthServerSide : number = 1000;
+const canvasHeightServerSide : number = 250;
+const canvasWidthServerSide : number = 500;
 
 //#region setup variables game
 // images
@@ -70,6 +70,7 @@ const convertToPixel = (value: number, maxValue: number) => {
     return (value * maxValue) / 100;
 };
 
+
 const Pong2 = ({roomName, who, handleSetEndGame} 
 	: {roomName : string, who : number, handleSetEndGame : (endGame: PlayerEndGame) => void}) => {
 	const { socket, user } = useUser();
@@ -91,7 +92,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		p5lib = p5;
 		// set paddles
 		paddleWidth = p5.width / 80;
-		paddleHeight = p5.height * 0.125;
+		paddleHeight = p5.height / 8;
 		paddlePlayer1Y = p5.height / 2 - paddleHeight / 2;
 		paddlePlayer2Y = p5.height / 2 - paddleHeight / 2;
 		speedPaddle = p5.height / 50;
@@ -102,8 +103,8 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		ballY = p5.height / 2 - ballSize / 2;
 		const ratioX = canvasHeightServerSide / p5lib.height;
 		const ratioY = canvasWidthServerSide / p5lib.width;
-		ballSpeedX = 1 / ratioX;
-		ballSpeedY = 1 / ratioY;
+		ballSpeedX = 2 / ratioX;
+		ballSpeedY = 2 / ratioY;
 
 		// resize images
 		bounce.resize(50, 50);
@@ -159,31 +160,27 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 						paddlePlayer1Y = 0;
 					else
 						paddlePlayer1Y -= speedPaddle;
-
 					percent = paddlePlayer1Y / p5lib.height * 100;
 				} else {
 					if (paddlePlayer2Y - speedPaddle < 0)
 						paddlePlayer2Y = 0;
 					else
 						paddlePlayer2Y -= speedPaddle;
-
 					percent = paddlePlayer2Y / p5lib.height * 100;
 				}
 			} else if (p5lib.keyIsDown(p5lib.DOWN_ARROW)) {
 				if (who === 0)
 				{
-					if(paddlePlayer1Y + speedPaddle > p5lib.height)
-						paddlePlayer1Y = p5lib.height;
+					if(paddlePlayer1Y + speedPaddle > p5lib.height - paddleHeight)
+						paddlePlayer1Y = p5lib.height - paddleHeight;
 					else
 						paddlePlayer1Y += speedPaddle;
-
 					percent = paddlePlayer1Y / p5lib.height * 100;
 				} else {
-					if (paddlePlayer2Y + speedPaddle > p5lib.height)
-						paddlePlayer2Y = 0;
+					if (paddlePlayer2Y + speedPaddle > p5lib.height - paddleHeight)
+						paddlePlayer2Y = p5lib.height - paddleHeight;
 					else
 						paddlePlayer2Y += speedPaddle;
-
 					percent = paddlePlayer2Y / p5lib.height * 100;
 				}
 			}

@@ -7,14 +7,12 @@ import { UserService } from '../user/user.service';
 import { PlayerInterface, roomInterface, obstaclesInterface, powerAvailables, PlayerEndGame } from '../interfaces/pong.interface';
 
 // set playground value
-const canvasHeight = 700;
-const canvasWidth = 1000;
+const canvasHeight = 350;
+const canvasWidth = 500;
 const playerHeight = canvasHeight / 8;
 const playerWidth = canvasWidth / 80;
 const ballSize = canvasWidth * 0.02;
 const radiusBall = ballSize / 2;
-
-let frameCount : number = 0;
 
 const convertToPercent = (value: number, maxValue: number) => {
     return (value / maxValue) * 100;
@@ -26,8 +24,8 @@ export const convertToPixel = (value: number, maxValue: number) => {
 
 const updateBallSpeedX = (speedX: number) => {
     let newSpeed = speedX;
-    if (speedX > 0 && speedX < 3) newSpeed = speedX + 0.2;
-    else if (speedX < 0 && speedX > -3) newSpeed = speedX - 0.2;
+    if (speedX > 0 && speedX < 5) newSpeed = speedX + 0.2;
+    else if (speedX < 0 && speedX > -5) newSpeed = speedX - 0.2;
     return newSpeed;
 };
 
@@ -47,8 +45,6 @@ const updateBallSpeedY = (room: roomInterface, player: number) => {
 };
 
 export const sendBallVector = (room: roomInterface, server: Server) => {
-    const speedX = convertToPercent(room.pongState.ball.speedX, canvasWidth);
-    const speedY = convertToPercent(room.pongState.ball.speedY, canvasHeight);
     server.to(room.name).emit('updateBallVector', {
         speedX: room.pongState.ball.speedX,
         speedY: room.pongState.ball.speedY,
@@ -65,13 +61,38 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
     });
 };
 
+const collisionWithPlayer1 = (room: roomInterface) : boolean => { 
+    if (room.pongState.ball.x < 20)
+    {
+        for (let i = 0; i > room.pongState.ball.speedX - 1; i -= 1)
+        {
+            if (room.pongState.ball.x - i <= playerWidth + radiusBall ||
+                room.pongState.ball.x - room.pongState.ball.speedX - i <= playerWidth + radiusBall)
+                return true;
+        } 
+    }
+    return false;
+}
+
+const collisionWithPlayer2 = (room: roomInterface) : boolean => {
+    if (room.pongState.ball.x > canvasWidth - 20)
+    {
+        for (let i = 0; i < room.pongState.ball.speedX + 1; i += 1)
+        {
+            if (room.pongState.ball.x + i >= canvasWidth - playerWidth - radiusBall ||
+                room.pongState.ball.x + room.pongState.ball.speedX + i >= canvasWidth - playerWidth - radiusBall)
+                return true;
+        }
+    }
+}
+
 const handleCheckCollision = (room: roomInterface, server: Server) => {
     // check collision with player 1
    
     if (room.pongState.ball.y >= convertToPixel(room.pongState.player1.y, canvasHeight) &&
     room.pongState.ball.y <= convertToPixel(room.pongState.player1.y, canvasHeight) + playerHeight)
     {
-        if (room.pongState.ball.x <= playerWidth + radiusBall && room.pongState.ball.x > 0)
+        if (collisionWithPlayer1(room))
         {
             console.log("COLLISION2 p1")
             if (room.pongState.ball.speedX < 0) {
@@ -90,7 +111,7 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
     if (room.pongState.ball.y >= convertToPixel(room.pongState.player2.y, canvasHeight) &&
     room.pongState.ball.y <= convertToPixel(room.pongState.player2.y, canvasHeight) + playerHeight)
     {
-        if (room.pongState.ball.x >= canvasWidth - playerWidth - radiusBall && room.pongState.ball.x < canvasWidth)
+        if (collisionWithPlayer2(room))
         {
             console.log("COLLISION2 p2")
             if (room.pongState.ball.speedX > 0) {
@@ -177,10 +198,8 @@ export class GameService {
         ]
         // Start loop of game
         while (1) {
-            frameCount++;
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
-                frameCount = 0;
                 this.handleEndGame(room, server, false);
                 return;
             }
@@ -211,7 +230,7 @@ export class GameService {
                 //console.log("player 1y", convertToPixel(room.pongState.player1.y, canvasHeight), room.pongState.player1.y, "player2y", convertToPixel(room.pongState.player1.y, canvasHeight), room.pongState.player2.y, "ballX", room.pongState.ball.x, "ballY", room.pongState.ball.y, playerHeight, playerWidth);
                 handleResetPlayerPosition(room, server);
             }
-            await sleep(120);
+            await sleep(60);
         }
     }
 
