@@ -1,4 +1,4 @@
-import { Channel, Friend, FriendRequest, Message, Relationships } from '@/interfaces/chat.interfaces';
+import { Channel, Friend, FriendRequest, Message, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -124,13 +124,37 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     })
                     .then((res) => {
                         if (res.status === 200) {
-                            // TODO: handle durations too
-                            if (res.data.hasOwnProperty("banned")) {
-                                setBannedChannels(new Set<number>(res.data.banned));
-                            }
-                            if (res.data.hasOwnProperty("muted")) {
-                                setMutedChannels(new Set<number>(res.data.muted));
-                            }
+                            let mutes = new Set<number>();
+                            let bans = new Set<number>();
+                            // Loop through the array in res.data, and add channel whose types are 0 to mutes, and 1 to bans
+                            let maxDate = new Date();
+                            maxDate.setFullYear(maxDate.getFullYear() + 5);
+                            res.data.forEach((punishment: PunishmentData) => {
+                                let date: Date = (punishment.expires_at) ? new Date(punishment.expires_at) : maxDate;
+                                switch (punishment.type) {
+                                    case 1:
+                                        mutes.add(punishment.channel_id);
+                                        // Make the ban expire if expiry date < now + 5 years, using a timeout
+                                        setTimeout(() => {
+                                            let newMutes = new Set<number>(mutedChannels);
+                                            newMutes.delete(punishment.channel_id);
+                                            setMutedChannels(newMutes);
+                                        }, date.getTime() - new Date().getTime());
+                                        break;
+                                    case 0:
+                                        bans.add(punishment.channel_id);
+                                        // Remove the ban if expiry date < now + 5 years, using a timeout
+                                        setTimeout(() => {
+                                            let newBans = new Set<number>(bannedChannels);
+                                            newBans.delete(punishment.channel_id);
+                                            setBannedChannels(newBans);
+                                        }, date.getTime() - new Date().getTime());
+                                    default:
+                                        break;
+                                }
+                            });
+                            setBannedChannels(bans);
+                            setMutedChannels(mutes);
                         }
                     });
             }
