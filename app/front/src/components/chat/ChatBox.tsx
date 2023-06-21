@@ -157,16 +157,32 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         });
         socket.on("punishment", (punishment: PunishmentData) => {
             // TODO: handle the punishment
-            switch (punishment.punishment_type) {
+            switch (punishment.type) {
                 case "muted":
                     setMutedChannels((mutedChannels) => {
                         return new Set(mutedChannels).add(punishment.channel_id);
                     });
+                    // Add a timeout to remove the channel from the list of banned channels
+                    setTimeout(() => {
+                        setMutedChannels((mutedChannels) => {
+                            const newMutedChannels = new Set(mutedChannels);
+                            newMutedChannels.delete(punishment.channel_id);
+                            return newMutedChannels;
+                        });
+                    }, (punishment.duration ? punishment.duration * 1000 : Infinity));
                     break;
                 case "banned":
                     setBannedChannels((bannedChannels) => {
                         return new Set(bannedChannels).add(punishment.channel_id);
                     });
+                    // Add a timeout to remove the channel from the list of banned channels
+                    setTimeout(() => {
+                        setBannedChannels((bannedChannels) => {
+                            const newBannedChannels = new Set(bannedChannels);
+                            newBannedChannels.delete(punishment.channel_id);
+                            return newBannedChannels;
+                        });
+                    }, (punishment.duration ? punishment.duration * 1000 : Infinity));
                     break;
                 case "kicked":
                     // remove the channel from the list of channels
@@ -302,7 +318,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                     placeholder={
                                         !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
                                             :
-                                            generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
+                                            generateMutedMessage(125364515461451)
                                     }
                                     aria-label={
                                         !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`

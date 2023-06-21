@@ -62,7 +62,8 @@ function getDefaultUnbanDate(): string {
 const applyPunishment = async (punished: SenderData, channel: Channel, type: PowerAction, permanent: boolean, stealth: boolean, unbanDate: string): Promise<void> => {
     // Resolve the promise after 2 seconds
     const permDuration = 365 * 24 * 60 * 60 * 5; // 5 years (permanent)
-    let duration = permanent ? permDuration : Math.abs(Math.floor((new Date(unbanDate).getTime() - new Date().getTime()) / 1000));
+    let unbanDateUTC = new Date(unbanDate).getTime();
+    let duration = permanent ? permDuration : Math.abs((unbanDateUTC - new Date().getTime()) / 1000);
     switch (type) {
         case 'banned':
             await axios.put(`http://localhost:3000/channel/${channel.id}/ban/${punished.id}`,

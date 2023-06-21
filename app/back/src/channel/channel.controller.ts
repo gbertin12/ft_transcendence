@@ -507,7 +507,7 @@ export class ChannelController {
         // send socket to punished
         if (this.chatGateway.usersClients[dto.user_id]) {
             this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                punishment_type: 'banned',
+                type: 'banned',
                 channel_id: dto.channel_id,
                 duration: body.duration || null,
             });
@@ -538,7 +538,7 @@ export class ChannelController {
         // send socket to punished
         if (this.chatGateway.usersClients[dto.user_id]) {
             this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                punishment_type: 'muted',
+                type: 'muted',
                 channel_id: dto.channel_id,
                 duration: body.duration || null,
             });
@@ -566,7 +566,7 @@ export class ChannelController {
         // send socket to punished
         if (this.chatGateway.usersClients[dto.user_id]) {
             this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                punishment_type: 'kicked',
+                type: 'kicked',
                 channel_id: dto.channel_id,
             });
         };

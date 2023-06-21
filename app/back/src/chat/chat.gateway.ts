@@ -131,7 +131,7 @@ export class ChatGateway
         if (await this.punishmentsService.hasActiveBan(client['user'].id, channelId)) {
             throw new ForbiddenException('You are banned from this channel');
         }
-        if (!await this.channelService.isUserInChannel(client['user'].id, channelId)) {
+        if (channel.private && !await this.channelService.isUserInChannel(client['user'].id, channelId)) {
             throw new ForbiddenException('You are not allowed to join this channel');
         }
         await client.join(`channel-${channelId}`);
@@ -140,7 +140,7 @@ export class ChatGateway
         let mute: Punishment | null = await this.punishmentsService.hasActiveMute(client['user'].id, channelId);
         if (mute) {
             client.emit('punishment', {
-                punishment_type: 'muted',
+                type: 'muted',
                 duration: Math.floor((new Date(mute.expires_at).getTime() - new Date().getTime()) / 1000),
             });
         }

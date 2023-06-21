@@ -43,7 +43,7 @@ export class PunishmentsService {
         }
         let expiration_date: Date = new Date();
         if (duration > 0 && duration < 365 * 24 * 60 * 60 * 1000 * 5) { // 5 years max
-            expiration_date = new Date(Date.now() + duration);
+            expiration_date = new Date(Date.now() + duration * 1000);
         } else {
             expiration_date = new Date(2038, 0, 1, 0, 0, 0, 0);
         }
