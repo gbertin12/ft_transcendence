@@ -115,8 +115,7 @@ model ChannelInvites {
 model ChannelAdmin {
     channel_id Int
     user_id    Int
-    Channel    Channel? @relation(fields: [channelId], references: [id])
-    channelId  Int?
+    Channel    Channel? @relation(fields: [channel_id], references: [id])
 
     @@id([channel_id, user_id])
 }
