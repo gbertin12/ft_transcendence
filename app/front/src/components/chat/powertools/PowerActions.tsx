@@ -136,7 +136,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconDoorExit />}
                         color="error"
-                        render={(isOwner || isAdmin) && !isAuthor}
+                        render={(isOwner || isAdmin) && !isAuthor && channel.private}
                         onPress={() => {
                             setPowerAction("kicked");
                             setPowerModalOpen(true);
