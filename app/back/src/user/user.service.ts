@@ -21,30 +21,44 @@ function generateRandomString(len: number) {
  */
 async function getPepeAvatar(): Promise<string> {
     try {
-        const randomPepe = generateRandomString(24) + ".png";
-        const file = fs.createWriteStream("files/static/avatars/" + randomPepe);
-        let fileValid = true;
-        http.get("https://pepe.mana.rip", function(response) {
+        const randomPepe = generateRandomString(24) + '.png';
+        const file = fs.createWriteStream('files/static/avatars/' + randomPepe);
+        const request = http.get('https://pepe.mana.rip/', (response) => {
             if (response.statusCode === 200) {
                 response.pipe(file);
+                file.on('finish', () => {
+                    file.close();
+                });
             } else {
-                fileValid = false;
+                file.close();
+                fs.unlinkSync(file.path);
             }
         });
-        return fileValid ? randomPepe : 'default.jpg';
+        request.on('error', (error) => {
+            console.error(error);
+            fs.unlinkSync(file.path);
+        });
+        // Wait for request to finish
+        await new Promise((resolve: any) => {
+            request.on('close', () => {
+                resolve();
+            });
+        });
+        // Check if file exists
+        return (fs.existsSync('files/static/avatars/' + randomPepe)) ? randomPepe : 'default.jpg';
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return 'default.jpg';
     }
 }
 @Injectable()
 export class UserService {
-    constructor(private db: DbService) {}
+    constructor(private db: DbService) { }
 
     async getUserById(id: number) {
         const user = await this.db.user.findUnique({
             where: { id },
-            select : {
+            select: {
                 id: true,
                 name: true,
                 avatar: true,
@@ -60,7 +74,7 @@ export class UserService {
     async getUserByName(name: string) {
         const user = await this.db.user.findUniqueOrThrow({
             where: { name },
-            select : {
+            select: {
                 id: true,
                 name: true,
                 avatar: true,
@@ -104,9 +118,9 @@ export class UserService {
     async getAllUserOrderedByElo() {
         return await this.db.user.findMany({
             orderBy: {
-                elo:'desc'
+                elo: 'desc'
             },
-            select : {
+            select: {
                 id: true,
                 name: true,
                 avatar: true,
@@ -185,7 +199,7 @@ export class UserService {
 
     async updateElo(name: string, elo: number) {
         await this.db.user.update({
-            data : { elo },
+            data: { elo },
             where: { name },
         });
     }
@@ -363,7 +377,7 @@ export class UserService {
                 winnerScore,
                 looserId,
                 looserScore,
-                eloDiff, 
+                eloDiff,
                 winnerElo,
                 looserElo,
                 mode
