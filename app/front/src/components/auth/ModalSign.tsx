@@ -1,40 +1,54 @@
 import SignIn from './SignIn';
 import SignUp from './SignUp';
-import React, { useState } from "react";
-import { Modal, Button, Text, Grid } from "@nextui-org/react";
+import ConnectedButton from '@/components/auth/ConnectedButton';
+
+import React from "react";
+import { Modal, Button, Text, Input, Grid } from "@nextui-org/react";
+import { useUser } from '@/contexts/user.context';
+
 
 export default function ModalSign() {
-    const [visible, setVisible] = useState(false);
+	const { user } = useUser();
+	const userId = user?.id
 
-    function closeModal() {
-        setVisible(false);
-    }
+	const [visible, setVisible] = React.useState(false);
+	const handler = () => setVisible(true);
 
-    return (
-        <div>
-            <Button auto onPress={() => setVisible(true)}>
-                <Text color="secondary">Login</Text>
-            </Button>
-            <Modal closeButton
-                blur
-                aria-labelledby="SignIn"
-                width="50%"
-                open={visible}
-                onClose={closeModal}>
-                <Modal.Body>
-                    <Grid direction="row" >
-                        <Grid.Container justify='center' gap={4}>
-                            <Grid>
-                                <SignIn closeModal={closeModal}/>
-                            </Grid>
+	const closeHandler = () => {
+		setVisible(false);
+		console.log("closed");
+	};
 
-                            <Grid>
-                                <SignUp/>
-                            </Grid>
-                        </Grid.Container>
-                    </Grid>
-                </Modal.Body>
-            </Modal>
-        </div>
-    );
+	return (
+		<div>
+			{
+			!userId ?
+				<Button auto onPress={handler}>
+					<Text bold color="secondary">Se connecter </Text>
+				</Button>
+				:
+				<ConnectedButton/>
+			}
+			<Modal closeButton
+				blur
+				aria-labelledby="SignIn"
+				width="80%"
+				open={visible}
+				onClose={closeHandler}
+			>
+				<Modal.Body>
+					<Grid direction="row" >
+						<Grid.Container justify='center' gap={4} >
+							<Grid>
+								<SignIn closeModal={closeHandler} />
+							</Grid>
+							<Grid>
+								<SignUp />
+							</Grid>
+						</Grid.Container>
+					</Grid>
+				</Modal.Body>
+			</Modal>
+		</div>
+	);
 }
