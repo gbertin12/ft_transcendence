@@ -37,10 +37,6 @@ function Power({ isActive, x, y, type }: { isActive: boolean, x: number, y: numb
         return <>{isActive && <Image src="/fence.png" alt='power' width={40} height={40} className={styles.power} style={{ top: y, left: x }} />}</>
 }
 
-const convertToPixel = (value: number, maxValue: number) => {
-    return (value * maxValue) / 100;
-};
-
 export default function Pong({ roomName, who, handleSetEndGame }: { roomName: string, who: number, handleSetEndGame: (endGame: PlayerEndGame) => void }) {
     const [score, setScore] = useState({ scorePlayer1: 0, scorePlayer2: 0 });
     const [playerOnePosition, setPlayerOnePosition] = useState<number>(0);
@@ -303,7 +299,7 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         }
     }
 
-    function DisplayScore({ scorePlayer1, scorePlayer2 }: { scorePlayer1: number, scorePlayer2: number }) {
+    function DisplayScore({ scorePlayer1, scorePlayer2 } : { scorePlayer1: number, scorePlayer2: number }) {
         return <>
             <Container>
                 <Row justify='center'>

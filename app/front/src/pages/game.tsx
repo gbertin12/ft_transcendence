@@ -15,9 +15,8 @@ export default function Game() {
                 <title> Game </title>
             </Head>
             <div className="flex flex-col items-center">
-            <Text h1>Pong Game</Text>
                 <Spacer y={3} />
-                <div style={{width:'80%', maxWidth:'700px'}}>
+                <div style={{width:'80%', maxWidth:'1000px'}}>
                     <GameBody />
                 </div>
             </div>
