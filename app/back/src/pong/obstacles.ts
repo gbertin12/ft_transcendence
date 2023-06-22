@@ -38,16 +38,16 @@ export const handleColisionWithObstacle = (room: roomInterface, server: Server, 
 }
 
 export const getType = (obstacles: obstaclesInterface[], powers: powerAvailables[]) => {
-    let type = Math.floor(Math.random() * 3);
-    if (type == 2)
-    {
-        let nbObs = obstacles.length;
-        for (let i = 0; i < powers.length; i++)
-        if (powers[i].type == 2)
-        nbObs++;
-    if (nbObs >= 2)
-        type = Math.floor(Math.random() * 2)
-    }
+    let type = Math.floor(Math.random() * 2);
+    // if (type == 2)
+    // {
+    //     let nbObs = obstacles.length;
+    //     for (let i = 0; i < powers.length; i++)
+    //     if (powers[i].type == 2)
+    //     nbObs++;
+    // if (nbObs >= 2)
+    //     type = Math.floor(Math.random() * 2)
+    // }
     return type;
 }
 

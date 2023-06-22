@@ -54,7 +54,6 @@ let score2 : number = 0;
 
 let mapPowers : Power[];
 
-let mapObstacles : Obstacle[];
 
 const convertToPixel = (value: number, maxValue: number) => {
     return (value * maxValue) / 100;
@@ -118,10 +117,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			{ isActive: false, x : 0, y : 0, id : 4, type : 0 },
 			{ isActive: false, x : 0, y : 0, id : 5, type : 0 }
 		]
-		mapObstacles = [
-			{ isActive: false, x : 0, y : 0, id : 0, size : 0 },
-			{ isActive: false, x : 0, y : 0, id : 1, size : 0 },
-		];
 
 		score1 = 0;
 		score2 = 0;
@@ -154,15 +149,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 				else if (mapPowers[i].type == 2)
 					p5.image(fence, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
 			}
-		}
-
-		// draw obstacles
-		for (let i = 0; i < mapObstacles.length; i++) {
-			if (mapObstacles[i].isActive) {
-				console.log("draw obstacle", mapObstacles[i].x, mapObstacles[i].y, mapObstacles[i].size)
-				p5.rect( mapObstacles[i].x, mapObstacles[i].y, p5.width / 50, mapObstacles[i].size);
-			}
-
 		}
 
 		// handle paddle movement
@@ -308,26 +294,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 				}
 			}
 		});
-		socket.on('addObstacle', ({x, y, id, size} : {x: number, y : number, id : number, size : number}) => {
-			if (p5lib)
-			{
-				let sizePixels = convertToPixel(size, p5lib.height);
-				let newX = convertToPixel(x, p5lib.width);
-				let newY = convertToPixel(y, p5lib.height);
-				console.log("addObstacle", newX, newY, id, sizePixels);
-				for (let i = 0; i < mapObstacles.length; i++)
-				{
-					if (mapObstacles[i].id == id)
-					{
-						mapObstacles[i].isActive = true;
-						mapObstacles[i].y = newY;
-						mapObstacles[i].x = newX;
-						mapObstacles[i].size = sizePixels;
-						break ;
-					}
-				}
-			}
-		});
+
 		return () => {
 			socket.off('playerMove');
 			socket.off('updateScore');
@@ -335,7 +302,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			socket.off('endGame');
 			socket.off('newPower');
 			socket.off('removePower');
-			socket.off('addObstacle');
 		}
 	}, [socket, roomName]);
 

@@ -116,10 +116,11 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 					newSpeedY += 0.2;
 				room.pongState.ball.speedY = newSpeedY;
 				sendBallVector(room, server);
-			} else if (power.type === 2) {
-				// spawn obstacles bonus
-				createObstacle(server, room, obstacles);
-			}
+			} 
+			// else if (power.type === 2) {
+			// 	// spawn obstacles bonus
+			// 	createObstacle(server, room, obstacles);
+			// }
 			powerAvailables[power.id].isActive = false;
 			powerAvailables[power.id].type = -1;
 		}
