@@ -8,30 +8,17 @@ import { convertToPixel, sendBallVector } from './game.service';
 
 const canvasHeight = 300;
 const canvasWidth = 500;
+const widthObstacle = canvasWidth / 50;
 
-const obstacle1 = {
-    x: 33,
-    y: 0,
-    size: 0,
-    id: 0,
-}
-
-const obstacle2 = {
-    x: 66,
-    y: 0,
-    size: 0,
-    id: 1,
-}
 
 export const handleColisionWithObstacle = (room: roomInterface, server: Server, obstacles: obstaclesInterface[]) => {
     for (let i = 0; i < obstacles.length; i++)
-{
+    {
         if (room.pongState.ball.x > convertToPixel(obstacles[i].x, canvasWidth) &&
-            room.pongState.ball.x < convertToPixel(obstacles[i].x, canvasWidth) + 12) {
+            room.pongState.ball.x < convertToPixel(obstacles[i].x, canvasWidth) + widthObstacle) {
 
             if (room.pongState.ball.y > convertToPixel(obstacles[i].y, canvasHeight) &&
             room.pongState.ball.y < convertToPixel(obstacles[i].y, canvasHeight) + convertToPixel(obstacles[i].size, canvasHeight)) {
-
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
                 sendBallVector(room, server);
             }

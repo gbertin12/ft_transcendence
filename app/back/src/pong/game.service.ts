@@ -24,8 +24,8 @@ export const convertToPixel = (value: number, maxValue: number) => {
 
 const updateBallSpeedX = (speedX: number) => {
     let newSpeed = speedX;
-    if (speedX > 0 && speedX < 5) newSpeed = speedX + 0.2;
-    else if (speedX < 0 && speedX > -5) newSpeed = speedX - 0.2;
+    if (speedX > 0 && speedX < 3) newSpeed = speedX + 0.2;
+    else if (speedX < 0 && speedX > -3) newSpeed = speedX - 0.2;
     return newSpeed;
 };
 
@@ -64,7 +64,7 @@ const sendBallPosition = (room: roomInterface, server: Server) => {
 const collisionWithPlayer1 = (room: roomInterface) : boolean => { 
     if (room.pongState.ball.x < 30)
     {
-        for (let i = 0; i > room.pongState.ball.speedX - 1; i -= 0.5)
+        for (let i = -room.pongState.ball.speedX; i > room.pongState.ball.speedX - 1; i -= 0.4)
         {
             if (room.pongState.ball.x - i <= playerWidth + radiusBall ||
                 room.pongState.ball.x - room.pongState.ball.speedX - i <= playerWidth + radiusBall)
@@ -77,7 +77,7 @@ const collisionWithPlayer1 = (room: roomInterface) : boolean => {
 const collisionWithPlayer2 = (room: roomInterface) : boolean => {
     if (room.pongState.ball.x > canvasWidth - 20)
     {
-        for (let i = 0; i < room.pongState.ball.speedX + 1; i += 0.5)
+        for (let i = 0; i < room.pongState.ball.speedX + 1; i += 0.4)
         {
             if (room.pongState.ball.x + i >= canvasWidth - playerWidth - radiusBall ||
                 room.pongState.ball.x + room.pongState.ball.speedX + i >= canvasWidth - playerWidth - radiusBall)
@@ -93,15 +93,8 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
     {
         if (collisionWithPlayer1(room))
         {
-            //console.log("COLLISION2 p1")
             if (room.pongState.ball.speedX < 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
-                // room.pongState.ball.speedX = updateBallSpeedX(
-                //     room.pongState.ball.speedX,
-                // );
-                //room.pongState.ball.x -= 5;
-                // room.pongState.ball.speedY = updateBallSpeedY(room, 1);
-                //room.pongState.ball.speedY = -room.pongState.ball.speedY;
             }
             sendBallVector(room, server);
         }
@@ -116,13 +109,7 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
             //console.log("COLLISION2 p2")
             if (room.pongState.ball.speedX > 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
-                // room.pongState.ball.speedX = updateBallSpeedX(
-                //     room.pongState.ball.speedX,
-                // );
-                //room.pongState.ball.x += 5;
             }
-            //room.pongState.ball.speedY = -room.pongState.ball.speedY;
-            //room.pongState.ball.speedY = updateBallSpeedY(room, 2);
             sendBallVector(room, server);
         }
     }

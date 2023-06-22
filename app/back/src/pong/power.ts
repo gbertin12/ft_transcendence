@@ -75,12 +75,13 @@ export const handleNewPower = (
 
 export const handleColisionWithPower = (room: roomInterface, server: Server, obstacles: obstaclesInterface[], powerAvailables: powerAvailables[]) => {
 	let id: number = -1;
+	let powerSize : number = canvasWidth / 16 -5;
 	powerAvailables.forEach((power) => {
 		if (power.isActive &&
-			room.pongState.ball.x > convertToPixel(power.x, canvasWidth) - 10 &&
-			room.pongState.ball.x < convertToPixel(power.x, canvasWidth) + 10 &&
-			room.pongState.ball.y > convertToPixel(power.y, canvasHeight) - 20 &&
-			room.pongState.ball.y < convertToPixel(power.y, canvasHeight) + 20
+			room.pongState.ball.x > convertToPixel(power.x, canvasWidth) - powerSize &&
+			room.pongState.ball.x < convertToPixel(power.x, canvasWidth) + powerSize &&
+			room.pongState.ball.y > convertToPixel(power.y, canvasHeight) - powerSize &&
+			room.pongState.ball.y < convertToPixel(power.y, canvasHeight) + powerSize
 		) {
 			server.to(room.name).emit('removePower', {
 				id: power.id,
@@ -88,13 +89,24 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 			if (power.type === 0) {
 				//speed up bonus
 				if (room.pongState.ball.speedX < 0)
-					room.pongState.ball.speedX -= 0.3;
+					room.pongState.ball.speedX -= 0.5;
 				else
-					room.pongState.ball.speedX += 0.3;
+					room.pongState.ball.speedX += 0.5;
 				if (room.pongState.ball.speedY < 0)
-					room.pongState.ball.speedY -= 0.3;
+					room.pongState.ball.speedY -= 0.5;
 				else
-					room.pongState.ball.speedY += 0.3;
+					room.pongState.ball.speedY += 0.5;
+				// check speed X
+				if (room.pongState.ball.speedX > 3)
+					room.pongState.ball.speedX = 3;
+				else if (room.pongState.ball.speedX < -3)
+					room.pongState.ball.speedX = -3;
+				// check speed Y
+				if (room.pongState.ball.speedY > 3)
+					room.pongState.ball.speedY = 3;
+				else if (room.pongState.ball.speedY < -3)
+					room.pongState.ball.speedY = -3;
+
 				sendBallVector(room, server);
 			}
 			else if (power.type === 1) {
