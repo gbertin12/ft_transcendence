@@ -14,7 +14,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         try {
             const user = await this.userService.getUserByNameFull(username);
             if (await argon2.verify(user.password, password)) {
-                return { id: user.id };
+                return user;
             }
         } catch {
             throw new HttpException('user does not exist', HttpStatus.NOT_FOUND);

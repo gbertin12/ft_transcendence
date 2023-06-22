@@ -42,7 +42,7 @@ export default function SignUp() {
 
     return (
         <Grid>
-            <Text h4 color="primaryLightContrast">Sign up</Text>
+            <Text h4 color="primaryLightContrast">Register</Text>
             <Grid.Container direction="column">
                 <Row>
 
@@ -67,7 +67,7 @@ export default function SignUp() {
                 <Grid.Container justify='flex-end'>
                     <Grid >
                         <Button bordered color="primarySolidContrast" onPress={register} auto>
-                            <Text >Sign up</Text>
+                            <Text>Register</Text>
                         </Button>
                     </Grid>
 

@@ -19,7 +19,7 @@ export default function MFAButton() {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ otp: code }),
         });
 
         return res;
