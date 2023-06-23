@@ -360,6 +360,19 @@ export class FriendsService {
             return res.length > 0;
         });
     }
+    
+    async isBlocked(user_id: number, other_id: number): Promise<boolean> {
+        return this.dbService.blockedUser.findUnique({
+            where: {
+                user_id_blocked_id: {
+                    user_id: user_id,
+                    blocked_id: other_id,
+                },
+            },
+        }).then((res) => {
+            return !!res;
+        });
+    }
 
     async blockUser(user_id: number, other_id: number) {
         return this.dbService.blockedUser.upsert({
