@@ -1,6 +1,6 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal, Col } from "@nextui-org/react";
+import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { FormEvent, useState } from 'react';
@@ -29,7 +29,6 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             closeModal();
             window.location.href = "/profile";
         } else {
-            console.log("2FA ERROR");
             const err = await res.json();
             setMfaError(err.message);
         }

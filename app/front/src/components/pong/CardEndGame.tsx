@@ -103,7 +103,7 @@ export default function CardEndGame({endGame, roomName, handleCloseCardEndGame}
             <Card.Divider />
 
             <Card.Footer css={{jc:'center'}}>
-                <Button onClick={handleCloseCardEndGame} bordered  size="sm">Close</Button>
+                <Button onPress={handleCloseCardEndGame} bordered  size="sm">Close</Button>
             </Card.Footer>
         </Card>
     );

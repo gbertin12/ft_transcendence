@@ -43,7 +43,6 @@ function generateRow(game: any, victory: boolean, id: number): MatchHistoryRow {
         row.eloOpponent = game.winnerElo;
     }
 
-    console.log("ROW", row);
     return row;
 }
 
@@ -72,7 +71,6 @@ export default function MatchHistory({ user }: { user: User }) {
         (async () => {
             const res = await fetch(`http://localhost:3000/user/history/${user.name}`);
             const data = await res.json();
-            console.log(data);
             setRows(setDataRows(data.gamesWon, data.gamesLost));
         })();
     }, []);

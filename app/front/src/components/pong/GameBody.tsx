@@ -8,10 +8,9 @@ import CardEndGame from './CardEndGame';
 import { useUser } from '@/contexts/user.context';
 import { PlayerEndGame } from '@/interfaces/pong.interface';
 
-export default function GameBody() {
+export default function GameBody({ roomName, setRoomName }: { roomName: string, setRoomName: (name: string) => void}) {
     const [playGame, setPlayGame] = useState(false);
     const [endGame, setEndGame] = useState(false);
-    const [roomName, setRoomName] = useState('');
     const [who, setWho] = useState<number>(-1);
     const [searchGame, setSearchGame] = useState(false);
     const [modes, setModes] = useState(true);
@@ -20,7 +19,6 @@ export default function GameBody() {
     const { user, socket } = useUser();
 
     const handleStartGame = (roomName: string, playerNumber: number) => {
-        console.log("ROOM NAME", roomName);
         setRoomName(roomName);
         setWho(playerNumber);
         socket.emit("joinRoom", roomName);
@@ -39,9 +37,9 @@ export default function GameBody() {
         setSearchGame(value);
     }
 
-    const handleSetEndGame = (endGame: PlayerEndGame)  => {
-        socket.emit('leaveRoom', endGame.room.name);
-        setDataEndGame(endGame);
+    const handleSetEndGame = (endGameData: PlayerEndGame)  => {
+        socket.emit('leaveRoom', endGameData.room.name);
+        setDataEndGame(endGameData);
         //handleSetRoomName('');
         setPlayGame(false);
         setEndGame(true);

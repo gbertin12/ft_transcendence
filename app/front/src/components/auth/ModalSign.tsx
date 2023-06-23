@@ -16,7 +16,6 @@ export default function ModalSign() {
 
     const closeHandler = () => {
         setVisible(false);
-        console.log("closed");
     };
 
     return (

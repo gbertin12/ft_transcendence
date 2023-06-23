@@ -3,7 +3,6 @@ import { useUser } from '@/contexts/user.context';
 
 export default function ConnectedButton() {
     const { user } = useUser();
-    console.log(user);
 
     return (
         <Dropdown>

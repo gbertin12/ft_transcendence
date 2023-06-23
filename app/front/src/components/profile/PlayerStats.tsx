@@ -39,7 +39,7 @@ export default function PlayerStats({ user }: { user: User }) {
 
             {(winrate !== -1) && (<Row justify="space-between" align="center">
                 <Text h4>Winrate</Text>
-                <Text h4>{winrate}</Text>
+                <Text h4>{winrate}%</Text>
             </Row>)}
 
             <Row justify="space-between" align="center">
