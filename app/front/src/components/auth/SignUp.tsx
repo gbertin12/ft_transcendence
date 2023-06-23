@@ -1,16 +1,40 @@
+import { useUser } from "@/contexts/user.context";
 import { Input, Spacer, Button, Grid, Text, Row, FormElement } from "@nextui-org/react";
 import axios from 'axios';
-import { FormEvent, useState } from "react";
-
-function dummyLogin() {
-	window.location.href = 'http://localhost:3000/auth/dummy';
-}
+import { useRouter } from "next/router";
+import { FormEvent, useEffect, useState } from "react";
 
 export default function SignUp() {
     const [ username, setUsername ] = useState<string>("");
     const [ password, setPassword ] = useState<string>("");
     const [ msg, setMsg ] = useState<string>("");
     const [ color, setColor ] = useState<string>("");
+
+    const [ nextPage, setNextPage ] = useState<string>("/profile");
+    const router = useRouter();
+    const { setUser } = useUser();
+
+    useEffect(() => {
+        if (router.isReady) {
+            if (router.query && router.query.next) {
+                setNextPage(router.query.next);
+            }
+        }
+    }, [router]);
+
+    async function refreshUser() {
+        const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
+        if (res?.ok) {
+            const userData = await res.json();
+            setUser(userData);
+        }
+    }
+
+    async function dummyLogin() {
+        await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
+        await refreshUser();
+        router.push(nextPage);
+    }
 
     function register() {
         if (username && password) {

@@ -1,14 +1,22 @@
 import Head from 'next/head';
 import GameBody from '../components/pong/GameBody'
-import { Spacer } from '@nextui-org/react'
+import { Loading, Spacer } from '@nextui-org/react'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useUser } from '@/contexts/user.context';
 
 export default function Game() {
     const router = useRouter();
-    const { socket } = useUser();
+    const { user, socket } = useUser();
     const [ roomName, setRoomName ] = useState('');
+
+    useEffect(() => {
+        if (router.isReady) {
+            if (!user.id) {
+                router.push(`/?next=${router.pathname}`);
+            }
+        }
+    }, [router]);
 
     useEffect(() => {
         const exitingFunction = () => {
@@ -20,6 +28,8 @@ export default function Game() {
             router.events.off("routeChangeStart", exitingFunction);
         };
     }, [roomName]);
+
+    if (!user.id) return (<Loading/>);
 
     return (
         <>

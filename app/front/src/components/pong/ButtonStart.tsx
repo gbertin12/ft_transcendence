@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/user.context';
 
 export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
     : { searchGame: boolean, modes: boolean, handleSetSearchGame: (value: boolean) => void }) {
-    const { socket } = useUser();
+    const { user, socket } = useUser();
 
     // Cancel Game
     function handleCancelGame() {
@@ -30,8 +30,7 @@ export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
         return <>
             <Button css={{ mx: 'auto' }} onPress={handleCancelGame} color="error">Cancel Game</Button>
         </>
-    }
-    else {
+    } else {
         return <>
             <Button css={{ mx: 'auto' }} bordered onPress={handleSearchGame} color="success">Search Game</Button>
         </>

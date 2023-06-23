@@ -3,8 +3,9 @@ import { IconBrandGithubFilled } from '@tabler/icons-react';
 import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import MFAInput from './MFAInput';
+import { useUser } from '@/contexts/user.context';
 
 export default function SignIn({ closeModal }: { closeModal: () => void }) {
     const [ username, setUsername ] = useState<string>("");
@@ -15,7 +16,17 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     const [ otp, setOtp ] = useState<string>("");
     const [ mfaError, setMfaError ] = useState<string>("");
 
+    const [ nextPage, setNextPage ] = useState<string>("/profile");
     const router = useRouter();
+    const { setUser } = useUser();
+
+    useEffect(() => {
+        if (router.isReady) {
+            if (router.query && router.query.next) {
+                setNextPage(router.query.next);
+            }
+        }
+    }, [router]);
 
     async function verify2FA() {
         const res = await fetch("http://localhost:3000/auth/2fa/verify", {
@@ -27,29 +38,42 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
         if (res?.ok) {
             setShowInput(false);
             closeModal();
-            window.location.href = "/profile";
+            await refreshUser();
+            router.push(nextPage);
         } else {
             const err = await res.json();
             setMfaError(err.message);
+            setOtp("");
+        }
+    }
+
+    async function refreshUser() {
+        const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
+        if (res?.ok) {
+            const userData = await res.json();
+            setUser(userData);
         }
     }
 
     async function userPassLogin() {
         if (username && password) {
-            axios.post("http://localhost:3000/auth/login", { username, password }, {  withCredentials: true })
-                .then((res) => {
-                    //closeModal();
-                    const data = res.data;
-                    if (data.otp) {
-                        setShowInput(true);
-                    } else {
-                        window.location.href = "/profile";
-                    }
-                })
-                .catch((_err) => {
-                    setError("login failed");
-                    setOtp("");
-                })
+            const res = await fetch("http://localhost:3000/auth/login", {
+                credentials: "include",
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
+            if (res?.ok) {
+                const data = await res.json();
+                if (data.otp) {
+                    setShowInput(true);
+                } else {
+                    await refreshUser();
+                    router.push(nextPage);
+                }
+            } else {
+                setError("Login failed");
+            }
         }
     }
 
