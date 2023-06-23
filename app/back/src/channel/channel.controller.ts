@@ -175,7 +175,7 @@ export class ChannelController {
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
-    @Get(':channel_id/:last_message_id')
+    @Get(':channel_id/history/:last_message_id')
     async channelHistory(@Param() dto: ChannelDto, @Req() req) {
         if (!dto.last_message_id) { throw new HttpException('Invalid last_message_id', 400); }
         // Check if user is banned
@@ -186,17 +186,36 @@ export class ChannelController {
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
+    @Get(":channel_id/punishments")
+    async getPunishments(@Param() dto: ChannelDto, @Req() req) {
+        const channel = await this.channelService.getChannel(dto.channel_id);
+        const user = req.user;
+        // Check if the user is admin or owner
+        if (!channel.admins.includes(user['id']) && channel.owner_id !== user['id']) {
+            throw new ForbiddenException("You are not allowed to get the punishments of this channel");
+        }
+        return await this.channelService.getPunishments(dto.channel_id);
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post(':channel_id/message')
     async createMessage(@Param() dto: ChannelDto, @Body() body: any, @Req() req) {
         if (!body || !body.content) { throw new HttpException('Invalid Message', 400); }
         if (body.content.length > 2000) { throw new HttpException('Message too long', 400); }
 
-        // TODO: Check that the channel exists (insert would fail in theory)
-        // TODO: Check that the user has access to the channel
-
         // Check that the user is not muted
         if (await this.punishmentsService.hasActiveMute(dto.channel_id, req.user['id'])) {
             throw new HttpException('You are muted in this channel', 403);
+        }
+
+        // Check that the user is not banned
+        if (await this.punishmentsService.hasActiveBan(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are banned from this channel', 403);
+        }
+
+        // Check that the user is in the channel (if private)
+        if (!await this.channelService.isUserInChannel(dto.channel_id, req.user['id'])) {
+            throw new HttpException('You are not in this channel', 403);
         }
 
         let senderId = req.user['id'];
