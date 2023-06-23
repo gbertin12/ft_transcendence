@@ -495,4 +495,89 @@ export class ChannelService {
             }
         });
     }
+
+    async getMembers(channel_id: number) {
+        // get all admins and owner, along with all users in channel via channelAccess if channel is private, otherwise return
+        // run all queries in parallel and await them all
+        let channel = await this.db.channel.findUnique({
+            where: {
+                id: channel_id
+            },
+            select: {
+                private: true
+            }
+        });
+        let [admins, owner, users] = await Promise.all([
+            this.db.channel.findFirst({
+                where: {
+                    id: channel_id
+                },
+                select: {
+                    admins: {
+                        select: {
+                            user: {
+                                select: {
+                                    avatar: true,
+                                    elo: true,
+                                    id: true,
+                                    losses: true,
+                                    name: true,
+                                    wins: true,
+                                    otp: false,
+                                    password: false,
+                                    otpSecret: false,
+                                },
+                            }
+                        }
+                    }
+                }
+            }),
+            this.db.channel.findFirst({
+                where: {
+                    id: channel_id
+                },
+                select: {
+                    owner: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    }
+                }
+            }),
+            // If the channel is private, find all users in the channel, otherwise return empty array
+            channel.private ? this.db.channelAccess.findMany({
+                where: {
+                    channel_id: channel_id
+                },
+                select: {
+                    user: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    }
+                }
+            }) : []
+        ]);
+        return {
+            owner: owner.owner,
+            admins: admins.admins.map((admin) => admin.user),
+            users: users.map((user) => user.user)
+        }
+    }
 }

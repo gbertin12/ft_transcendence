@@ -198,6 +198,17 @@ export class ChannelController {
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
+    @Get(":channel_id/members")
+    async getMembers(@Param() dto: ChannelDto, @Req() req) {
+        const channel = await this.channelService.getChannel(dto.channel_id);
+        const user = req.user;
+        // Check if the user is admin or owner
+        if (!channel.admins.includes(user['id']) && channel.owner_id !== user['id']) {
+            throw new ForbiddenException("You are not allowed to get the members of this channel");
+        }
+        return await this.channelService.getMembers(dto.channel_id);
+    }
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post(':channel_id/message')
     async createMessage(@Param() dto: ChannelDto, @Body() body: any, @Req() req) {
         if (!body || !body.content) { throw new HttpException('Invalid Message', 400); }

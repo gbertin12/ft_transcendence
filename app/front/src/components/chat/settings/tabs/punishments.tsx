@@ -66,24 +66,25 @@ const PunishmentsTab: React.FC<PunishmentsTabProps> = ({ channel }) => {
                     <Text h3>Total Punishments : {punishments.length}</Text>
                     <Table compact>
                         <Table.Header>
-                            <Table.Column>Username</Table.Column>
-                            <Table.Column>Punished at (UTC)</Table.Column>
-                            <Table.Column>Expires at (UTC)</Table.Column>
-                            <Table.Column>Punished by</Table.Column>
-                            <Table.Column>Type</Table.Column>
-                            <Table.Column> </Table.Column>
+                            <Table.Column align='start'>Username</Table.Column>
+                            <Table.Column align='center'>Punished at (UTC)</Table.Column>
+                            <Table.Column align='center'>Expires at (UTC)</Table.Column>
+                            <Table.Column align='center'>Punished by</Table.Column>
+                            <Table.Column align='center'>Type</Table.Column>
+                            <Table.Column align='center'>Actions</Table.Column>
                         </Table.Header>
                         <Table.Body>
                             {punishments.map((punishment, index: number) => (
                                 <Table.Row key={index}>
                                     <Table.Cell>{punishment.punished.name}</Table.Cell>
-                                    <Table.Cell>{formatDate(new Date(punishment.punished_at))}</Table.Cell>
-                                    <Table.Cell>{formatDate(new Date(punishment.expires_at))}</Table.Cell>
-                                    <Table.Cell>{punishment.punisher.name}</Table.Cell>
-                                    <Table.Cell>{typeToString(punishment.type)}</Table.Cell>
-                                    <Table.Cell>
+                                    <Table.Cell css={{ta: "center"}}>{formatDate(new Date(punishment.punished_at))}</Table.Cell>
+                                    <Table.Cell css={{ta: "center"}}>{formatDate(new Date(punishment.expires_at))}</Table.Cell>
+                                    <Table.Cell css={{ta: "center"}}>{punishment.punisher.name}</Table.Cell>
+                                    <Table.Cell css={{ta: "center"}}>{typeToString(punishment.type)}</Table.Cell>
+                                    <Table.Cell css={{ta: "center"}}>
                                         <Container display='flex' justify='center'>
                                             <Button
+                                                css={{ w: "stretch" }}
                                                 disabled={working.has(index)}
                                                 onPress={() => {
                                                     setWorking(new Set(working).add(index));
