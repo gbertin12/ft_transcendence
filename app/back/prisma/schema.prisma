@@ -31,6 +31,8 @@ model User {
     PrivateMessage    PrivateMessage[]
     punished          Punishment[]     @relation("punished")
     punisher          Punishment[]     @relation("punisher")
+    ChannelAdmin      ChannelAdmin[]
+    ChannelAccess     ChannelAccess[]
 }
 
 model MatchHistory {
@@ -99,6 +101,7 @@ model ChannelAccess {
     channel_id Int
     user_id    Int
     channel    Channel @relation(fields: [channel_id], references: [id])
+    user       User    @relation(fields: [user_id], references: [id])
 
     @@id([channel_id, user_id])
 }
@@ -117,7 +120,8 @@ model ChannelInvites {
 model ChannelAdmin {
     channel_id Int
     user_id    Int
-    Channel    Channel? @relation(fields: [channel_id], references: [id])
+    channel    Channel? @relation(fields: [channel_id], references: [id])
+    user       User?    @relation(fields: [user_id], references: [id])
 
     @@id([channel_id, user_id])
 }
