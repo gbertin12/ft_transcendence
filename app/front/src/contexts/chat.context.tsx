@@ -134,20 +134,22 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                                 switch (punishment.type) {
                                     case 1:
                                         mutes.add(punishment.channel_id);
-                                        // Make the ban expire if expiry date < now + 5 years, using a timeout
-                                        setTimeout(() => {
-                                            let newMutes = new Set<number>(mutedChannels);
-                                            newMutes.delete(punishment.channel_id);
-                                            setMutedChannels(newMutes);
-                                        }, date.getTime() - new Date().getTime());
+                                        if (date.getTime() - new Date().getTime() < 86400000) {
+                                            setTimeout(() => {
+                                                let newMutes = new Set<number>(mutedChannels);
+                                                newMutes.delete(punishment.channel_id);
+                                                setMutedChannels(newMutes);
+                                            }, date.getTime() - new Date().getTime());
+                                        }
                                         break;
                                     case 0:
                                         bans.add(punishment.channel_id);
-                                        // Remove the ban if expiry date < now + 5 years, using a timeout
                                         setTimeout(() => {
-                                            let newBans = new Set<number>(bannedChannels);
-                                            newBans.delete(punishment.channel_id);
-                                            setBannedChannels(newBans);
+                                            if (date.getTime() - new Date().getTime() < 86400000) {
+                                                let newBans = new Set<number>(bannedChannels);
+                                                newBans.delete(punishment.channel_id);
+                                                setBannedChannels(newBans);
+                                            }
                                         }, date.getTime() - new Date().getTime());
                                     default:
                                         break;
@@ -231,14 +233,12 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             socket.on("offline", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: false, isTyping: false, isPlaying: false } : f));
             });
-            socket.on("unbanned", (channel_id: number) => { // TODO: Implement on the server side
+            socket.on("punishment_revoked", (channel_id: number) => {
                 setBannedChannels((bannedChannels) => {
                     const newBannedChannels = new Set<number>(bannedChannels);
                     newBannedChannels.delete(channel_id);
                     return newBannedChannels;
                 });
-            });
-            socket.on("unmuted", (channel_id: number) => { // TODO: Implement on the server side
                 setMutedChannels((mutedChannels) => {
                     const newMutedChannels = new Set<number>(mutedChannels);
                     newMutedChannels.delete(channel_id);
