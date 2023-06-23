@@ -12,7 +12,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     useEffect(() => {
         if (router.isReady) {
             if (!user.id) {
-                router.push(`/?next=${router.pathname}`);
+                router.push(`/?next=${router.asPath}`);
             }
         }
     }, [router]);

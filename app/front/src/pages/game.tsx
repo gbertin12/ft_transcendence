@@ -13,7 +13,7 @@ export default function Game() {
     useEffect(() => {
         if (router.isReady) {
             if (!user.id) {
-                router.push(`/?next=${router.pathname}`);
+                router.push(`/?next=${router.asPath}`);
             }
         }
     }, [router]);
