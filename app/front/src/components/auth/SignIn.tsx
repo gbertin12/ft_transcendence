@@ -106,7 +106,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             <Modal
                 closeButton
                 preventClose
-                width="25%"
+                width="50%"
                 aria-labelledby="2FA Input"
                 open={showInput}
                 onClose={() => setShowInput(false)}>

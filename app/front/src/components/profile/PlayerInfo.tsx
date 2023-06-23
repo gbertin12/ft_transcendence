@@ -3,6 +3,7 @@ import { User } from "@/interfaces/user.interface";
 import PlayerStats from "@/components/profile/PlayerStats";
 import { IconPencil } from '@tabler/icons-react';
 import { useUser } from "@/contexts/user.context";
+import UserInteractionButtons from "./UserInteractionButtons";
 
 export default function PlayerInfo(
     { user, handleShowEdit }: { user: User, handleShowEdit: () => void }
@@ -37,10 +38,16 @@ export default function PlayerInfo(
                     <Spacer y={1}/>
                     <Text h2>{user.name}</Text>
                 </Col>
+
                 <hr/>
+
                 <Col>
                     <PlayerStats user={user}/>
                 </Col>
+
+                {(me.id !== user.id) && (<Col>
+                    <UserInteractionButtons user={user}/>
+                </Col>)}
             </Card.Body>
         </Card>
     );

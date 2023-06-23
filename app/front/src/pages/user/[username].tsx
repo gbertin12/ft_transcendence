@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { User } from "@/interfaces/user.interface";
 import EloChart from "@/components/profile/EloChart";
-import AvatarTooltip from "@/components/profile/AvatarTooltip";
 
 function handleShowEdit() {}
 
