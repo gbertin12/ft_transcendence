@@ -431,11 +431,66 @@ export class ChannelService {
     }
 
     async isUserInChannel(user_id: number, channel_id: number) {
-        return await this.db.channelAccess.findUnique({
+        // Check if channel is private, if so, check if user is in channel otherwise return true
+        let channel = await this.db.channel.findUnique({
             where: {
-                channel_id_user_id: {
-                    channel_id: channel_id,
-                    user_id: user_id
+                id: channel_id
+            },
+            select: {
+                private: true
+            }
+        });
+        if (channel.private) {
+            return await this.db.channelAccess.findUnique({
+                where: {
+                    channel_id_user_id: {
+                        channel_id: channel_id,
+                        user_id: user_id
+                    }
+                }
+            });
+        } else {
+            return true;
+        }
+    }
+
+    async getPunishments(channel_id: number) {
+        return await this.db.punishment.findMany({
+            where: {
+                channel_id: channel_id,
+                expires_at: {
+                    gt: new Date()
+                }
+            },
+            orderBy: {
+                punished_at: "desc"
+            },
+            include: {
+                punished: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+                punisher: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
                 }
             }
         });
