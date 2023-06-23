@@ -7,6 +7,7 @@ import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
 import { IconDoorExit, IconShieldCog } from "@tabler/icons-react";
+import ChannelSettings from "./settings/ChannelSettingsModal";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -36,6 +37,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
     const [endOfHistory, setEndOfHistory] = useState<boolean>(false);
+    const [channelSettingsOpen, setChannelSettingsOpen] = useState<boolean>(false);
+
     const { socket, user } = useUser();
     const {
         bannedChannels,
@@ -99,7 +102,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, []);
 
     const fetchHistory = useCallback(async (channel: Channel, lastMessageId: number): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/${lastMessageId}`,
+        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/history/${lastMessageId}`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -256,23 +259,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                                 light
                                                 disabled={channel.owner_id === user.id}
                                                 onPress={() => {
-                                                axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
-                                                    {
-                                                        withCredentials: true,
-                                                        validateStatus: () => true,
-                                                    }
-                                                )
-                                            }}>
+                                                    axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
+                                                        {
+                                                            withCredentials: true,
+                                                            validateStatus: () => true,
+                                                        }
+                                                    )
+                                                }}>
                                                 <IconDoorExit />
                                             </Button>
                                         </Tooltip>
                                     )}
                                     {/* Hide if not admin / owner */}
-                                    <Tooltip content="Channel settings" color="warning">
-                                        <Button auto light>
-                                            <IconShieldCog />
-                                        </Button>
-                                    </Tooltip>
+                                    {(channel.owner_id == user.id || admins.has(user.id)) && (
+                                        <Tooltip content="Channel settings" color="warning">
+                                            <Button auto light onPress={() => {
+                                                setChannelSettingsOpen(true);
+                                            }}>
+                                                <IconShieldCog />
+                                            </Button>
+                                        </Tooltip>
+                                    )}
                                 </Container>
                             </Container>
                             <ul
@@ -345,6 +352,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     </Grid.Container>
                 </Grid>
             </Grid.Container>
+            <ChannelSettings
+                channel={channel}
+                open={channelSettingsOpen}
+                onClose={() => setChannelSettingsOpen(false)}
+            />
         </Container>
     );
 };
