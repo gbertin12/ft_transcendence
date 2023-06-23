@@ -191,15 +191,6 @@ const PowerModal: React.FC<PowerModalProps> = ({ open, onClose, punished, channe
                     color="error"
                     css={{ zIndex: 10000 }} // NextUI in a nutshell
                 >
-                    <Switch
-                        size="lg"
-                        initialChecked={stealth}
-                        onChange={() => setStealth(!stealth)}
-                        color="error"
-                        iconOn={<IconSpy />}
-                        iconOff={<IconSpyOff />}
-                        disabled={working}
-                    />
                 </Tooltip>
                 <Button
                     auto
