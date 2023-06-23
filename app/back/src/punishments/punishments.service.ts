@@ -140,4 +140,14 @@ export class PunishmentsService {
             }
         });
     }
+
+    async revoke(issuer_id: number, punished_id: number, channel_id: number) {
+        await this.db.punishment.deleteMany({
+            where: {
+                issuer_id: issuer_id,
+                punished_id: punished_id,
+                channel_id: channel_id
+            }
+        });
+    }
 }
