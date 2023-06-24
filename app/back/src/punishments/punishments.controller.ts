@@ -51,7 +51,7 @@ export class PunishmentsController {
 			throw new NotFoundException("Channel not found");
 		}
 		// Check if revoker is admin / owner of the channel
-		if (channel.owner_id !== req.user.id && !channel.admins.includes(req.user.id)) {
+		if (channel.owner_id !== req.user.id && !channel.admins.map(a => a.user_id).includes(req.user.id)) {
 			throw new NotFoundException("Channel not found");
 		}
 		await this.punishmentsService.revoke(dto.issuer_id, dto.punished_id, dto.channel_id);

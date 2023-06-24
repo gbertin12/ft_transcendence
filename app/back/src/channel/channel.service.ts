@@ -250,7 +250,11 @@ export class ChannelService {
                 id: channelId
             },
             include: {
-                admins: true,
+                admins: {
+                    select: {
+                        user_id: true
+                    }
+                }
             }
         });
     }
@@ -408,6 +412,7 @@ export class ChannelService {
                         }
                     }
                 });
+                break;
             case 1:
                 await this.db.channelAdmin.upsert({
                     where: {
@@ -425,8 +430,7 @@ export class ChannelService {
                         user_id: user_id
                     }
                 });
-            default:
-                throw new Error("Invalid power level passed");
+                break;
         }
     }
 

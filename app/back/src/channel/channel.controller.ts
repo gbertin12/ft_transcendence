@@ -65,6 +65,7 @@ class OwnershipTransferDto {
     // Optionnal password (if the user has 2FA setup, we're using the 2FA instead)
     @Type(() => String)
     @Length(2, 100)
+    @IsOptional()
     password: string;
 }
 
@@ -75,7 +76,7 @@ class RoleUpdateDto {
     user_id: number;
 
     @Type(() => String)
-    @Matches(/^(admin|user)$/i)
+    @Matches(/^(admin|member)$/i)
     role: string;
 }
 
@@ -119,7 +120,7 @@ class UserActionDto {
  */
 function privilegesCheck(channel, punisher, punished) {
     if (punisher.id === punished.id) { throw new ForbiddenException('You cannot perform this action on yourself'); }
-    if (channel.owner_id !== punisher.id && !channel.admins.includes(punisher.id)) { throw new ForbiddenException('You do not have the required privileges to perform this action'); }
+    if (channel.owner_id !== punisher.id && !channel.admins.map(a => a.user_id).includes(punisher.id)) { throw new ForbiddenException('You do not have the required privileges to perform this action'); }
     if (channel.owner_id === punished.id) { throw new ForbiddenException('You cannot perform this action on the owner'); }
 }
 
@@ -191,7 +192,7 @@ export class ChannelController {
         const channel = await this.channelService.getChannel(dto.channel_id);
         const user = req.user;
         // Check if the user is admin or owner
-        if (!channel.admins.includes(user['id']) && channel.owner_id !== user['id']) {
+        if (!channel.admins.map(a => a.user_id).includes(user['id']) && channel.owner_id !== user['id']) {
             throw new ForbiddenException("You are not allowed to get the punishments of this channel");
         }
         return await this.channelService.getPunishments(dto.channel_id);
@@ -203,7 +204,7 @@ export class ChannelController {
         const channel = await this.channelService.getChannel(dto.channel_id);
         const user = req.user;
         // Check if the user is admin or owner
-        if (!channel.admins.includes(user['id']) && channel.owner_id !== user['id']) {
+        if (!channel.admins.map(a => a.user_id).includes(user['id']) && channel.owner_id !== user['id']) {
             throw new ForbiddenException("You are not allowed to get the members of this channel");
         }
         return await this.channelService.getMembers(dto.channel_id);
@@ -414,9 +415,13 @@ export class ChannelController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Patch(':channel_id/transfer')
     async transferOwnership(@Param() dto: ChannelDto, @Body() body: OwnershipTransferDto, @Req() req) {
-        if (!body.password && !body.code) {
+        if (req.user.otp && !body.code) { // User has 2fa but didn't provide a code
             throw new BadRequestException("Missing authentication fields");
         }
+        if (req.user.password && !req.user.otp && !body.password) { // User has no 2fa but has a password and didn't provide it
+            throw new BadRequestException("Missing authentication fields");
+        }
+
         const userId = req.user['id'];
         const channel = await this.channelService.getChannel(dto.channel_id);
         if (!channel) {
@@ -428,19 +433,16 @@ export class ChannelController {
 
         // Get new owner data for system message
         let user = await this.userService.getUserById(body.new_owner);
-
         if (!user) {
             throw new NotFoundException("Unknown user");
         }
 
-        if (body.password) {
-            if (!await argon2.verify(channel.password, body.password)) {
-                throw new HttpException('Invalid password', 401);
-            }
-        }
-
-        if (body.code && !await this.authService.verifyOTP(req.user['id'], body.code)) {
+        // Check authentication fields
+        if (req.user.otp && body.code && !await this.authService.verifyOTP(req.user['id'], body.code)) {
             throw new HttpException('Invalid code', 401);
+        }
+        if (!req.user.otp && req.user.password && body.password && !await this.authService.verifyPassword(req.user, body.password)) {
+            throw new HttpException('Invalid password', 401);
         }
 
         // Update ownership
@@ -466,8 +468,9 @@ export class ChannelController {
             case "admin":
                 targetRole = 1;
                 break;
-            case "user":
+            case "member":
                 targetRole = 0;
+                break;
             default:
                 throw new BadRequestException("Invalid role");
         }
@@ -485,7 +488,7 @@ export class ChannelController {
         // Send promotion socket
         this.chatGateway.server.to(`channel-${dto.channel_id}`).emit((targetStatus > targetRole ? 'removeStaff' : 'addStaff'), {
             channel_id: dto.channel_id,
-            target_id: body.user_id,
+            user_id: body.user_id,
         });
     }
 
@@ -502,7 +505,7 @@ export class ChannelController {
         if (!message) {
             throw new NotFoundException("Unknown message");
         }
-        if (message.sender_id !== userId && !channel.admins.includes(userId) && channel.owner_id !== userId) {
+        if (message.sender_id !== userId && !channel.admins.map(a => a.user_id).includes(userId) && channel.owner_id !== userId) {
             throw new ForbiddenException("You are not allowed to delete this message");
         }
         await this.channelService.deleteMessage(dto.message_id);

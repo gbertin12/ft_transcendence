@@ -55,7 +55,7 @@ async function getPepeAvatar(): Promise<string> {
 export class UserService {
     constructor(private db: DbService) { }
 
-    async getUserById(id: number) {
+    async getUserById(id: number, withPassword: boolean = false) {
         const user = await this.db.user.findUnique({
             where: { id },
             select: {
@@ -66,6 +66,7 @@ export class UserService {
                 losses: true,
                 elo: true,
                 otp: true,
+                password: withPassword,
             },
         });
         return user;

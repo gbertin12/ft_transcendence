@@ -13,10 +13,14 @@ interface ChatBoxProps {
     channel: Channel;
 }
 
-interface MutePunishment {
-    active: boolean;  // true = muted, false = not muted
-    duration: number; // number of seconds left before we can talk again (negative if we are permanently muted)
-    interval: NodeJS.Timeout | null;
+interface StaffUpdate {
+    channel_id: number;
+    user_id: number;
+}
+
+interface OwnerUpdate {
+    channel_id: number;
+    new_owner: number;
 }
 
 function generateMutedMessage(talkPowerTimer: number): string {
@@ -52,6 +56,33 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     } = useChat();
 
     const messagesRef = useRef<HTMLUListElement>(null);
+
+    socket.on("addStaff", (data: StaffUpdate) => {
+        if (data.channel_id === channel.id) {
+            setAdmins((admins) => {
+                const newAdmins = new Set(admins);
+                newAdmins.add(data.user_id);
+                return newAdmins;
+            });
+        }
+    });
+
+    socket.on("removeStaff", (data: StaffUpdate) => {
+        if (data.channel_id === channel.id) {
+            setAdmins((admins) => {
+                const newAdmins = new Set(admins);
+                newAdmins.delete(data.user_id);
+                return newAdmins;
+            });
+        }
+    });
+
+    socket.on("updateOwner", (data: OwnerUpdate) => {
+        if (data.channel_id === channel.id) {
+            setOwnerId(data.new_owner);
+            channel.owner_id = data.new_owner;
+        }
+    });
 
     function handleScroll() {
         if (messagesRef.current) {
@@ -206,6 +237,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('message');
             socket.off('staff');
             socket.off('punishment');
+            socket.off('addStaff');
+            socket.off('removeStaff');
+            socket.off('updateOwner');
             socket.off('messageDeleted');
             socket.emit('leave', channel.id);
         }
