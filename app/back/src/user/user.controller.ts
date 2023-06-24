@@ -48,7 +48,6 @@ export class UserController {
         return user;
     }
     
-    //fileIsRequired: false
     @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
     @UseInterceptors(FileInterceptor('avatar'))
@@ -59,6 +58,7 @@ export class UserController {
             validators: [
                 new MaxFileSizeValidator({ maxSize: 10000 }),
             ],
+            fileIsRequired: false
         })) avatar?: Express.Multer.File,
     ) {
         try {
