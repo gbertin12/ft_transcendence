@@ -281,6 +281,7 @@ export class ChannelController {
         }
 
         channel.name = body.name;
+        channel.private = body.private;
 
         // update the channel
         let updatedChannel: Channel = await this.channelService.updateChannel(dto.channel_id, channel);
