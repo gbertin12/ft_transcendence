@@ -5,6 +5,7 @@ import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck,
 import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
 import { FriendRequest } from "@/interfaces/chat.interfaces";
+import { useUser } from "@/contexts/user.context";
 
 function handleAddFriend(to: number) {
     axios.post('http://localhost:3000/friends/add', { to }, {
@@ -112,6 +113,7 @@ function friendInteractionButton(
 export default function UserInteractionButtons({ user }: { user: User }) {
     const { friends, receivedRequests, sentRequests } = useChat();
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
+    const { socket } = useUser();
 
     useEffect(() => {
         if (friends.some((friend) => friend.userId === user.id)) {
@@ -121,10 +123,15 @@ export default function UserInteractionButtons({ user }: { user: User }) {
         }
     }, [friends]);
 
+    async function handleDuelRequest() {
+        console.log("in handleDuelRequest");
+        socket.emit('duelRequest', user.id);
+    }
+
     return (
             <Row justify="space-evenly">
                 {friendInteractionButton(user, sentRequests, receivedRequests, isFriend)}
-                <Button size="sm" color="error" auto><IconSwords/></Button>
+                <Button onPress={handleDuelRequest} size="sm" color="error" auto><IconSwords/></Button>
             </Row>
     );
 }

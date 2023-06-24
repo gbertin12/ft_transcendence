@@ -34,7 +34,7 @@ export default function SignUp() {
         await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
         //await refreshUser();
         //router.push(nextPage);
-        window.location.href = "/profile";
+        window.location.href = nextPage;
     }
 
     function register() {

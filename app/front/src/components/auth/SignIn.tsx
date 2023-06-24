@@ -40,7 +40,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             closeModal();
             //await refreshUser();
             //router.push(nextPage);
-            window.location.href = "/profile";
+            window.location.href = nextPage;
         } else {
             const err = await res.json();
             setMfaError(err.message);
@@ -71,7 +71,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
                 } else {
                     //await refreshUser();
                     //router.push(nextPage);
-                    window.location.href = "/profile";
+                    window.location.href = nextPage;
                 }
             } else {
                 setError("Login failed");

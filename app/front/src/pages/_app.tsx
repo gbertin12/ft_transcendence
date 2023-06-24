@@ -34,6 +34,7 @@ const darkTheme = createTheme({
 import { NextUIProvider } from '@nextui-org/react';
 import { UserContextProvider } from '@/contexts/user.context';
 import { ChatContextProvider } from '@/contexts/chat.context';
+import { NotifContextProvider } from '@/contexts/notif.context';
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
@@ -48,9 +49,11 @@ export default function App({ Component, pageProps }: AppProps) {
             <NextUIProvider>
                 <UserContextProvider>
                     <ChatContextProvider>
+                        <NotifContextProvider>
                         <Layout>
                             <Component {...pageProps} />
                         </Layout>
+                        </NotifContextProvider>
                     </ChatContextProvider>
                 </UserContextProvider>
             </NextUIProvider>

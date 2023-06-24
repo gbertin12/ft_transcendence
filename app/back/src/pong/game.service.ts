@@ -186,7 +186,7 @@ export class GameService {
             { id: 5, isActive: false, type: -1, x: 80, y: 80 },
         ]
         // Start loop of game
-        while (room.state == 1) {
+        while (room.state != 2) {
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
                 this.handleEndGame(room, server, false);
