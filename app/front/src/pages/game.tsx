@@ -21,6 +21,7 @@ export default function Game() {
     useEffect(() => {
         const exitingFunction = () => {
             socket.emit('leaveGame', roomName);
+            socket.emit('cancelGame');
         }
         router.events.on("routeChangeStart", exitingFunction);
 

@@ -165,13 +165,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('cancelGame')
-    cancelGame(@MessageBody() data: { clientId: string }) {
-        const playerId = data.clientId;
+    cancelGame(client: Socket) {
+        const playerId = client.id;
         const player = this.players.find((player) => player.id === playerId);
         if (player) {
             player.state = 0;
         }
         this.server.to(playerId).emit('cancelGame');
+        console.log("CANCLED GASME");
     }
 
     @SubscribeMessage('joinRoom')

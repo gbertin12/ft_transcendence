@@ -9,9 +9,7 @@ export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
     // Cancel Game
     function handleCancelGame() {
         if (socket) {
-            socket.emit('cancelGame', {
-                clientId: socket.id
-            });
+            socket.emit('cancelGame');
             handleSetSearchGame(false);
         }
     }
