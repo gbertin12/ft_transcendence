@@ -430,7 +430,7 @@ export class ChannelService {
         }
     }
 
-    async isUserInChannel(user_id: number, channel_id: number) {
+    async isUserInChannel(channel_id: number, user_id: number) {
         // Check if channel is private, if so, check if user is in channel otherwise return true
         let channel = await this.db.channel.findUnique({
             where: {
@@ -552,7 +552,7 @@ export class ChannelService {
                     }
                 }
             }),
-            // If the channel is private, find all users in the channel, otherwise return empty array
+            // If the channel is private, find all users in the channel, otherwise find all users that sent a message in the channel
             channel.private ? this.db.channelAccess.findMany({
                 where: {
                     channel_id: channel_id
@@ -572,12 +572,35 @@ export class ChannelService {
                         },
                     }
                 }
-            }) : []
+            }) : this.db.message.findMany({
+                where: {
+                    channel_id: channel_id
+                }, // Select distinct users
+                select: {
+                    sender: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    },
+                },
+                distinct: ['sender_id']
+            })
         ]);
         return {
             owner: owner.owner,
             admins: admins.admins.map((admin) => admin.user),
-            users: users.map((user) => user.user)
+            // remove users that are admins or owner
+            users: users.map((user) => user.sender).filter((user) => {
+                return !admins.admins.some((admin) => admin.user.id == user.id) && owner.owner.id != user.id;
+            })
         }
     }
 }

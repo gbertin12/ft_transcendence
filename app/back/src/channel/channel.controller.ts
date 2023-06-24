@@ -587,7 +587,7 @@ export class ChannelController {
         const punisher = req.user;
         privilegesCheck(channel, punisher, user);
         // Check if the user is in the channel
-        const isInChannel = await this.channelService.isUserInChannel(dto.user_id, dto.channel_id);
+        const isInChannel = await this.channelService.isUserInChannel(dto.channel_id, dto.user_id);
         if (!isInChannel) {
             throw new BadRequestException("User is not in the channel");
         }
