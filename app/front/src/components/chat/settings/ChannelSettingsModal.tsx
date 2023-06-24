@@ -3,7 +3,6 @@ import { Button, Container, Modal, Spacer, Text } from '@nextui-org/react';
 import React from 'react';
 import MembersTab from './tabs/members';
 import PunishmentsTab from './tabs/punishments';
-import ResetTab from './tabs/reset';
 
 interface ChannelSettingsProps {
     channel: Channel;
@@ -21,10 +20,6 @@ function renderTab(tab: string, channel: Channel) {
             return (
                 <PunishmentsTab channel={channel} />
             );
-        case "reset":
-            return (
-                <ResetTab channel={channel} />
-            );
         default:
             return (
                 <MembersTab channel={channel} />
@@ -36,10 +31,6 @@ const ChannelSettings: React.FC<ChannelSettingsProps> = ({ channel, open, onClos
     const [tab, setTab] = React.useState<string>("members");
     // members = List of members, with the ability to promote / demote / kick / ban / mute
     // punishments = List of punishments, with the ability to revoke them
-    // reset = Remove all staff
-    //         Remove all punishments
-    //         Remove all messages
-    //         Reset everything
     return (
         <Modal
             closeButton
@@ -68,12 +59,6 @@ const ChannelSettings: React.FC<ChannelSettingsProps> = ({ channel, open, onClos
                             onPress={() => setTab("punishments")}
                         >
                             Punishments
-                        </Button>
-                        <Button
-                            disabled={tab === "reset"}
-                            onPress={() => setTab("reset")}
-                        >
-                            Reset
                         </Button>
                     </Button.Group>
                 </Container>
