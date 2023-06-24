@@ -45,7 +45,7 @@ const ChannelSettings: React.FC<ChannelSettingsProps> = ({ channel, open, onClos
             closeButton
             aria-labelledby="modal-title"
             onClose={onClose}
-            open={true}
+            open={open}
             width='80rem'
         >
             <Modal.Header>
