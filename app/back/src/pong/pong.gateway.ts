@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
     MessageBody,
     OnGatewayConnection,
@@ -117,8 +118,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           ball: {
             x: 50,
             y: 50,
-            speedX: 2,
-            speedY: 2,
+            speedX: 0.8,
+            speedY: 0.8,
           },
           player1: waitingPlayer,
           player2: player,
@@ -127,8 +128,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       };
 
       this.rooms.push(newRoom);
-      this.server.to(playerId).emit('searchGame', newRoom.name, 1);
-      this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0);
+      this.server.to(playerId).emit('searchGame', newRoom.name, 1, waitingPlayer.name);
+      this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0, player.name);
       this.gameService.handleGame(newRoom, this.server);
     }
   }

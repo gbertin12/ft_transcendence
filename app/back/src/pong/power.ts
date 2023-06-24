@@ -1,15 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Server } from 'socket.io';
 import { roomInterface, PowerInterface, obstaclesInterface, powerAvailables } from '../../src/interfaces/pong.interface';
-import { convertToPixel, sendBallVector } from './game.service';
-import { getType, createObstacle } from './obstacles'
+import { convertToPixel } from './game.service';
 
 // set playground value
 const canvasHeight = 300;
 const canvasWidth = 500;
-const playerHeight = canvasHeight / 4;
-const radiusBall = 10;
-const spaceBetweenPlayerAndWall = canvasWidth * 0.05;
 
 
 const setAvailablePower = (
@@ -26,7 +22,7 @@ const setAvailablePower = (
 			nbAvailable++;
 		i++;
 	}
-	const type = getType(obstacles, powerAvailables);
+	const type = Math.floor(Math.random() * 2);
 	while (powerAvailables[i].isActive && i < powerAvailables.length)
 		i++;
 	//const type = 2;
@@ -72,8 +68,7 @@ export const handleNewPower = (
 };
 
 export const handleColisionWithPower = (room: roomInterface, server: Server, obstacles: obstaclesInterface[], powerAvailables: powerAvailables[]) => {
-	let id: number = -1;
-	let powerSize : number = canvasWidth / 16 -5;
+	const powerSize : number = canvasWidth / 16 -5;
 	powerAvailables.forEach((power) => {
 		if (power.isActive &&
 			room.pongState.ball.x > convertToPixel(power.x, canvasWidth) - powerSize &&
@@ -87,40 +82,33 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 			if (power.type === 0) {
 				//speed up bonus
 				if (room.pongState.ball.speedX < 0)
-					room.pongState.ball.speedX -= 0.5;
+					room.pongState.ball.speedX -= 0.4;
 				else
-					room.pongState.ball.speedX += 0.5;
+					room.pongState.ball.speedX += 0.4;
 				if (room.pongState.ball.speedY < 0)
-					room.pongState.ball.speedY -= 0.5;
+					room.pongState.ball.speedY -= 0.4;
 				else
-					room.pongState.ball.speedY += 0.5;
+					room.pongState.ball.speedY += .3;0
 				// check speed X
-				if (room.pongState.ball.speedX > 3)
-					room.pongState.ball.speedX = 3;
-				else if (room.pongState.ball.speedX < -3)
-					room.pongState.ball.speedX = -3;
+				if (room.pongState.ball.speedX > 2)
+					room.pongState.ball.speedX = 2;
+				else if (room.pongState.ball.speedX < -2)
+					room.pongState.ball.speedX = -2;
 				// check speed Y
-				if (room.pongState.ball.speedY > 3)
-					room.pongState.ball.speedY = 3;
-				else if (room.pongState.ball.speedY < -3)
-					room.pongState.ball.speedY = -3;
-
-				sendBallVector(room, server);
+				if (room.pongState.ball.speedY > 2)
+					room.pongState.ball.speedY = 2;
+				else if (room.pongState.ball.speedY < -2)
+					room.pongState.ball.speedY = -2;
 			}
 			else if (power.type === 1) {
 				// bounce bonus
 				let newSpeedY = -room.pongState.ball.speedY;
 				if (newSpeedY < 0)
-					newSpeedY -= 0.2;
+					newSpeedY -= 0.4;
 				else
-					newSpeedY += 0.2;
+					newSpeedY += 0.4;
 				room.pongState.ball.speedY = newSpeedY;
-				sendBallVector(room, server);
 			} 
-			// else if (power.type === 2) {
-			// 	// spawn obstacles bonus
-			// 	createObstacle(server, room, obstacles);
-			// }
 			powerAvailables[power.id].isActive = false;
 			powerAvailables[power.id].type = -1;
 		}

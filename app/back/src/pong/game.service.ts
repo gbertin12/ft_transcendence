@@ -24,18 +24,10 @@ export const convertToPixel = (value: number, maxValue: number) => {
 
 const updateBallSpeedX = (speedX: number) => {
     let newSpeed = speedX;
-    if (speedX > 0 && speedX < 3) newSpeed = speedX + 0.2;
-    else if (speedX < 0 && speedX > -3) newSpeed = speedX - 0.2;
+    if (speedX > 0 && speedX < 1.5) newSpeed = speedX + 0.2;
+    else if (speedX < 0 && speedX > -1.5) newSpeed = speedX - 0.2;
     return newSpeed;
 };
-
-export const sendBallVector = (room: roomInterface, server: Server) => {
-    server.to(room.name).emit('updateBallVector', {
-        speedX: room.pongState.ball.speedX,
-        speedY: room.pongState.ball.speedY,
-    });
-    //sendBallPosition(room, server);
-}; 
 
 const sendBallPosition = (room: roomInterface, server: Server) => {
     const x = convertToPercent(room.pongState.ball.x, canvasWidth);
@@ -82,7 +74,6 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
             if (room.pongState.ball.speedX < 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
             }
-            sendBallVector(room, server);
         }
     }
 
@@ -96,7 +87,6 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
             if (room.pongState.ball.speedX > 0) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
             }
-            sendBallVector(room, server);
         }
     }
 
@@ -104,7 +94,6 @@ const handleCheckCollision = (room: roomInterface, server: Server) => {
     if (room.pongState.ball.y - radiusBall <= 0 || room.pongState.ball.y + radiusBall >= canvasHeight) {
         room.pongState.ball.speedY = -room.pongState.ball.speedY;
         room.pongState.ball.speedX = updateBallSpeedX(room.pongState.ball.speedX);
-        sendBallVector(room, server);
     }
 }
 
@@ -122,10 +111,9 @@ const resetBallPosition = (
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
     const randY: number = 100 * Math.random();
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
-    room.pongState.ball.speedX = 2;
-    room.pongState.ball.speedY = 2;
+    room.pongState.ball.speedX = 0.8;
+    room.pongState.ball.speedY = 0.8;
     sendBallPosition(room, server);
-    sendBallVector(room, server);
 }
 
 const handleResetPlayerPosition = (
@@ -134,12 +122,12 @@ const handleResetPlayerPosition = (
     // Check who win round
     if (room.pongState.ball.x <= radiusBall) {
         room.pongState.player2.score++;
-        room.pongState.ball.speedX = 2;
-        room.pongState.ball.speedY = 2;
+        room.pongState.ball.speedX = 1;
+        room.pongState.ball.speedY = 1;
     } else {
         room.pongState.player1.score++;
-        room.pongState.ball.speedX = -2;
-        room.pongState.ball.speedY = -2;
+        room.pongState.ball.speedX = -1;
+        room.pongState.ball.speedY = -1;
     }
     resetBallPosition(room, server);
     sendScore(room, server);
@@ -161,7 +149,6 @@ export class GameService {
         room.pongState.player1.y = canvasHeight / 3;
         room.pongState.player2.y = canvasHeight / 3;
         let timeToNewPower = 0;
-        //let timeToSendBallPosition = 0;
         const obstacles: obstaclesInterface[] = [];
         const powersAvailables: powerAvailables[] = [
             { id: 0, isActive: false, type: -1, x: 20, y: 20 },
@@ -171,6 +158,8 @@ export class GameService {
             { id: 4, isActive: false, type: -1, x: 75, y: 50 },
             { id: 5, isActive: false, type: -1, x: 80, y: 80 },
         ]
+        room.pongState.player1.score = 0;
+        room.pongState.player2.score = 0;
         // Start loop of game
         while (1) {
             // check if game is finished
@@ -193,8 +182,7 @@ export class GameService {
             // {
             //     timeToSendBallPosition = 0;
             // }
-            if (room.pongState.ball.x > 15 && room.pongState.ball.x < canvasWidth - 15 && room.pongState.ball.y > 5 && room.pongState.ball.y < canvasHeight - 5)
-                sendBallPosition(room, server);
+            sendBallPosition(room, server);
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
             room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
@@ -203,7 +191,7 @@ export class GameService {
             // check if someone loose the round
             if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
                 handleResetPlayerPosition(room, server);
-            await sleep(60);
+            await sleep(20);
         }
     }
 

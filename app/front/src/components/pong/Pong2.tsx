@@ -45,8 +45,6 @@ let speedPaddle : number;
 let ballX : number;
 let ballY : number;
 let ballSize : number;
-let ballSpeedY : number;
-let ballSpeedX : number;
 
 // score
 let score1 : number = 0;
@@ -61,8 +59,8 @@ const convertToPixel = (value: number, maxValue: number) => {
 };
 
 
-const Pong2 = ({windowWidth, roomName, who, handleSetEndGame} 
-	: {windowWidth : number, roomName : string, who : number, handleSetEndGame : (endGame: PlayerEndGame) => void}) => {
+const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame} 
+	: {nameOpponent : string, windowWidth : number, roomName : string, who : number, handleSetEndGame : (endGame: PlayerEndGame) => void}) => {
 	const { socket, user } = useUser();
 	
 
@@ -100,17 +98,14 @@ const Pong2 = ({windowWidth, roomName, who, handleSetEndGame}
 	}
 	
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
+		p5.stroke("#F5A524");
+		p5.strokeWeight(4);
 		p5.createCanvas(p5.windowWidth * 0.6, p5.windowWidth * 0.6 * 0.7).parent(canvasParentRef);
+		p5.strokeWeight(1);
 		p5.resizeCanvas(windowWidth * 0.6, windowWidth * 0.6 * 0.7);
 		p5lib = p5;
 		resize = 1;
 		setSize(p5);
-		const ratioX = canvasHeightServerSide / p5lib.height;
-		const ratioY = canvasWidthServerSide / p5lib.width;
-
-
-		ballSpeedX = 2 / ratioX;
-		ballSpeedY = 2 / ratioY;
 
 		mapPowers = [
 			{ isActive: false, x : 0, y : 0, id : 0, type : 0 },
@@ -134,36 +129,54 @@ const Pong2 = ({windowWidth, roomName, who, handleSetEndGame}
 		p5.fill(255);
 		p5.stroke(255);
 
-		// draw paddles
-		p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
-		p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
-
-		// update ball position
-		ballX += ballSpeedX;
-		ballY += ballSpeedY;
-
 		// draw powers
 		let WidthPower = p5.width / 16;
 		for (let i = 0; i < mapPowers.length; i++) {
 			if (mapPowers[i].isActive) {
 				if (mapPowers[i].type == 0)
-					p5.image(power, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
+				p5.image(power, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
 				else if (mapPowers[i].type == 1)
-					p5.image(bounce, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
+				p5.image(bounce, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
 				else if (mapPowers[i].type == 2)
-					p5.image(fence, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
+				p5.image(fence, mapPowers[i].x - WidthPower, mapPowers[i].y - WidthPower);
 			}
 		}
-
+		
 		// handle paddle movement
 		handlePaddleMove();
 		// draw ball
 		p5.ellipse(ballX, ballY, ballSize, ballSize);
-
-		// draw score
+		
 		p5.textSize(32);
-		p5.text(score1, p5.width / 2 - 50, 50);
-		p5.text(score2, p5.width / 2 + 50, 50);
+		p5.fill("#17C964")
+		if (who == 0)
+		{
+			p5.text(score1, p5.width / 2 - 50, 50);
+			p5.textSize(16);
+			p5.text(user.name, p5.width / 2 - 180, 50);
+			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
+		} else {
+			p5.fill("#F31260");
+			p5.text(score1, p5.width / 2 - 50, 50);
+			p5.textSize(16);
+			p5.text(nameOpponent, p5.width / 2 - 180, 50);
+			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
+		}
+		p5.textSize(32);
+		p5.fill("#17C964")
+		if (who == 1)
+		{
+			p5.text(score2, p5.width / 2 + 50, 50);
+			p5.textSize(16);
+			p5.text(user.name, p5.width / 2 + 120, 50);
+			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
+		} else {
+			p5.fill("#F31260");
+			p5.text(score2, p5.width / 2 + 50, 50);
+			p5.textSize(16);
+			p5.text(nameOpponent, p5.width / 2 + 120, 50);
+			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
+		}
 	}
 
 	const handleWindowResize = () => {
@@ -246,15 +259,6 @@ const Pong2 = ({windowWidth, roomName, who, handleSetEndGame}
 			score1 = scorePlayer1;
 			score2 = scorePlayer2;
 		});
-		socket.on('updateBallVector', ({ speedX, speedY } : { speedX: number, speedY: number }) => {
-			if (p5lib)
-			{
-				const ratioX = canvasHeightServerSide / p5lib.height;
-				const ratioY = canvasWidthServerSide / p5lib.width;
-				ballSpeedX = speedX / ratioX;
-				ballSpeedY = speedY / ratioY;
-			}
-		});
 		socket.on('updateBallPosition', ({ x, y }: { x: number, y: number }) => {
 			if (p5lib)
 			{
@@ -305,7 +309,6 @@ const Pong2 = ({windowWidth, roomName, who, handleSetEndGame}
 			socket.off('playerMove');
 			socket.off('updateScore');
 			socket.off('updateBallPosition');
-			socket.off('updateBallVector');
 			socket.off('endGame');
 			socket.off('newPower');
 			socket.off('removePower');

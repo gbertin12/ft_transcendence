@@ -2,8 +2,8 @@
 /* eslint-disable prettier/prettier */
 
 import { Server } from 'socket.io';
-import {roomInterface, PowerInterface,  obstaclesInterface, powerAvailables} from '../../src/interfaces/pong.interface';
-import { convertToPixel, sendBallVector } from './game.service';
+import {roomInterface, obstaclesInterface} from '../../src/interfaces/pong.interface';
+import { convertToPixel } from './game.service';
 
 
 const canvasHeight = 300;
@@ -20,60 +20,16 @@ export const handleColisionWithObstacle = (room: roomInterface, server: Server, 
             if (room.pongState.ball.y > convertToPixel(obstacles[i].y, canvasHeight) &&
             room.pongState.ball.y < convertToPixel(obstacles[i].y, canvasHeight) + convertToPixel(obstacles[i].size, canvasHeight)) {
                 room.pongState.ball.speedX = -room.pongState.ball.speedX;
-                sendBallVector(room, server);
+                
             }
             else if (obstacles[i].y === 0 && room.pongState.ball.y <= convertToPixel(obstacles[i].size, canvasHeight)) {
-
                 room.pongState.ball.speedY = -room.pongState.ball.speedY;
-                sendBallVector(room, server);
             } 
 
             else if (obstacles[i].y !== 0 && room.pongState.ball.y <= convertToPixel(obstacles[i].y, canvasHeight)) {
-
                 room.pongState.ball.speedY = -room.pongState.ball.speedY;
-                sendBallVector(room, server);
             } 
         }
     }
 }
 
-export const getType = (obstacles: obstaclesInterface[], powers: powerAvailables[]) => {
-    let type = Math.floor(Math.random() * 2);
-    // if (type == 2)
-    // {
-    //     let nbObs = obstacles.length;
-    //     for (let i = 0; i < powers.length; i++)
-    //     if (powers[i].type == 2)
-    //     nbObs++;
-    // if (nbObs >= 2)
-    //     type = Math.floor(Math.random() * 2)
-    // }
-    return type;
-}
-
-export const createObstacle = (server: Server, room: roomInterface, obstacles: obstaclesInterface[]) => {
-
-    const size = Math.floor(Math.random() * 15) + 20;
-    let newObstacle: obstaclesInterface = {
-        x: 33,
-        y: 0,
-        size: size,
-        id: 0
-    };
-    if (obstacles.length > 0)
-    {
-        newObstacle.x = 66;
-        newObstacle.y = 100 - size;
-        newObstacle.id = 1;
-    }
-
-    obstacles.push(newObstacle);
-
-
-    server.to(room.name).emit('addObstacle', {
-        x: newObstacle.x,
-        y: newObstacle.y,
-        id: newObstacle.id,	
-        size: newObstacle.size
-    });
-}

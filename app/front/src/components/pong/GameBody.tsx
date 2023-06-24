@@ -23,15 +23,17 @@ export default function GameBody() {
     const [modes, setModes] = useState(true);
     const [dataEndGame, setDataEndGame] = useState<PlayerEndGame>({} as PlayerEndGame);
     const [windowWidth, setWindowWidth] = useState<number>(0);
+    const [nameOpponent, setNameOpponent] = useState<string>("");
 
     const { user, socket } = useUser();
 
-    const handleStartGame = (roomName: string, playerNumber: number) => {
+    const handleStartGame = (roomName: string, playerNumber: number, nameOpponent : string) => {
         setRoomName(roomName);
         setWho(playerNumber);
         socket.emit("joinRoom", roomName);
         setPlayGame(true);
         setEndGame(false);
+        setNameOpponent(nameOpponent);
         if (window && window.innerWidth != 0)
             setWindowWidth(window.innerWidth);
     }
@@ -103,7 +105,7 @@ export default function GameBody() {
     }
     else if (playGame) {
         return <>
-            <Pong2 windowWidth={windowWidth} roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
+            <Pong2 nameOpponent={nameOpponent} windowWidth={windowWidth} roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
         </>
     }
     else
