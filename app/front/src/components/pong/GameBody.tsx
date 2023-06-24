@@ -29,6 +29,7 @@ export default function GameBody() {
     const handleStartGame = (roomName: string, playerNumber: number) => {
         setRoomName(roomName);
         setWho(playerNumber);
+        socket.emit("joinRoom", roomName);
         setPlayGame(true);
         setEndGame(false);
         if (window && window.innerWidth != 0)

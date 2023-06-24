@@ -161,7 +161,7 @@ export class GameService {
         room.pongState.player1.y = canvasHeight / 3;
         room.pongState.player2.y = canvasHeight / 3;
         let timeToNewPower = 0;
-        let timeToSendBallPosition = 0;
+        //let timeToSendBallPosition = 0;
         const obstacles: obstaclesInterface[] = [];
         const powersAvailables: powerAvailables[] = [
             { id: 0, isActive: false, type: -1, x: 20, y: 20 },
@@ -193,7 +193,8 @@ export class GameService {
             // {
             //     timeToSendBallPosition = 0;
             // }
-            sendBallPosition(room, server);
+            if (room.pongState.ball.x > 15 && room.pongState.ball.x < canvasWidth - 15 && room.pongState.ball.y > 5 && room.pongState.ball.y < canvasHeight - 5)
+                sendBallPosition(room, server);
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
             room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);
