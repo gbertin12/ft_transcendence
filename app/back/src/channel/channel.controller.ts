@@ -10,6 +10,7 @@ import { MessageData } from '../interfaces/chat.interfaces';
 import { PunishmentsService } from '../punishments/punishments.service';
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
+import { DbService } from '../db/db.service';
 
 class ChannelDto {
     @Type(() => Number)
@@ -157,6 +158,7 @@ export class ChannelController {
         private punishmentsService: PunishmentsService,
         private userService: UserService,
         private authService: AuthService,
+        private dbService: DbService
     ) { }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -281,6 +283,44 @@ export class ChannelController {
         }
 
         channel.name = body.name;
+
+        // If the private becomes private, give access to anyone that sent a message into it
+        if (channel.private === false && body.private === true) {
+            let members = await this.channelService.getMembers(dto.channel_id);
+            if (channel.users && channel.users.length > 0) {
+                await this.dbService.channelAccess.createMany({
+                    data: members.users.map(m => {
+                        return {
+                            channel_id: dto.channel_id,
+                            user_id: m.id,
+                        }
+                    })
+                });
+            }
+            if (channel.admins && channel.admins.length > 0) {
+                await this.dbService.channelAccess.createMany({
+                    data: channel.admins.map(a => {
+                        return {
+                            channel_id: dto.channel_id,
+                            user_id: a.user_id,
+                        }
+                    })
+                });
+            }
+            await this.dbService.channelAccess.create({
+                data: {
+                    channel_id: dto.channel_id,
+                    user_id: channel.owner_id,
+                }
+            });
+        } else if (channel.private === true && body.private === false) { // If the channel becomes public, remove all access
+            await this.dbService.channelAccess.deleteMany({
+                where: {
+                    channel_id: dto.channel_id,
+                }
+            });
+        }
+
         channel.private = body.private;
 
         // update the channel
