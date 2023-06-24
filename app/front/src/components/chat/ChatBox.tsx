@@ -18,11 +18,6 @@ interface StaffUpdate {
     user_id: number;
 }
 
-interface OwnerUpdate {
-    channel_id: number;
-    new_owner: number;
-}
-
 function generateMutedMessage(talkPowerTimer: number): string {
     if (talkPowerTimer < 0 || talkPowerTimer > 31536000 * 5) { // Negative or 5 years
         return "You are muted.";
@@ -151,12 +146,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 });
             }
         });
-        socket.on("updateOwner", (data: OwnerUpdate) => {
-            if (data.channel_id === channel.id) {
-                setOwnerId(data.new_owner);
-                channel.owner_id = data.new_owner;
-            }
-        });
         socket.on('message', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
@@ -236,7 +225,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('punishment');
             socket.off('addStaff');
             socket.off('removeStaff');
-            socket.off('updateOwner');
             socket.off('deleteMessage');
             socket.emit('leave', channel.id);
         }

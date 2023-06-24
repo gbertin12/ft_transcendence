@@ -22,6 +22,11 @@ interface ChatContextType {
     setReceivedRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
 }
 
+interface OwnerUpdate {
+    channel_id: number;
+    new_owner: number;
+}
+
 const ChatContext = createContext<ChatContextType>({
     channels: [],
     setChannels: () => { },
@@ -267,7 +272,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     );
                 }
             });
+            socket.on("updateOwner", (data: OwnerUpdate) => {
+                setChannels((channels) => channels.map((c) => c.id === data.channel_id ? { ...c, owner_id: data.new_owner } : c));
 
+            });
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
