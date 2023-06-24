@@ -28,12 +28,21 @@ export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
 
     if (searchGame === true) {
         return <>
-            <Button css={{ mx: 'auto' }} onClick={handleCancelGame} color="error">Cancel Game</Button>
+            <Button
+            css={{mx:'10px'}} 
+            onPress={handleCancelGame} 
+            color="error"
+            >Cancel Game</Button>
         </>
     }
     else {
         return <>
-            <Button css={{ mx: 'auto' }} bordered onClick={handleSearchGame} color="success">Search Game</Button>
+            <Button 
+            css={{mx:'10px'}}
+            bordered 
+            onPress={handleSearchGame} 
+            color="success"
+            >Search Game</Button>
         </>
     }
 }

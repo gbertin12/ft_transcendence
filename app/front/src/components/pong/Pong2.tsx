@@ -26,6 +26,7 @@ interface Obstacle {
 
 const canvasHeightServerSide : number = 250;
 const canvasWidthServerSide : number = 500;
+let resize = 1;
 
 //#region setup variables game
 // images
@@ -60,12 +61,13 @@ const convertToPixel = (value: number, maxValue: number) => {
 };
 
 
-const Pong2 = ({roomName, who, handleSetEndGame} 
-	: {roomName : string, who : number, handleSetEndGame : (endGame: PlayerEndGame) => void}) => {
+const Pong2 = ({windowWidth, roomName, who, handleSetEndGame} 
+	: {windowWidth : number, roomName : string, who : number, handleSetEndGame : (endGame: PlayerEndGame) => void}) => {
 	const { socket, user } = useUser();
+	
 
 	let p5lib : p5Types;
-
+	windowWidth = window.innerWidth;
 	const sketchRef = useRef(null);
 	const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 		ssr: false,
@@ -78,6 +80,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	}
 
 	const setSize = (p5 : p5Types) => {
+		//p5.resizeCanvas(p5.windowWidth * 0.6, p5.windowWidth * 0.6 * 0.7);
 		// set paddles
 		paddleWidth = p5.width / 80;
 		paddleHeight = p5.height / 8;
@@ -98,10 +101,10 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
 		p5.createCanvas(p5.windowWidth * 0.6, p5.windowWidth * 0.6 * 0.7).parent(canvasParentRef);
+		p5.resizeCanvas(windowWidth * 0.6, windowWidth * 0.6 * 0.7);
 		p5lib = p5;
-
+		resize = 1;
 		setSize(p5);
-
 		const ratioX = canvasHeightServerSide / p5lib.height;
 		const ratioY = canvasWidthServerSide / p5lib.width;
 
@@ -125,6 +128,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	}
 
 	const draw = (p5: p5Types) => {
+		p5lib = p5;
 		// draw background
 		p5.background(0);
 		p5.fill(255);
@@ -165,9 +169,12 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	const handleWindowResize = () => {
 		if (p5lib)
 		{
+			p5lib.resizeCanvas(p5lib.windowWidth * 0.6, p5lib.windowWidth * 0.6 * 0.7)
 			setSize(p5lib);
 		}
 	};
+
+
 
 	const handlePaddleMove = () => {
 		if (p5lib)
@@ -263,7 +270,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			{
 				let newX = convertToPixel(x, p5lib.width);
 				let newY = convertToPixel(y, p5lib.height);
-				console.log("newPower", newX, newY, id, type);
 				for (let i = 0; i < mapPowers.length; i++)
 				{
 					if (mapPowers[i].id == id)
@@ -280,7 +286,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		socket.on('removePower', ({id} : {id : number}) => {
 			if (p5lib)
 			{
-				console.log("removePower");
 				for (let i = 0; i < mapPowers.length; i++)
 				{
 					if (mapPowers[i].id == id)
@@ -306,8 +311,10 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 	}, [socket, roomName]);
 
 	return (
-		<div>
-			<Sketch preload={preload} setup={setup} draw={draw} />
+		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+			<div style={{ textAlign: 'center' }}>
+				<Sketch preload={preload} setup={setup} draw={draw} />
+			</div>
 		</div>
 	)
 }

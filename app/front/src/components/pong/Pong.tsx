@@ -11,7 +11,7 @@ import { headers } from 'next/dist/client/components/headers';
 const canvasHeightServerSide : number = 300;
 const canvasWidthServerSide : number = 500;
 
-function Player({ x, y, canvasHeight }: { x: number, y: number, canvasHeight: number }) {
+function Player({ x, y, canvasHeight } : { x: number, y: number, canvasHeight: number }) {
     return (
         <div className={styles.player} style={{ top: y, left: x, height: canvasHeight / 8 }}></div>
     )

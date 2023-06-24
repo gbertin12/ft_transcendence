@@ -188,12 +188,12 @@ export class GameService {
                 handleColisionWithPower(room, server, obstacles, powersAvailables);
                 //handleColisionWithObstacle(room, server, obstacles);
             }
-            timeToSendBallPosition++;
-            if (timeToSendBallPosition === 1)
-            {
-                timeToSendBallPosition = 0;
-                sendBallPosition(room, server);
-            }
+            // timeToSendBallPosition++;
+            // if (timeToSendBallPosition === 1)
+            // {
+            //     timeToSendBallPosition = 0;
+            // }
+            sendBallPosition(room, server);
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
             room.pongState.ball.y = room.pongState.ball.y + convertToPixel(room.pongState.ball.speedY, canvasHeight);

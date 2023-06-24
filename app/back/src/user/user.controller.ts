@@ -47,7 +47,8 @@ export class UserController {
         const user = await this.userService.getUserById(req.user['id']);
         return user;
     }
-
+    
+    //fileIsRequired: false
     @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
     @UseInterceptors(FileInterceptor('avatar'))
@@ -58,7 +59,6 @@ export class UserController {
             validators: [
                 new MaxFileSizeValidator({ maxSize: 10000 }),
             ],
-            fileIsRequired: false
         })) avatar?: Express.Multer.File,
     ) {
         try {
