@@ -83,16 +83,31 @@ const MembersTab: React.FC<MembersTabProps> = ({ channel }) => {
                     <Text h3>Members</Text>
                     <Table compact striped>
                         <Table.Header>
-                            <Table.Column>Username</Table.Column>
-                            {channel.private && (
-                                <Table.Column>Joined</Table.Column>
-                            ) || (
-                                    <Table.Column>First message</Table.Column>
-                                )}
-                            <Table.Column>Actions</Table.Column>
+                            <Table.Column align='start'>Username</Table.Column>
+                            <Table.Column align='center'>Owner Actions</Table.Column>
+                            <Table.Column align='center'>Admin Actions</Table.Column>
                         </Table.Header>
                         <Table.Body>
                             {/* List of members */}
+                            {members.map((currentUser) => (
+                                <Table.Row key={currentUser.id}>
+                                    <Table.Cell>
+                                        {currentUser.name}
+                                    </Table.Cell>
+                                    <Table.Cell css={{ ta: "center" }}>
+                                        <Button.Group color="warning" disabled={user.id !== channel.owner_id}>
+                                            <Button>Promote to admin</Button>
+                                        </Button.Group>
+                                    </Table.Cell>
+                                    <Table.Cell css={{ ta: "center" }}>
+                                        <Button.Group color="error" disabled={user.id == currentUser.id}>
+                                            <Button disabled={channel.private}>Kick</Button>
+                                            <Button>Ban</Button>
+                                            <Button>Mute</Button>
+                                        </Button.Group>
+                                    </Table.Cell>
+                                </Table.Row>
+                            ))}
                         </Table.Body>
                         <Table.Pagination align='start' rowsPerPage={5} />
                     </Table>
