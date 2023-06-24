@@ -250,7 +250,11 @@ export class ChannelService {
                 id: channelId
             },
             include: {
-                admins: true,
+                admins: {
+                    select: {
+                        user_id: true
+                    }
+                }
             }
         });
     }
@@ -408,6 +412,7 @@ export class ChannelService {
                         }
                     }
                 });
+                break;
             case 1:
                 await this.db.channelAdmin.upsert({
                     where: {
@@ -425,19 +430,181 @@ export class ChannelService {
                         user_id: user_id
                     }
                 });
-            default:
-                throw new Error("Invalid power level passed");
+                break;
         }
     }
 
-    async isUserInChannel(user_id: number, channel_id: number) {
-        return await this.db.channelAccess.findUnique({
+    async isUserInChannel(channel_id: number, user_id: number) {
+        // Check if channel is private, if so, check if user is in channel otherwise return true
+        let channel = await this.db.channel.findUnique({
             where: {
-                channel_id_user_id: {
-                    channel_id: channel_id,
-                    user_id: user_id
+                id: channel_id
+            },
+            select: {
+                private: true
+            }
+        });
+        if (channel.private) {
+            return await this.db.channelAccess.findUnique({
+                where: {
+                    channel_id_user_id: {
+                        channel_id: channel_id,
+                        user_id: user_id
+                    }
+                }
+            });
+        } else {
+            return true;
+        }
+    }
+
+    async getPunishments(channel_id: number) {
+        return await this.db.punishment.findMany({
+            where: {
+                channel_id: channel_id,
+                expires_at: {
+                    gt: new Date()
+                }
+            },
+            orderBy: {
+                punished_at: "desc"
+            },
+            include: {
+                punished: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+                punisher: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
                 }
             }
         });
+    }
+
+    async getMembers(channel_id: number) {
+        // get all admins and owner, along with all users in channel via channelAccess if channel is private, otherwise return
+        // run all queries in parallel and await them all
+        let channel = await this.db.channel.findUnique({
+            where: {
+                id: channel_id
+            },
+            select: {
+                private: true
+            }
+        });
+        let [admins, owner, users] = await Promise.all([
+            this.db.channel.findFirst({
+                where: {
+                    id: channel_id
+                },
+                select: {
+                    admins: {
+                        select: {
+                            user: {
+                                select: {
+                                    avatar: true,
+                                    elo: true,
+                                    id: true,
+                                    losses: true,
+                                    name: true,
+                                    wins: true,
+                                    otp: false,
+                                    password: false,
+                                    otpSecret: false,
+                                },
+                            }
+                        }
+                    }
+                }
+            }),
+            this.db.channel.findFirst({
+                where: {
+                    id: channel_id
+                },
+                select: {
+                    owner: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    }
+                }
+            }),
+            // If the channel is private, find all users in the channel, otherwise find all users that sent a message in the channel
+            channel.private ? this.db.channelAccess.findMany({
+                where: {
+                    channel_id: channel_id
+                },
+                select: {
+                    user: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    }
+                }
+            }) : this.db.message.findMany({
+                where: {
+                    channel_id: channel_id
+                }, // Select distinct users
+                select: {
+                    sender: {
+                        select: {
+                            avatar: true,
+                            elo: true,
+                            id: true,
+                            losses: true,
+                            name: true,
+                            wins: true,
+                            otp: false,
+                            password: false,
+                            otpSecret: false,
+                        },
+                    },
+                },
+                distinct: ['sender_id']
+            })
+        ]);
+        return {
+            owner: owner.owner,
+            admins: admins.admins.map((admin) => admin.user),
+            // remove users that are admins or owner
+            users: users.map((user) => user.sender).filter((user) => {
+                return !admins.admins.some((admin) => admin.user.id == user.id) && owner.owner.id != user.id;
+            })
+        }
     }
 }

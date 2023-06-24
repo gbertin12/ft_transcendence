@@ -7,15 +7,15 @@ import ChannelPasswordPrompt from "./ChannelPasswordPrompt";
 import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
 import { IconDoorExit, IconShieldCog } from "@tabler/icons-react";
+import ChannelSettings from "./settings/ChannelSettingsModal";
 
 interface ChatBoxProps {
     channel: Channel;
 }
 
-interface MutePunishment {
-    active: boolean;  // true = muted, false = not muted
-    duration: number; // number of seconds left before we can talk again (negative if we are permanently muted)
-    interval: NodeJS.Timeout | null;
+interface StaffUpdate {
+    channel_id: number;
+    user_id: number;
 }
 
 function generateMutedMessage(talkPowerTimer: number): string {
@@ -36,6 +36,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [admins, setAdmins] = useState<Set<number>>(new Set<number>());
     const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
     const [endOfHistory, setEndOfHistory] = useState<boolean>(false);
+    const [channelSettingsOpen, setChannelSettingsOpen] = useState<boolean>(false);
+
     const { socket, user } = useUser();
     const {
         bannedChannels,
@@ -99,7 +101,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, []);
 
     const fetchHistory = useCallback(async (channel: Channel, lastMessageId: number): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/${lastMessageId}`,
+        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/history/${lastMessageId}`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -126,12 +128,30 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     useEffect(() => {
         socket.emit('join', channel.id);
+        socket.on("addStaff", (data: StaffUpdate) => {
+            if (data.channel_id === channel.id) {
+                setAdmins((admins) => {
+                    const newAdmins = new Set(admins);
+                    newAdmins.add(data.user_id);
+                    return newAdmins;
+                });
+            }
+        });
+        socket.on("removeStaff", (data: StaffUpdate) => {
+            if (data.channel_id === channel.id) {
+                setAdmins((admins) => {
+                    const newAdmins = new Set(admins);
+                    newAdmins.delete(data.user_id);
+                    return newAdmins;
+                });
+            }
+        });
         socket.on('message', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
             setMessages((messages) => [payload, ...messages]);
         });
-        socket.on('messageDeleted', (payload: MessageData) => {
+        socket.on('deleteMessage', (payload: MessageData) => {
             // find the message in the list and remove it
             setMessages((messages) => {
                 const index = messages.findIndex((message) => message.message_id === payload.message_id);
@@ -203,7 +223,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('message');
             socket.off('staff');
             socket.off('punishment');
-            socket.off('messageDeleted');
+            socket.off('addStaff');
+            socket.off('removeStaff');
+            socket.off('deleteMessage');
             socket.emit('leave', channel.id);
         }
     }, [socket, channel]);
@@ -256,23 +278,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                                 light
                                                 disabled={channel.owner_id === user.id}
                                                 onPress={() => {
-                                                axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
-                                                    {
-                                                        withCredentials: true,
-                                                        validateStatus: () => true,
-                                                    }
-                                                )
-                                            }}>
+                                                    axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
+                                                        {
+                                                            withCredentials: true,
+                                                            validateStatus: () => true,
+                                                        }
+                                                    )
+                                                }}>
                                                 <IconDoorExit />
                                             </Button>
                                         </Tooltip>
                                     )}
                                     {/* Hide if not admin / owner */}
-                                    <Tooltip content="Channel settings" color="warning">
-                                        <Button auto light>
-                                            <IconShieldCog />
-                                        </Button>
-                                    </Tooltip>
+                                    {(channel.owner_id == user.id || admins.has(user.id)) && (
+                                        <Tooltip content="Channel settings" color="warning">
+                                            <Button auto light onPress={() => {
+                                                setChannelSettingsOpen(true);
+                                            }}>
+                                                <IconShieldCog />
+                                            </Button>
+                                        </Tooltip>
+                                    )}
                                 </Container>
                             </Container>
                             <ul
@@ -318,12 +344,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                     placeholder={
                                         !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
                                             :
-                                            generateMutedMessage(125364515461451)
+                                            generateMutedMessage(Infinity)
                                     }
                                     aria-label={
                                         !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
                                             :
-                                            generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
+                                            generateMutedMessage(Infinity)
                                     }
                                     minLength={1}
                                     maxLength={2000}
@@ -345,6 +371,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                     </Grid.Container>
                 </Grid>
             </Grid.Container>
+            <ChannelSettings
+                channel={channel}
+                open={channelSettingsOpen}
+                onClose={() => setChannelSettingsOpen(false)}
+            />
         </Container>
     );
 };

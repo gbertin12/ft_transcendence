@@ -70,7 +70,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     }, []);
 
     const fetchHistory = useCallback(async (interlocutor: User, lastMessageId: number): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/${lastMessageId}`,
+        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/history/${lastMessageId}`,
             {
                 withCredentials: true,
                 validateStatus: () => true,

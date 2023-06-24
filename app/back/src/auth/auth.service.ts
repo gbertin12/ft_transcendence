@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
+import { DbService } from '../db/db.service';
 import { User } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import * as OTPAuth from 'otpauth';
@@ -43,6 +44,7 @@ export class AuthService {
     constructor(
         private userService: UserService,
         private jwtService: JwtService,
+        private dbService: DbService,
     ) { }
 
     async register(username: string, password: string): Promise<boolean> {
@@ -151,5 +153,10 @@ export class AuthService {
         });
         const result = totp.validate({ token, window: 1 });
         return result !== null;
+    }
+
+    async verifyPassword(request_user: User, password: string): Promise<Boolean> {
+        const result = await argon2.verify(request_user.password, password);
+        return result;
     }
 }

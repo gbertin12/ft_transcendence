@@ -131,7 +131,7 @@ export class ChatGateway
         if (await this.punishmentsService.hasActiveBan(client['user'].id, channelId)) {
             throw new ForbiddenException('You are banned from this channel');
         }
-        if (channel.private && !await this.channelService.isUserInChannel(client['user'].id, channelId)) {
+        if (channel.private && !await this.channelService.isUserInChannel(channelId, client['user'].id)) {
             throw new ForbiddenException('You are not allowed to join this channel');
         }
         await client.join(`channel-${channelId}`);

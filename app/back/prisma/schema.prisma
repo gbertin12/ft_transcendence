@@ -29,6 +29,10 @@ model User {
     friend2           Friend[]         @relation("friend2")
     ChannelInvites    ChannelInvites[]
     PrivateMessage    PrivateMessage[]
+    punished          Punishment[]     @relation("punished")
+    punisher          Punishment[]     @relation("punisher")
+    ChannelAdmin      ChannelAdmin[]
+    ChannelAccess     ChannelAccess[]
 }
 
 model MatchHistory {
@@ -97,6 +101,7 @@ model ChannelAccess {
     channel_id Int
     user_id    Int
     channel    Channel @relation(fields: [channel_id], references: [id])
+    user       User    @relation(fields: [user_id], references: [id])
 
     @@id([channel_id, user_id])
 }
@@ -115,7 +120,8 @@ model ChannelInvites {
 model ChannelAdmin {
     channel_id Int
     user_id    Int
-    Channel    Channel? @relation(fields: [channel_id], references: [id])
+    channel    Channel? @relation(fields: [channel_id], references: [id])
+    user       User?    @relation(fields: [user_id], references: [id])
 
     @@id([channel_id, user_id])
 }
@@ -138,6 +144,8 @@ model Punishment {
     type        Int      @db.SmallInt
     punished_at DateTime @default(now()) @db.Timestamp(6)
     expires_at  DateTime @default(dbgenerated("CURRENT_TIMESTAMP + INTERVAL '1 HOUR'")) @db.Timestamp(6) // default
+    punished    User     @relation("punished", fields: [punished_id], references: [id])
+    punisher    User     @relation("punisher", fields: [issuer_id], references: [id])
 
     @@id([issuer_id, punished_id, channel_id])
     @@index([punished_id, issuer_id, type], name: "punished_id_issuer_id_type")

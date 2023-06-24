@@ -44,7 +44,8 @@ export class UserController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get('me')
     async me(@Req() req: Request) {
-        const user = await this.userService.getUserById(req.user['id']);
+        const user: any = await this.userService.getUserById(req.user['id'], true);
+        user['password'] = (user['password'] !== null ? '' : null);
         return user;
     }
     

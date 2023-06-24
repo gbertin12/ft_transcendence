@@ -79,6 +79,19 @@ export class DmsController {
 	async sendDMMessage(@Req() req, @Param() dto: GenericUserIdDto) {
 		const requester_id = req.user.id;
 		const interlocutor_id = dto.id;
+		// Check if the interlocutor are friends, and if interlocutor or requester didn't block each other
+		const areFriends = await this.friendsService.areFriends(requester_id, interlocutor_id);
+		if (!areFriends) {
+			throw new ForbiddenException("Users are not friends");
+		}
+		const isBlocked = await this.friendsService.isBlocked(requester_id, interlocutor_id);
+		if (isBlocked) {
+			throw new ForbiddenException("You are blocked by this user");
+		}
+		const isBlockedBy = await this.friendsService.isBlocked(interlocutor_id, requester_id);
+		if (isBlockedBy) {
+			throw new ForbiddenException("You blocked this user");
+		}
 		let message = await this.dmsService.createMessage(requester_id, interlocutor_id, req.body.content);
 		this.chatGateway.usersClients[requester_id].emit('dmMessage', message);
 		this.chatGateway.usersClients[interlocutor_id].emit('dmMessage', message);

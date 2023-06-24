@@ -160,6 +160,7 @@ function ProfileTooltip({ user }: { user: User }) {
 export default function AvatarTooltip({ user, placement }: { user: User, placement: any }) {
     return (
         <Tooltip
+            css={{zIndex: 100000}}
             placement={placement}
             content={<ProfileTooltip user={user}/>}>
             <Avatar
