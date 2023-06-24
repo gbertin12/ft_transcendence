@@ -325,12 +325,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                     placeholder={
                                         !mutedChannels.has(channel.id) ? `Send a message to #${channel.name}`
                                             :
-                                            generateMutedMessage(125364515461451)
+                                            generateMutedMessage(Infinity)
                                     }
                                     aria-label={
                                         !mutedChannels.has(channel.id) ? `Send a message to the channel : ${channel.name}`
                                             :
-                                            generateMutedMessage(455445455) // TODO: get duration from mutedChannels / bannedChannels
+                                            generateMutedMessage(Infinity)
                                     }
                                     minLength={1}
                                     maxLength={2000}
