@@ -140,6 +140,36 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(opponent.id).emit('duelRequest', initiator);
     }
 
+    @SubscribeMessage('acceptDuel')
+    acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
+        const player = this.players.find((p) => client.id === p.id);
+        const roomName: string = uuidv4();
+        const newRoom: roomInterface = {
+            name: roomName,
+            state: 0,
+            pongState: {
+                ball: {
+                    x: 50,
+                    y: 50,
+                    speedX: 2,
+                    speedY: 2,
+                },
+                player1: player,
+                player2: opponent,
+                modes: true
+            },
+        };
+
+        player.state = 2;
+        opponent.state = 2;
+        const duelData = { roomname: roomName, who: 0};
+        this.rooms.push(newRoom);
+        this.server.to(player.id).emit('searchGameDuel', duelData);
+        duelData.who = 1;
+        this.server.to(opponent.id).emit('searchGameDuel', duelData);
+        this.gameService.handleGame(newRoom, this.server);
+    }
+
     @SubscribeMessage('playerMove')
     playerMove(
         @MessageBody() data: { percent: number; clientId: string; room: string },

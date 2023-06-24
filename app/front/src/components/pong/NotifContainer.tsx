@@ -1,17 +1,17 @@
 import { useNotif } from '@/contexts/notif.context';
 import { useUser } from '@/contexts/user.context';
-import { Button, Card, Row, Spacer, Text } from '@nextui-org/react';
+import { Button, Card, Text } from '@nextui-org/react';
 
 export default function NotifContainer() {
     const { opponent } = useNotif();
     const { socket } = useUser();
 
     async function handleAccept() {
-        socket.emit('acceptDuel', {});
+        socket.emit('acceptDuel', opponent);
     }
 
     async function handleDecline() {
-        socket.emit('declineDuel', {});
+        socket.emit('declineDuel', opponent);
     }
 
     return (

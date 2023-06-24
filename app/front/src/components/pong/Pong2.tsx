@@ -220,6 +220,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			}
 			if (percent != -1)
 			{
+                                console.log("socket id:", socket.id);
 				socket.emit('playerMove', {
 					percent : percent, 
 					clientId : socket.id, 

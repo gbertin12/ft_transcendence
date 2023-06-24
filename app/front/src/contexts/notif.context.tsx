@@ -6,6 +6,10 @@ interface NotifContextType {
     setShowNotif: React.Dispatch<React.SetStateAction<boolean>>;
     opponent: PlayerInterface,
     setOpponent: React.Dispatch<React.SetStateAction<PlayerInterface>>;
+    roomName: string;
+    setRoomName: React.Dispatch<React.SetStateAction<string>>;
+    who: number;
+    setWho: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const NotifContext = createContext<NotifContextType>({
@@ -13,6 +17,10 @@ const NotifContext = createContext<NotifContextType>({
     setShowNotif: () => {},
     opponent: {} as PlayerInterface,
     setOpponent: () => {},
+    roomName: "",
+    setRoomName: () => {},
+    who: 0,
+    setWho: () => {},
 });
 
 export const useNotif = () => useContext(NotifContext);
@@ -20,9 +28,11 @@ export const useNotif = () => useContext(NotifContext);
 export const NotifContextProvider: React.FC<any> = ({ children }) => {
     const [ showNotif, setShowNotif ] = useState<boolean>(false);
     const [ opponent, setOpponent ] = useState<PlayerInterface>({} as PlayerInterface);
+    const [ roomName, setRoomName ] = useState<string>("");
+    const [ who, setWho ] = useState<number>(0);
 
     return (
-        <NotifContext.Provider value={{ showNotif, setShowNotif, opponent, setOpponent }}>
+        <NotifContext.Provider value={{ showNotif, setShowNotif, opponent, setOpponent, roomName, setRoomName, who, setWho }}>
             {children}
         </NotifContext.Provider>
     );
