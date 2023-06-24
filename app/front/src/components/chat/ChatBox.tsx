@@ -57,33 +57,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     const messagesRef = useRef<HTMLUListElement>(null);
 
-    socket.on("addStaff", (data: StaffUpdate) => {
-        if (data.channel_id === channel.id) {
-            setAdmins((admins) => {
-                const newAdmins = new Set(admins);
-                newAdmins.add(data.user_id);
-                return newAdmins;
-            });
-        }
-    });
-
-    socket.on("removeStaff", (data: StaffUpdate) => {
-        if (data.channel_id === channel.id) {
-            setAdmins((admins) => {
-                const newAdmins = new Set(admins);
-                newAdmins.delete(data.user_id);
-                return newAdmins;
-            });
-        }
-    });
-
-    socket.on("updateOwner", (data: OwnerUpdate) => {
-        if (data.channel_id === channel.id) {
-            setOwnerId(data.new_owner);
-            channel.owner_id = data.new_owner;
-        }
-    });
-
     function handleScroll() {
         if (messagesRef.current) {
             // Get height of the scrollable area
@@ -160,12 +133,36 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     useEffect(() => {
         socket.emit('join', channel.id);
+        socket.on("addStaff", (data: StaffUpdate) => {
+            if (data.channel_id === channel.id) {
+                setAdmins((admins) => {
+                    const newAdmins = new Set(admins);
+                    newAdmins.add(data.user_id);
+                    return newAdmins;
+                });
+            }
+        });
+        socket.on("removeStaff", (data: StaffUpdate) => {
+            if (data.channel_id === channel.id) {
+                setAdmins((admins) => {
+                    const newAdmins = new Set(admins);
+                    newAdmins.delete(data.user_id);
+                    return newAdmins;
+                });
+            }
+        });
+        socket.on("updateOwner", (data: OwnerUpdate) => {
+            if (data.channel_id === channel.id) {
+                setOwnerId(data.new_owner);
+                channel.owner_id = data.new_owner;
+            }
+        });
         socket.on('message', (payload: MessageData) => {
             // parse the timestamp
             payload.timestamp = new Date(payload.timestamp);
             setMessages((messages) => [payload, ...messages]);
         });
-        socket.on('messageDeleted', (payload: MessageData) => {
+        socket.on('deleteMessage', (payload: MessageData) => {
             // find the message in the list and remove it
             setMessages((messages) => {
                 const index = messages.findIndex((message) => message.message_id === payload.message_id);
@@ -240,7 +237,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('addStaff');
             socket.off('removeStaff');
             socket.off('updateOwner');
-            socket.off('messageDeleted');
+            socket.off('deleteMessage');
             socket.emit('leave', channel.id);
         }
     }, [socket, channel]);
