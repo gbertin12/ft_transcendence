@@ -6,6 +6,7 @@ import { Channel, Message } from "@/interfaces/chat.interfaces";
 import { useRouter } from "next/router";
 import { useChat } from "@/contexts/chat.context";
 import { useUser } from "@/contexts/user.context";
+import ChannelInvites from "./ChannelInvites";
 
 
 const ChannelList: React.FC<any> = () => {
@@ -28,11 +29,11 @@ const ChannelList: React.FC<any> = () => {
                 <ChannelCreateIcon />
             </Grid.Container>
 
-            {/* TODO: Display latest chats with friends and channel invites */}
             <ChatChannelBrowser
                 channels={channels}
                 channelChanged={handleChannelChange}
             />
+            <ChannelInvites />
         </>
     )
 }
