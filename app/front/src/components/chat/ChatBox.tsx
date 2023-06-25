@@ -175,54 +175,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 return [...channels];
             });
         });
-        socket.on("punishment", (punishment: PunishmentData) => {
-            // TODO: handle the punishment
-            switch (punishment.type) {
-                case "muted":
-                    setMutedChannels((mutedChannels) => {
-                        return new Set(mutedChannels).add(punishment.channel_id);
-                    });
-                    // Add a timeout to remove the channel from the list of banned channels
-                    setTimeout(() => {
-                        setMutedChannels((mutedChannels) => {
-                            const newMutedChannels = new Set(mutedChannels);
-                            newMutedChannels.delete(punishment.channel_id);
-                            return newMutedChannels;
-                        });
-                    }, (punishment.duration ? punishment.duration * 1000 : Infinity));
-                    break;
-                case "banned":
-                    setBannedChannels((bannedChannels) => {
-                        return new Set(bannedChannels).add(punishment.channel_id);
-                    });
-                    // Add a timeout to remove the channel from the list of banned channels
-                    setTimeout(() => {
-                        setBannedChannels((bannedChannels) => {
-                            const newBannedChannels = new Set(bannedChannels);
-                            newBannedChannels.delete(punishment.channel_id);
-                            return newBannedChannels;
-                        });
-                    }, (punishment.duration ? punishment.duration * 1000 : Infinity));
-                    break;
-                case "kicked":
-                    // remove the channel from the list of channels
-                    setChannels((channels) => {
-                        const index = channels.findIndex((channel) => channel.id === punishment.channel_id);
-                        if (index !== -1) {
-                            channels.splice(index, 1);
-                        }
-                        return [...channels];
-                    });
-                    break;
-            }
-        });
         fetchMessages(channel).then((messages) => {
             setMessages(messages);
         });
         return () => {
             socket.off('message');
             socket.off('staff');
-            socket.off('punishment');
             socket.off('addStaff');
             socket.off('removeStaff');
             socket.off('deleteMessage');

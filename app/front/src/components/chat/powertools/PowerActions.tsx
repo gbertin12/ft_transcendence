@@ -97,7 +97,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         ariaLabel='Delete this message'
                         icon={<IconTrash />}
                         color="default"
-                        render={isAuthor || isAdmin || isOwner}
+                        render={isAuthor || ((isAdmin || isOwner) && sender.id !== channel.owner_id)}
                         onPress={() => emitPowerAction(channel, "deleted", undefined, message)}
                     />
                 </Grid>
@@ -108,7 +108,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconVolume3 />}
                         color="error"
-                        render={(isOwner || isAdmin) && !isAuthor}
+                        render={(isOwner || isAdmin && sender.id !== channel.owner_id) && !isAuthor}
                         onPress={() => {
                             setPowerAction("muted");
                             setPowerModalOpen(true);
@@ -122,7 +122,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                         tooltipColor="error"
                         icon={<IconBan />}
                         color="error"
-                        render={(isOwner || isAdmin) && !isAuthor}
+                        render={(isOwner || isAdmin && sender.id !== channel.owner_id) && !isAuthor}
                         onPress={() => {
                             setPowerAction("banned");
                             setPowerModalOpen(true);

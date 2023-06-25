@@ -62,13 +62,13 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchChannels = async () => {
-            axios.get("http://localhost:3000/channel/all", 
+            axios.get("http://localhost:3000/channel/all",
                 {
                     withCredentials: true,
                     validateStatus: () => true,
                 })
                 .then((res) => {
-                    if (res.status !== 200) return ;
+                    if (res.status !== 200) return;
                     setChannels(res.data);
                 })
         };
@@ -76,7 +76,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             if (user.id === undefined) return;
             axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
                 .then((res) => {
-                    if (res.status !== 200) return ;
+                    if (res.status !== 200) return;
                     const relationships: Relationships = res.data;
                     if (Array.isArray(relationships.friends)) {
                         const friends: Friend[] = relationships.friends.map((friend) => {
@@ -113,16 +113,16 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                         }
                         setBlockedUsers(blockedUsers);
                         setFriends(friends);
-                        socket.emit("updateStatus", {"status": "online"});
+                        socket.emit("updateStatus", { "status": "online" });
                     }
                 }).catch((err) => {
-                    return ;
+                    return;
                 });
         };
         const fetchBans = async () => {
             if (user.id === undefined) return;
             try {
-                axios.get("http://localhost:3000/punishments/active", 
+                axios.get("http://localhost:3000/punishments/active",
                     {
                         withCredentials: true,
                         validateStatus: () => true,
@@ -166,7 +166,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     });
             }
             catch (err) {
-                return ;
+                return;
             }
         }
         const fetchFriendRequests = async () => {
@@ -175,10 +175,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 withCredentials: true,
                 validateStatus: () => true,
             }).then((response) => {
-                    if (response.status === 200) {
-                        setFriendRequests(response.data);
-                    }
-                });
+                if (response.status === 200) {
+                    setFriendRequests(response.data);
+                }
+            });
         };
 
         fetchChannels();
@@ -230,7 +230,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isTyping: true } : f));
             });
             socket.on("playing", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isPlaying: true, isTyping: false, isOnline: true} : f));
+                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isPlaying: true, isTyping: false, isOnline: true } : f));
             });
             socket.on("onlineAnswer", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isTyping: false, isPlaying: false } : f));
@@ -274,7 +274,52 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             });
             socket.on("updateOwner", (data: OwnerUpdate) => {
                 setChannels((channels) => channels.map((c) => c.id === data.channel_id ? { ...c, owner_id: data.new_owner } : c));
-
+            });
+            socket.on("punishment", (punishment: PunishmentData) => {
+                // TODO: handle the punishment
+                const noTimeoutThreshold = 157679999;
+                switch (punishment.type) {
+                    case "muted":
+                        setMutedChannels((mutedChannels) => {
+                            return new Set(mutedChannels).add(punishment.channel_id);
+                        });
+                        // Add a timeout to remove the channel from the list of banned channels
+                        if (punishment.duration && punishment.duration < noTimeoutThreshold) {
+                            setTimeout(() => {
+                                setMutedChannels((mutedChannels) => {
+                                    const newMutedChannels = new Set(mutedChannels);
+                                    newMutedChannels.delete(punishment.channel_id);
+                                    return newMutedChannels;
+                                });
+                            }, (punishment.duration ? punishment.duration * 1000 : Infinity));
+                        }
+                        break;
+                    case "banned":
+                        setBannedChannels((bannedChannels) => {
+                            return new Set(bannedChannels).add(punishment.channel_id);
+                        });
+                        // Add a timeout to remove the channel from the list of banned channels
+                        if (punishment.duration && punishment.duration < noTimeoutThreshold) {
+                            setTimeout(() => {
+                                setBannedChannels((bannedChannels) => {
+                                    const newBannedChannels = new Set(bannedChannels);
+                                    newBannedChannels.delete(punishment.channel_id);
+                                    return newBannedChannels;
+                                });
+                            }, (punishment.duration ? punishment.duration * 1000 : Infinity));
+                        }
+                        break;
+                    case "kicked":
+                        // remove the channel from the list of channels
+                        setChannels((channels) => {
+                            const index = channels.findIndex((channel) => channel.id === punishment.channel_id);
+                            if (index !== -1) {
+                                channels.splice(index, 1);
+                            }
+                            return [...channels];
+                        });
+                        break;
+                }
             });
             return () => {
                 socket.off("newChannel");
@@ -294,6 +339,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("blocked");
                 socket.off("unblocked");
                 socket.off("dmMessage");
+                socket.off("updateOwner");
+                socket.off("punishment");
             }
         }
     }, [socket]);
