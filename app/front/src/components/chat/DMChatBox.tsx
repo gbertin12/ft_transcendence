@@ -81,6 +81,8 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
                 return [];
             } else if (res.status === 403) {
                 return [];
+            } else if (res.status === 404) {
+                return [];
             } else {
                 setMissingPermissions(false);
             }
