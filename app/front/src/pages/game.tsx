@@ -23,6 +23,8 @@ export default function Game() {
     const [searchGame, setSearchGame] = useState(false);
     const [modes, setModes] = useState(true);
     const [dataEndGame, setDataEndGame] = useState<PlayerEndGame>({} as PlayerEndGame);
+    const [nameOpponent, setNameOpponent] = useState<string>("");
+    const [windowWidth, setWindowWidth] = useState<number>(0);
 
     const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
 
@@ -31,18 +33,21 @@ export default function Game() {
             if (!user.id) {
                 router.push(`/?next=${router.asPath}`);
             }
-            if (router.query && router.query.roomName && router.query.who) {
-                handleStartGame(router.query.roomName, parseInt(router.query.who));
+            if (router.query && router.query.roomName && router.query.who, router.query.nameOpponent) {
+                handleStartGame(router.query.roomName, parseInt(router.query.who), router.query.nameOpponent);
             }
         }
-    }, [router]);
+    }, [router]); 
 
-    const handleStartGame = (roomName: string, playerNumber: number) => {
+    const handleStartGame = (roomName: string, playerNumber: number, nameOpponent: string) => {
         setRoomName(roomName);
         setWho(playerNumber);
         socket.emit("joinRoom", roomName);
         setPlayGame(true);
         setEndGame(false);
+        setNameOpponent(nameOpponent);
+        if (window && window.innerWidth != 0)
+            setWindowWidth(window.innerWidth);
     }
 
     useEffect(() => {
@@ -138,7 +143,7 @@ export default function Game() {
             <div className="flex flex-col items-center">
                 <Spacer y={3} />
                 <div style={{width:'80%', maxWidth:'1000px'}}>
-                    <Pong2 roomName={roomName} who={who} handleSetEndGame={handleSetEndGame} />
+                    <Pong2 nameOpponent={nameOpponent} roomName={roomName} windowWidth={windowWidth} who={who} handleSetEndGame={handleSetEndGame} />
                 </div>
             </div>
         </>

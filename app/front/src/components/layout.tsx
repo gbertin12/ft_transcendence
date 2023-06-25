@@ -18,9 +18,9 @@ export default function Layout({ children }) {
             setOpponent(opponent);
         });
 
-        socket.on('searchGameDuel', ({ roomname, who }: { roomname: string, who: number }) => {
+        socket.on('searchGameDuel', ({ roomname, who, nameOpponent }: { roomname: string, who: number, nameOpponent : string }) => {
             setShowNotif(false);
-            router.push(`/game?roomName=${roomname}&who=${who}`);
+            router.push(`/game?roomName=${roomname}&who=${who}&nameOpponent=${nameOpponent}`);
         });
     }, [socket]);
 

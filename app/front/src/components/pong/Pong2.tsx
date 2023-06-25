@@ -65,7 +65,6 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 	
 
 	let p5lib : p5Types;
-	windowWidth = window.innerWidth;
 	const sketchRef = useRef(null);
 	const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 		ssr: false,
@@ -106,7 +105,6 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		p5lib = p5;
 		resize = 1;
 		setSize(p5);
-
 		mapPowers = [
 			{ isActive: false, x : 0, y : 0, id : 0, type : 0 },
 			{ isActive: false, x : 0, y : 0, id : 1, type : 0 },

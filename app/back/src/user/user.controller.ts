@@ -50,6 +50,7 @@ export class UserController {
         return user;
     }
     
+//fileIsRequired: false
 @UseGuards(AuthGuard('jwt-2fa'))
 @Post('me')
 @UseInterceptors(FileInterceptor('avatar'))
@@ -60,7 +61,6 @@ async update(
         validators: [
             new MaxFileSizeValidator({ maxSize: 10000 }),
         ],
-        fileIsRequired: false
     })) avatar?: Express.Multer.File,
     ) {
         try {
@@ -80,6 +80,7 @@ async update(
             return avatar.filename;
         }
     }
+    // http://localhost:8000/?next=/game?roomName=aa627a88-972e-42d0-b3af-789e670b77c3&who=0&nameOpponentPnuUPdmP
 
     @Get('profile/:username')
     async getProfile(@Param() dto: UsernameParamDto) {

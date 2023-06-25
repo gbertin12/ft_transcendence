@@ -161,6 +161,7 @@ export class GameService {
         room.pongState.player1.score = 0;
         room.pongState.player2.score = 0;
         // Start loop of game
+        await sleep(1000);
         while (room.state != 2) {
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
@@ -177,11 +178,6 @@ export class GameService {
                 handleColisionWithPower(room, server, obstacles, powersAvailables);
                 //handleColisionWithObstacle(room, server, obstacles);
             }
-            // timeToSendBallPosition++;
-            // if (timeToSendBallPosition === 1)
-            // {
-            //     timeToSendBallPosition = 0;
-            // }
             sendBallPosition(room, server);
             // update ball position
             room.pongState.ball.x = room.pongState.ball.x + convertToPixel(room.pongState.ball.speedX, canvasWidth);
@@ -190,7 +186,14 @@ export class GameService {
             handleCheckCollision(room, server);
             // check if someone loose the round
             if (room.pongState.ball.x <= radiusBall || room.pongState.ball.x >= canvasWidth - radiusBall)
+            {
+                server.to(room.name).emit('updateBallPosition', {
+                    x: 150,
+                    y: 150,
+                });
+                await sleep(1000);
                 handleResetPlayerPosition(room, server);
+            }
             await sleep(20);
         }
     }
