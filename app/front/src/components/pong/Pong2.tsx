@@ -159,7 +159,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		// draw obstacles
 		for (let i = 0; i < mapObstacles.length; i++) {
 			if (mapObstacles[i].isActive) {
-				console.log("draw obstacle", mapObstacles[i].x, mapObstacles[i].y, mapObstacles[i].size)
 				p5.rect( mapObstacles[i].x, mapObstacles[i].y, p5.width / 50, mapObstacles[i].size);
 			}
 
@@ -195,7 +194,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 					else
 						paddlePlayer1Y -= speedPaddle;
 					percent = paddlePlayer1Y / p5lib.height * 100;
-				} else {
+				} else if (who === 1) {
 					if (paddlePlayer2Y - speedPaddle < 0)
 						paddlePlayer2Y = 0;
 					else
@@ -210,7 +209,7 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 					else
 						paddlePlayer1Y += speedPaddle;
 					percent = paddlePlayer1Y / p5lib.height * 100;
-				} else {
+				} else if (who === 1) {
 					if (paddlePlayer2Y + speedPaddle > p5lib.height - paddleHeight)
 						paddlePlayer2Y = p5lib.height - paddleHeight;
 					else
@@ -220,7 +219,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			}
 			if (percent != -1)
 			{
-                                console.log("socket id:", socket.id);
 				socket.emit('playerMove', {
 					percent : percent, 
 					clientId : socket.id, 
@@ -278,7 +276,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 			{
 				let newX = convertToPixel(x, p5lib.width);
 				let newY = convertToPixel(y, p5lib.height);
-				console.log("newPower", newX, newY, id, type);
 				for (let i = 0; i < mapPowers.length; i++)
 				{
 					if (mapPowers[i].id == id)
@@ -295,7 +292,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 		socket.on('removePower', ({id} : {id : number}) => {
 			if (p5lib)
 			{
-				console.log("removePower");
 				for (let i = 0; i < mapPowers.length; i++)
 				{
 					if (mapPowers[i].id == id)
@@ -315,7 +311,6 @@ const Pong2 = ({roomName, who, handleSetEndGame}
 				let sizePixels = convertToPixel(size, p5lib.height);
 				let newX = convertToPixel(x, p5lib.width);
 				let newY = convertToPixel(y, p5lib.height);
-				console.log("addObstacle", newX, newY, id, sizePixels);
 				for (let i = 0; i < mapObstacles.length; i++)
 				{
 					if (mapObstacles[i].id == id)

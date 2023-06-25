@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
     MessageBody,
     OnGatewayConnection,
@@ -61,7 +62,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 userInfos: user,
             };
             this.players.push(player);
-            //console.log('players', this.players);
             // send the player id to the client
             client.emit('playerId', client.id);
         } catch {
@@ -125,8 +125,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             };
 
             this.rooms.push(newRoom);
-            this.server.to(playerId).emit('searchGame', newRoom.name, 1);
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0);
+            this.server.to(playerId).emit('searchGame', newRoom.name, 1);
             this.gameService.handleGame(newRoom, this.server);
         }
     }
@@ -144,6 +144,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
         const player = this.players.find((p) => client.id === p.id);
         const roomName: string = uuidv4();
+        player.state = 2;
+        opponent.state = 2;
         const newRoom: roomInterface = {
             name: roomName,
             state: 0,
@@ -160,8 +162,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             },
         };
 
-        player.state = 2;
-        opponent.state = 2;
+       
         const duelData = { roomname: roomName, who: 0};
         this.rooms.push(newRoom);
         this.server.to(player.id).emit('searchGameDuel', duelData);
@@ -176,6 +177,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {
         const room = this.rooms.find((room) => room.name === data.room);
         if (room) {
+            //console.log(room)
             if (room.pongState.player1.id === data.clientId) {
                 const percent = data.percent;
                 room.pongState.player1.y = percent;
@@ -202,19 +204,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             player.state = 0;
         }
         this.server.to(playerId).emit('cancelGame');
-        console.log("CANCLED GASME");
     }
 
     @SubscribeMessage('joinRoom')
     handleJoinRoom(client: Socket, roomName: string): void {
         client.join(roomName);
-        console.log('joinRoom', client.id);
     }
 
     @SubscribeMessage('leaveRoom')
     handleLeaveRoom(client: Socket, roomName: string): void {
         client.leave(roomName);
-        console.log('leaveRoom', client.id);
     }
 
     bustLeaver(client: Socket, roomName: string) {

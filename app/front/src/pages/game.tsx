@@ -30,7 +30,7 @@ export default function Game() {
                 router.push(`/?next=${router.asPath}`);
             }
             if (router.query && router.query.roomName && router.query.who) {
-                handleStartGame(router.query.roomName, router.query.who);
+                handleStartGame(router.query.roomName, parseInt(router.query.who));
             }
         }
     }, [router]);
@@ -38,7 +38,6 @@ export default function Game() {
     const handleStartGame = (roomName: string, playerNumber: number) => {
         setRoomName(roomName);
         setWho(playerNumber);
-        console.log("who:", playerNumber);
         socket.emit("joinRoom", roomName);
         setPlayGame(true);
         setEndGame(false);
