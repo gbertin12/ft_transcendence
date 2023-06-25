@@ -8,6 +8,8 @@ import CardEndGame from '@/components/pong/CardEndGame';
 import ButtonStart from '@/components/pong/ButtonStart';
 import CardPlayerInformation from '@/components/pong/CardPlayerInformation';
 import { PlayerEndGame } from '@/interfaces/pong.interface';
+import ButtonModes from '@/components/pong/ButtonModes';
+import ButtonHintGame from '@/components/pong/ButtonHintGame';
 
 export default function Game() {
     const router = useRouter();
@@ -74,6 +76,10 @@ export default function Game() {
         setEndGame(true);
     }
 
+    const handleSetModes = (value: boolean) => {
+        setModes(value);
+    }
+
     const handleCloseCardEndGame = () => {
         setEndGame(false);
         setWho(-1);
@@ -91,20 +97,24 @@ export default function Game() {
             <div className="flex flex-col items-center">
                 <Spacer y={3} />
                 <div style={{width:'80%', maxWidth:'1000px'}}>
-                    <div>
-                        <Checkbox defaultSelected onChange={() => setModes(!modes)}>Modes</Checkbox>
-                    </div>
                     <Container>
                         <Row justify='center'>
-                            <CardPlayerInformation searchGame={false} username={user.name} avatar={pathAvatar} elo={user.elo} nbWin={user.wins} nbLoose={user.losses} />
-                            <Spacer x={2} />
-                            <Text css={{ my:'auto' }} h1>VS</Text>
-                            <Spacer x={2} />
-                            <CardPlayerInformation searchGame={searchGame} username={"Adversary"} avatar="https://i.imgur.com/pLGJ0Oj.jpeg" elo={0} nbWin={0} nbLoose={0} />
+                            <Row justify='center'>
+                                <CardPlayerInformation searchGame={false} username={user.name} avatar={pathAvatar} elo={user.elo} nbWin={user.wins} nbLoose={user.losses} />
+                                <Spacer x={2} />
+                                <Text css={{ my:'auto' }} h1>VS</Text>
+                                <Spacer x={2} />
+                                <CardPlayerInformation searchGame={searchGame} username={"Adversary"} avatar="https://i.imgur.com/pLGJ0Oj.jpeg" elo={0} nbWin={0} nbLoose={0} />
+                            </Row>
                         </Row>
                     </Container>
                     <Spacer y={2} />
-                    <ButtonStart searchGame={searchGame} modes={modes} handleSetSearchGame={handleSetSearchGame} />
+                    <Row justify='center' >
+                        <ButtonModes modes={modes} handleSetModes={handleSetModes} />
+                        <ButtonStart searchGame={searchGame} modes={modes} handleSetSearchGame={handleSetSearchGame} />
+                        <ButtonHintGame />
+                    </Row>
+                    <Spacer />
                 </div>
             </div>
         </>
