@@ -102,7 +102,7 @@ export class AuthController {
     ) {
         const token = await this.authService.generateJWT(req.user['id']);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.send('/profile');
+        res.send({ otp: req.user['otp'] });
     }
 
     // before starting the OAuth flow, we hit this endpoint
@@ -159,7 +159,7 @@ export class AuthController {
         const user = await this.userService.createDummyUser();
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+        res.end();
     }
 
     @Get('/logout')

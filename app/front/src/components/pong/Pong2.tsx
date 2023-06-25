@@ -201,7 +201,7 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 					else
 						paddlePlayer1Y -= speedPaddle;
 					percent = paddlePlayer1Y / p5lib.height * 100;
-				} else {
+				} else if (who === 1) {
 					if (paddlePlayer2Y - speedPaddle < 0)
 						paddlePlayer2Y = 0;
 					else
@@ -216,7 +216,7 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 					else
 						paddlePlayer1Y += speedPaddle;
 					percent = paddlePlayer1Y / p5lib.height * 100;
-				} else {
+				} else if (who === 1) {
 					if (paddlePlayer2Y + speedPaddle > p5lib.height - paddleHeight)
 						paddlePlayer2Y = p5lib.height - paddleHeight;
 					else
@@ -304,7 +304,6 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 				}
 			}
 		});
-
 		return () => {
 			socket.off('playerMove');
 			socket.off('updateScore');

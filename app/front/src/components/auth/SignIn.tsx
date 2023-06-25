@@ -1,26 +1,81 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button , Grid, Text, Row, FormElement } from "@nextui-org/react";
+import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
+import MFAInput from './MFAInput';
+import { useUser } from '@/contexts/user.context';
 
 export default function SignIn({ closeModal }: { closeModal: () => void }) {
     const [ username, setUsername ] = useState<string>("");
     const [ password, setPassword] = useState<string>("");
     const [ error, setError ] = useState<string>("");
+
+    const [ showInput, setShowInput ] = useState<boolean>(false);
+    const [ otp, setOtp ] = useState<string>("");
+    const [ mfaError, setMfaError ] = useState<string>("");
+
+    const [ nextPage, setNextPage ] = useState<string>("/profile");
     const router = useRouter();
+    const { setUser } = useUser();
+
+    useEffect(() => {
+        if (router.isReady) {
+            if (router.query && router.query.next) {
+                setNextPage(router.query.next);
+            }
+        }
+    }, [router]);
+
+    async function verify2FA() {
+        const res = await fetch("http://localhost:3000/auth/2fa/verify", {
+            credentials: "include",
+            method: "POST",
+            body: JSON.stringify({ otp }),
+            headers: { "Content-Type": "application/json" },
+        });
+        if (res?.ok) {
+            setShowInput(false);
+            closeModal();
+            //await refreshUser();
+            //router.push(nextPage);
+            window.location.href = nextPage;
+        } else {
+            const err = await res.json();
+            setMfaError(err.message);
+            setOtp("");
+        }
+    }
+
+    async function refreshUser() {
+        const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
+        if (res?.ok) {
+            const userData = await res.json();
+            setUser(userData);
+        }
+    }
 
     async function userPassLogin() {
         if (username && password) {
-            axios.post("http://localhost:3000/auth/login", { username, password }, {  withCredentials: true })
-                .then((res) => {
-                    closeModal();
-                    router.push(res.data);
-                })
-                .catch((_err) => {
-                    setError("login failed");
-                })
+            const res = await fetch("http://localhost:3000/auth/login", {
+                credentials: "include",
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
+            if (res?.ok) {
+                const data = await res.json();
+                if (data.otp) {
+                    setShowInput(true);
+                } else {
+                    //await refreshUser();
+                    //router.push(nextPage);
+                    window.location.href = nextPage;
+                }
+            } else {
+                setError("Login failed");
+            }
         }
     }
 
@@ -48,9 +103,30 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
         setPassword(target.value);
     }
 
+    if (showInput) {
+        return (
+            <Modal
+                closeButton
+                preventClose
+                width="50%"
+                aria-labelledby="2FA Input"
+                open={showInput}
+                onClose={() => setShowInput(false)}>
+                <Modal.Header>
+                    <Text>Enter your TOTP to continue</Text>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <MFAInput code={otp} setCode={setOtp} btnCallback={verify2FA}/>
+                    {(mfaError) && (<Text color="error">{mfaError}</Text>)}
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
     return (
         <Grid>
-            <Text h4>Sign in</Text>
+            <Text h4>Login</Text>
             <Grid.Container direction="column" >
                 <Row>
                     <Input bordered onInput={handleOnInputUsername} value={username} placeholder="Username" label="Username"/>
@@ -72,7 +148,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
                 <Grid.Container justify='flex-end'>
                     <Grid >
                         <Button bordered onPress={userPassLogin} auto color="primarySolidContrast">
-                            <Text >Sign in</Text>
+                            <Text>Login</Text>
                         </Button>
                     </Grid>
                 </Grid.Container>

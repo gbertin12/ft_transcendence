@@ -161,7 +161,7 @@ export class GameService {
         room.pongState.player1.score = 0;
         room.pongState.player2.score = 0;
         // Start loop of game
-        while (1) {
+        while (room.state != 2) {
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
                 this.handleEndGame(room, server, false);
@@ -245,14 +245,15 @@ export class GameService {
 
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);
         const user2 = await this.userService.getUserByName(room.pongState.player2.name);
-        server.to(room.pongState.player1.id).emit('updateUser', user1, forfeit);
-        server.to(room.pongState.player2.id).emit('updateUser', user2, forfeit);
+        server.to(room.pongState.player1.id).emit('updateUser', user1);
+        server.to(room.pongState.player2.id).emit('updateUser', user2);
         const endGame: PlayerEndGame = { id: 1, room, eloDiff, forfeit };
         server.to(room.pongState.player1.id).emit('endGame', endGame);
         endGame.id = 2;
         server.to(room.pongState.player2.id).emit('endGame', endGame);
         room.pongState.player1.score = 0;
         room.pongState.player2.score = 0;
+        console.log("IN HANDLE END GAME: forfeit = ", forfeit);
     }
 
     calcElo(winner: PlayerInterface, looser: PlayerInterface): number[] {

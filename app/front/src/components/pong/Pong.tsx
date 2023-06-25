@@ -178,14 +178,12 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
     const handleUpdateVectorBall = ({ speedX, speedY }: { speedX: number, speedY: number }) => {
         const ratioX = canvasHeightServerSide / canvas.height;
         const ratioY = canvasWidthServerSide / canvas.width;
-        console.log("update ball vector ", speedX / ratioX, speedY / ratioY)
 		setBallVectorSpeed({speedX : speedX / ratioX, speedY : speedY / ratioY});
     }
 
     const handleNewPowers = ({ x, y, id, type }: { x: number, y: number, id: number, type: number }) => {
         const PixelX = convertToPixel(x, canvas.width);
         const PixelY = convertToPixel(y, canvas.height);
-        console.log("new power id", id, PixelX, PixelY);
         setPowers(prevPowers => {
             return prevPowers.map((power) => {
                 if (power.id === id) {
@@ -213,8 +211,6 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
         let sizePixels = convertToPixel(size, canvas.height);
         let xPixels = convertToPixel(x, canvas.width);
         let yPixels = convertToPixel(y, canvas.height);
-        console.log(x, y, size, xPixels, yPixels, sizePixels)
-        setObstacles(prevObstacles => {
             return prevObstacles.map((obstacle) => {
                 if (obstacle.id == id) {
                     return { isActive: true, x: xPixels, y: yPixels, size: sizePixels, id: id };
@@ -226,7 +222,6 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
     }
 
     const handleResetPlayer = ({ percentP1, percentP2 }: { percentP1: number, percentP2: number }) => {
-        console.log('resetPlayers', percentP1, percentP2);
         const newYP1 = convertToPixel(percentP1, canvas.height);
         const newYP2 = convertToPixel(percentP2, canvas.height);
         setPlayerOnePosition(newYP1);
@@ -235,7 +230,6 @@ export default function Pong({ roomName, who, handleSetEndGame }: { roomName: st
 
     const handleEndGame = (endGame: PlayerEndGame) => {
         handleSetEndGame(endGame);
-        console.log(endGame);
     }
 
     useEffect(() => {

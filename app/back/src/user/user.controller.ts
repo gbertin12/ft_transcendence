@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
     Body,
     Controller,
@@ -49,18 +50,18 @@ export class UserController {
         return user;
     }
     
-    @UseGuards(AuthGuard('jwt-2fa'))
-    @Post('me')
-    @UseInterceptors(FileInterceptor('avatar'))
-    async update(
-        @Req() req: Request,
-        @Body('') dto: UpdateNameDto,
-        @UploadedFile(new ParseFilePipe({
-            validators: [
-                new MaxFileSizeValidator({ maxSize: 10000 }),
-            ],
-            fileIsRequired: false
-        })) avatar?: Express.Multer.File,
+@UseGuards(AuthGuard('jwt-2fa'))
+@Post('me')
+@UseInterceptors(FileInterceptor('avatar'))
+async update(
+    @Req() req: Request,
+    @Body('') dto: UpdateNameDto,
+    @UploadedFile(new ParseFilePipe({
+        validators: [
+            new MaxFileSizeValidator({ maxSize: 10000 }),
+        ],
+        fileIsRequired: false
+    })) avatar?: Express.Multer.File,
     ) {
         try {
             await this.userService.updateName(req.user['id'], dto.name);

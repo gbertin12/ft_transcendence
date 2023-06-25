@@ -3,7 +3,7 @@ import SignUp from './SignUp';
 import ConnectedButton from '@/components/auth/ConnectedButton';
 
 import React from "react";
-import { Modal, Button, Text, Input, Grid } from "@nextui-org/react";
+import { Modal, Button, Text, Grid } from "@nextui-org/react";
 import { useUser } from '@/contexts/user.context';
 
 
@@ -16,7 +16,6 @@ export default function ModalSign() {
 
     const closeHandler = () => {
         setVisible(false);
-        console.log("closed");
     };
 
     return (
@@ -24,7 +23,7 @@ export default function ModalSign() {
             {
                 !userId ?
                     <Button auto onPress={handler}>
-                        <Text bold color="secondary">Se connecter </Text>
+                        <Text color="secondary">Login</Text>
                     </Button>
                     :
                 <ConnectedButton/>
@@ -32,7 +31,7 @@ export default function ModalSign() {
             <Modal closeButton
                 blur
                 aria-labelledby="SignIn"
-                width="80%"
+                width="50%"
                 open={visible}
                 onClose={closeHandler}
                 >

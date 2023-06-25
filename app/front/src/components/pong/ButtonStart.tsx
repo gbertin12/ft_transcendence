@@ -4,14 +4,12 @@ import { useUser } from '@/contexts/user.context';
 
 export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
     : { searchGame: boolean, modes: boolean, handleSetSearchGame: (value: boolean) => void }) {
-    const { socket } = useUser();
+    const { user, socket } = useUser();
 
     // Cancel Game
     function handleCancelGame() {
         if (socket) {
-            socket.emit('cancelGame', {
-                clientId: socket.id
-            });
+            socket.emit('cancelGame');
             handleSetSearchGame(false);
         }
     }
@@ -34,8 +32,7 @@ export default function ButtonStart({ searchGame, modes, handleSetSearchGame }
             color="error"
             >Cancel Game</Button>
         </>
-    }
-    else {
+    } else {
         return <>
             <Button 
             css={{mx:'10px'}}

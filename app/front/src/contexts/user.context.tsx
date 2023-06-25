@@ -39,7 +39,6 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         socket.on('updateUser', (user: User) => {
-            console.log("IN UPDATE USER");
             setUser(user);
         });
     }, [socket]);

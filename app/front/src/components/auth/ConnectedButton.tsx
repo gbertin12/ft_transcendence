@@ -3,7 +3,6 @@ import { useUser } from '@/contexts/user.context';
 
 export default function ConnectedButton() {
     const { user } = useUser();
-    console.log(user);
 
     return (
         <Dropdown>
@@ -19,10 +18,10 @@ export default function ConnectedButton() {
             />
           </Dropdown.Trigger>
             <Dropdown.Menu aria-label="Connected Menu">
-                <Dropdown.Item key="profile">
+                <Dropdown.Item key="profile" textValue="View profile">
                     <Link href='/profile' color="text">View profile</Link>
                     </Dropdown.Item>
-                <Dropdown.Item key="Logout" color="error">
+                <Dropdown.Item key="Logout" color="error" textValue="Logout">
                     <Link href="http://localhost:3000/auth/logout" color="error">Logout</Link>
                 </Dropdown.Item>
             </Dropdown.Menu>

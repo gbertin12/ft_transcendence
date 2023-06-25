@@ -159,7 +159,6 @@ export class UserService {
     // create a new user if it doesn't already exist
     async createUser(name: string, password: string = null): Promise<User> {
         let avatarPath: string = await getPepeAvatar();
-        console.log(avatarPath)
         const user = await this.db.user.upsert({
             where: { name },
             update: {},

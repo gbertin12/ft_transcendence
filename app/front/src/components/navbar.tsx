@@ -1,5 +1,5 @@
 import { IconMedal,  IconMessageCircle2, IconDeviceGamepad } from '@tabler/icons-react';
-import { Navbar, Text } from "@nextui-org/react";
+import { Navbar } from "@nextui-org/react";
 import ModalSign from "./auth/ModalSign";
 import Link from 'next/link';
 
@@ -7,7 +7,7 @@ export default function myNavbar() {
     return (
         <Navbar maxWidth="fluid" variant="static" color="backgroundAlpha">
             <Navbar.Brand >
-                <Text color="primary">ft_pong</Text>
+                <Link href="/" color="primary">ft_pong</Link>
             </Navbar.Brand >
 
             <Navbar.Content gap={50} >

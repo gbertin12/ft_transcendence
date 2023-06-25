@@ -1,5 +1,5 @@
 import React, { FormEvent } from "react";
-import { Button, FormElement, Input, Spacer } from "@nextui-org/react";
+import { Button, FormElement, Input, Row, Spacer } from "@nextui-org/react";
 
 export default function MFAInput(
     { code, setCode, btnCallback }: { code: string, setCode: (code: string) => void, btnCallback: () => void}
@@ -10,7 +10,7 @@ export default function MFAInput(
     }
 
     return (
-        <>
+        <Row justify="center">
             <Input
                 bordered
                 aria-label="2FA input"
@@ -19,6 +19,6 @@ export default function MFAInput(
                 value={code}/>
             <Spacer x={1}/>
             <Button auto onPress={btnCallback}>Verify</Button>
-        </>
+        </Row>
     );
 }
