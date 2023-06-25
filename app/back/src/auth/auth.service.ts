@@ -119,7 +119,7 @@ export class AuthService {
         return { state, state_token };
     }
 
-    async setOTP(id: number): Promise<string> {
+    async generateTOTP() {
         const secret = new OTPAuth.Secret({ size: 42 });
         const totp = new OTPAuth.TOTP({
             issuer: 'ACME',
@@ -129,9 +129,7 @@ export class AuthService {
             period: 30,
             secret,
         });
-        await this.userService.updateOTPSecret(id, secret.base32);
-        const uri = totp.toString();
-        return uri;
+        return totp;
     }
 
     async unsetOTP(id: number) {

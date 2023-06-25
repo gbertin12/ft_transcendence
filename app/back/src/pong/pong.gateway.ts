@@ -146,7 +146,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const roomName: string = uuidv4();
         const newRoom: roomInterface = {
             name: roomName,
-            state: 0,
+            state: 1,
             pongState: {
                 ball: {
                     x: 50,

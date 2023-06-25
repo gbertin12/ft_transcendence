@@ -35,21 +35,12 @@ export default function Game() {
         }
     }, [router]);
 
-    const handleStartGame = (roomName: string, playerNumber: number) => {
-        setRoomName(roomName);
-        setWho(playerNumber);
-        console.log("who:", playerNumber);
-        socket.emit("joinRoom", roomName);
-        setPlayGame(true);
-        setEndGame(false);
-    }
-
     useEffect(() => {
         socket.on('searchGame', handleStartGame)
         return () => {
             socket.off('searchGame', handleStartGame);
         }
-    }, [socket, roomName]);
+    }, [socket]);
 
     useEffect(() => {
         const exitingFunction = () => {
@@ -62,6 +53,15 @@ export default function Game() {
             router.events.off("routeChangeStart", exitingFunction);
         };
     }, [roomName]);
+
+    const handleStartGame = (roomName: string, playerNumber: number) => {
+        setRoomName(roomName);
+        setWho(playerNumber);
+        console.log("who:", playerNumber);
+        socket.emit("joinRoom", roomName);
+        setPlayGame(true);
+        setEndGame(false);
+    }
 
     const handleSetSearchGame = (value: boolean) => {
         setSearchGame(value);

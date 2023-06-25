@@ -132,6 +132,13 @@ export class UserService {
         });
     }
 
+    async hasOTP(id: number): Promise<boolean> {
+        const user = await this.db.user.findUnique({
+            where: { id },
+        });
+        return user.otp;
+    }
+
     async getOTPSecretById(id: number): Promise<string> {
         const user = await this.db.user.findUnique({
             where: { id },
@@ -149,7 +156,7 @@ export class UserService {
             });
         } else {
             await this.db.user.updateMany({
-                data: { otp: false, otpSecret: null },
+                data: { otp: false, otpSecret: null, otpVerified: false },
                 where: { id, otp: true },
             });
         }
