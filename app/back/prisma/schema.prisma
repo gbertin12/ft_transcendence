@@ -33,6 +33,8 @@ model User {
     punisher          Punishment[]     @relation("punisher")
     ChannelAdmin      ChannelAdmin[]
     ChannelAccess     ChannelAccess[]
+    ChannelInvite     ChannelInvite[]
+    ChannelInvite     ChannelInvite[]
 }
 
 model MatchHistory {
@@ -83,6 +85,16 @@ model FriendRequest {
     @@id([sender_id, receiver_id])
 }
 
+model ChannelInvite {
+    sender_id   Int
+    receiver_id Int
+    channel_id  Int
+    sent_at     DateTime @default(now()) @db.Timestamp(6)
+    sender      User     @relation(fields: [sender_id], references: [id])
+    receiver    User     @relation(fields: [receiver_id], references: [id])
+    channel     Channel  @relation(fields: [channel_id], references: [id])
+}
+
 model Channel {
     id             Int              @id @default(autoincrement())
     name           String           @db.VarChar(64)
@@ -95,6 +107,7 @@ model Channel {
     channel_access ChannelAccess[]
     admins         ChannelAdmin[]
     ChannelInvites ChannelInvites[]
+    ChannelInvite  ChannelInvite[]
 }
 
 model ChannelAccess {
