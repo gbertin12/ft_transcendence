@@ -6,6 +6,10 @@ import axios from 'axios';
 interface ChatContextType {
     channels: Channel[];
     setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
+    privateChannels: Channel[];
+    setPrivateChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
+    publicChannels: Channel[];
+    setPublicChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
     friends: Friend[];
     setFriends: React.Dispatch<React.SetStateAction<Friend[]>>;
     bannedChannels: Set<number>;
@@ -30,6 +34,10 @@ interface OwnerUpdate {
 const ChatContext = createContext<ChatContextType>({
     channels: [],
     setChannels: () => { },
+    privateChannels: [],
+    setPrivateChannels: () => { },
+    publicChannels: [],
+    setPublicChannels: () => { },
     friends: [],
     setFriends: () => { },
     bannedChannels: new Set<number>(),
@@ -50,6 +58,8 @@ export const useChat = () => useContext(ChatContext);
 
 export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
+    const [privateChannels, setPrivateChannels] = useState<Channel[]>([]);
+    const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
@@ -186,6 +196,14 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         fetchBans();
         fetchFriendRequests();
     }, [user]);
+
+    useEffect(() => {
+        // Filter out public channels / private channels that user is in
+        const publicChannels = channels.filter((channel) => !channel.private);
+        const privateChannels = channels.filter((channel) => channel.private); // The API only returns private channels that user is in
+        setPublicChannels(publicChannels);
+        setPrivateChannels(privateChannels);
+    }, [channels])
 
     // Listen for new friends / channels
     const { socket } = useUser();
@@ -354,6 +372,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         <ChatContext.Provider value={{
             channels,
             setChannels,
+            publicChannels,
+            setPublicChannels,
+            privateChannels,
+            setPrivateChannels,
             friends,
             setFriends,
             bannedChannels,
