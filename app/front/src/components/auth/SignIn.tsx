@@ -38,9 +38,9 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
         if (res?.ok) {
             setShowInput(false);
             closeModal();
-            //await refreshUser();
-            //router.push(nextPage);
-            window.location.href = nextPage;
+            await refreshUser();
+            router.push(nextPage);
+            //window.location.href = nextPage;
         } else {
             const err = await res.json();
             setMfaError(err.message);
@@ -69,9 +69,9 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
                 if (data.otp) {
                     setShowInput(true);
                 } else {
-                    //await refreshUser();
-                    //router.push(nextPage);
-                    window.location.href = nextPage;
+                    await refreshUser();
+                    router.push(nextPage);
+                    //window.location.href = nextPage;
                 }
             } else {
                 setError("Login failed");

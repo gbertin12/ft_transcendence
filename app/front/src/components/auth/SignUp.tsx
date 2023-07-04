@@ -32,9 +32,9 @@ export default function SignUp() {
 
     async function dummyLogin() {
         await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
-        //await refreshUser();
-        //router.push(nextPage);
-        window.location.href = nextPage;
+        await refreshUser();
+        router.push(nextPage);
+        //window.location.href = nextPage;
     }
 
     function register() {
