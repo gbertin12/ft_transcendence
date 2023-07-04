@@ -1,4 +1,4 @@
-import { Channel, Friend, FriendRequest, Message, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
+import { Channel, ChannelInvite, Friend, FriendRequest, Message, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -60,6 +60,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [privateChannels, setPrivateChannels] = useState<Channel[]>([]);
     const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
+    const [channelInvites, setChannelInvites] = useState<ChannelInvite[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
@@ -294,7 +295,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setChannels((channels) => channels.map((c) => c.id === data.channel_id ? { ...c, owner_id: data.new_owner } : c));
             });
             socket.on("punishment", (punishment: PunishmentData) => {
-                // TODO: handle the punishment
                 const noTimeoutThreshold = 157679999;
                 switch (punishment.type) {
                     case "muted":
@@ -339,6 +339,18 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                         break;
                 }
             });
+            socket.on("invite", (invite: ChannelInvite) => {
+                setChannelInvites((invites) => [...invites, invite]);
+            });
+            socket.on("cancelInvite", (invite: ChannelInvite) => {
+                setChannelInvites((invites) => invites.filter((i: ChannelInvite) => i.channel.id !== invite.channel.id));
+            });
+            socket.on("acceptInvite", (invite: ChannelInvite) => {
+                // Remove the invite from the list of invites
+                setChannelInvites((invites) => invites.filter((i: ChannelInvite) => i.channel.id !== invite.channel.id));
+                // Add the channel to the list of channels
+                setChannels((channels) => [...channels, invite.channel]);
+            });
             return () => {
                 socket.off("newChannel");
                 socket.off("deleteChannel");
@@ -359,6 +371,9 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("dmMessage");
                 socket.off("updateOwner");
                 socket.off("punishment");
+                socket.off("invite");
+                socket.off("cancelInvite");
+                socket.off("acceptInvite");
             }
         }
     }, [socket]);

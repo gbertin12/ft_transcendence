@@ -384,6 +384,7 @@ export class ChannelController {
                 this.chatGateway.usersClients[userId].emit('invite', {
                     channel: channel,
                     channel_id: dto.channel_id,
+                    channel_name: channel.name,
                     sender: req.user,
                 });
             }
