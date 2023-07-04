@@ -41,6 +41,9 @@ let paddlePlayer1Y : number;
 let paddlePlayer2Y : number;
 let speedPaddle : number;
 
+let titleSize : number;
+let textSize : number;
+
 // ball
 let ballX : number;
 let ballY : number;
@@ -94,6 +97,10 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		bounce.resize(p5.width / 16, p5.width / 16);
 		power.resize(p5.width / 16 / 1.5, p5.width / 16);
 		fence.resize(p5.width / 16, p5.width / 16);
+
+		// set title size
+		titleSize = p5.width / 20;
+		textSize = p5.width / 40;
 	}
 	
 	const setup = (p5: p5Types, canvasParentRef: Element) => {
@@ -145,33 +152,33 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		// draw ball
 		p5.ellipse(ballX, ballY, ballSize, ballSize);
 		
-		p5.textSize(32);
+		p5.textSize(titleSize);
 		p5.fill("#17C964")
 		if (who == 0)
 		{
 			p5.text(score1, p5.width / 2 - 50, 50);
-			p5.textSize(16);
+			p5.textSize(textSize);
 			p5.text(user.name, p5.width / 2 - 180, 50);
 			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
 		} else {
 			p5.fill("#F31260");
 			p5.text(score1, p5.width / 2 - 50, 50);
-			p5.textSize(16);
+			p5.textSize(textSize);
 			p5.text(nameOpponent, p5.width / 2 - 180, 50);
 			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
 		}
-		p5.textSize(32);
+		p5.textSize(titleSize);
 		p5.fill("#17C964")
 		if (who == 1)
 		{
 			p5.text(score2, p5.width / 2 + 50, 50);
-			p5.textSize(16);
+			p5.textSize(textSize);
 			p5.text(user.name, p5.width / 2 + 120, 50);
 			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
 		} else {
 			p5.fill("#F31260");
 			p5.text(score2, p5.width / 2 + 50, 50);
-			p5.textSize(16);
+			p5.textSize(textSize);
 			p5.text(nameOpponent, p5.width / 2 + 120, 50);
 			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
 		}
