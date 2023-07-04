@@ -39,15 +39,6 @@ const ChannelList: React.FC<any> = () => {
                     flexDirection: "column",
                 }}
             >
-                {publicChannels.length >= 1 && (
-                    <>
-                        <Text h3>Public Channels</Text>
-                        <ChatChannelBrowser
-                            publicOnly
-                            channelChanged={handleChannelChange}
-                        />
-                    </>
-                )}
                 {privateChannels.length >= 1 && (
                     <>
                         <Text h3>Private Channels</Text>
@@ -57,7 +48,15 @@ const ChannelList: React.FC<any> = () => {
                         />
                     </>
                 )}
-                
+                {publicChannels.length >= 1 && (
+                    <>
+                        <Text h3>Public Channels</Text>
+                        <ChatChannelBrowser
+                            publicOnly
+                            channelChanged={handleChannelChange}
+                        />
+                    </>
+                )}
             </Container>
             <ChannelInvites />
         </>
