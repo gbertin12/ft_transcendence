@@ -126,17 +126,6 @@ const FriendRequests: React.FC = () => {
 
     return (
         <div className="mt-2">
-            <ul
-                style={{
-                    listStyle: "none",
-                    padding: 0,
-                    overflowY: "auto",
-                    overflowX: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                }}
-            >
-            </ul>
             <div className="mt-2">
                 <ReceivedRequests requests={receivedRequests} setFriendRequests={setFriendRequests} />
                 <SentRequests requests={sentRequests} setFriendRequests={setFriendRequests} />

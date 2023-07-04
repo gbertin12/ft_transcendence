@@ -41,12 +41,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const { socket, user } = useUser();
     const {
         bannedChannels,
-        setBannedChannels,
         mutedChannels,
-        setMutedChannels,
         blockedUsers,
-        setBlockedUsers,
-        channels,
         setChannels,
     } = useChat();
 

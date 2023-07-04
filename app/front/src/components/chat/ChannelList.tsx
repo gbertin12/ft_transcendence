@@ -1,4 +1,4 @@
-import { Grid, Text } from "@nextui-org/react";
+import { Container, Grid, Text } from "@nextui-org/react";
 import ChannelCreateIcon from "./icons/ChannelCreateIcon";
 import ChatChannelBrowser from "./ChatChannelBrowser";
 import { useCallback, useEffect, useState } from "react";
@@ -11,7 +11,6 @@ import ChannelInvites from "./ChannelInvites";
 
 const ChannelList: React.FC<any> = () => {
     const { socket } = useUser();
-    const { channels } = useChat();
     const router = useRouter();
 
     const handleChannelChange = useCallback((channel: Channel) => {
@@ -20,19 +19,34 @@ const ChannelList: React.FC<any> = () => {
 
     return (
         <>
-            <Text h3>Chats</Text>
             <hr />
             <Grid.Container>
                 <Grid xs={10}>
-                    <Text h4>Channels</Text>
+                    <Text h3>Channels</Text>
                 </Grid>
                 <ChannelCreateIcon />
             </Grid.Container>
-
-            <ChatChannelBrowser
-                channels={channels}
-                channelChanged={handleChannelChange}
-            />
+            <hr/>
+            <Container
+                css={{
+                    listStyle: "none",
+                    padding: 0,
+                    height: "85vh",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <ChatChannelBrowser
+                    publicOnly
+                    channelChanged={handleChannelChange}
+                />
+                <ChatChannelBrowser
+                    privateOnly
+                    channelChanged={handleChannelChange}
+                />
+            </Container>
             <ChannelInvites />
         </>
     )
