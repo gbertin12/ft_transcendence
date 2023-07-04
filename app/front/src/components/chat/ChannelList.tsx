@@ -11,6 +11,7 @@ import ChannelInvites from "./ChannelInvites";
 
 const ChannelList: React.FC<any> = () => {
     const { socket } = useUser();
+    const { publicChannels, privateChannels } = useChat();
     const router = useRouter();
 
     const handleChannelChange = useCallback((channel: Channel) => {
@@ -26,7 +27,7 @@ const ChannelList: React.FC<any> = () => {
                 </Grid>
                 <ChannelCreateIcon />
             </Grid.Container>
-            <hr/>
+            <hr />
             <Container
                 css={{
                     listStyle: "none",
@@ -38,14 +39,25 @@ const ChannelList: React.FC<any> = () => {
                     flexDirection: "column",
                 }}
             >
-                <ChatChannelBrowser
-                    publicOnly
-                    channelChanged={handleChannelChange}
-                />
-                <ChatChannelBrowser
-                    privateOnly
-                    channelChanged={handleChannelChange}
-                />
+                {publicChannels.length >= 1 && (
+                    <>
+                        <Text h3>Public Channels</Text>
+                        <ChatChannelBrowser
+                            publicOnly
+                            channelChanged={handleChannelChange}
+                        />
+                    </>
+                )}
+                {privateChannels.length >= 1 && (
+                    <>
+                        <Text h3>Private Channels</Text>
+                        <ChatChannelBrowser
+                            privateOnly
+                            channelChanged={handleChannelChange}
+                        />
+                    </>
+                )}
+                
             </Container>
             <ChannelInvites />
         </>
