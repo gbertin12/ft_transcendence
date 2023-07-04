@@ -41,10 +41,11 @@ function ProfileTooltip({ user }: { user: User }) {
 export default function AvatarTooltip({ user, placement }: { user: User, placement: any }) {
     return (
         <Tooltip
-            css={{zIndex: 100000}}
+            css={{ zIndex: 100000 }}
             placement={placement}
             content={<ProfileTooltip user={user}/>}>
             <Avatar
+                css={{ cursor: "pointer" }}
                 src={`http://localhost:3000/static/avatars/${user.avatar}`}
             />
         </Tooltip>
