@@ -45,13 +45,15 @@ const ReceivedRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequ
                             key={request.sender_id}
                         >
                             <Grid xs={1}>
-                                <IconCheck onClick={() => {
+                                <IconCheck className="my-auto" onClick={() => {
                                     axios.post(`http://localhost:3000/friends/requests/${request.sender_id}/accept`, {}, { withCredentials: true })
                                         .then((res) => {
                                             if (res.status !== 200) return;
                                             setFriendRequests((requests) => requests.filter((request) => request.sender_id !== request.sender_id));
                                         })
                                 }} />
+                            </Grid>
+                            <Grid className="my-auto" xs={1}>
                                 <IconX onClick={() => {
                                     axios.delete(`http://localhost:3000/friends/requests/${request.sender_id}`, { withCredentials: true })
                                         .then((res) => {
