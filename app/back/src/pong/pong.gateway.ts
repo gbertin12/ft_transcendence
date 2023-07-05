@@ -266,7 +266,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             player.state = 0;
         }
         this.server.to(playerId).emit('cancelGame');
-        console.log("CANCLED GASME");
     }
 
     @SubscribeMessage('joinRoom')

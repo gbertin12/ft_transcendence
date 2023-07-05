@@ -1,13 +1,14 @@
 import { User } from "@/interfaces/user.interface";
 import { Button, Row } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
-import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX, IconUser, IconUserOff, IconCircleX } from '@tabler/icons-react';
+import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX, IconUser, IconUserOff, IconCircleX, IconMessage2, IconMessages } from '@tabler/icons-react';
 import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
 import { FriendRequest } from "@/interfaces/chat.interfaces";
 import { useUser } from "@/contexts/user.context";
 import { PlayerInterface } from "@/interfaces/pong.interface";
 import { useNotif } from "@/contexts/notif.context";
+import { useRouter } from "next/router";
 
 function handleAddFriend(to: number) {
     axios.post('http://localhost:3000/friends/add', { to }, {
@@ -165,6 +166,8 @@ export default function UserInteractionButtons({ user }: { user: User }) {
     const [ player, setPlayer ] = useState<PlayerInterface>({} as PlayerInterface);
     const [ isOpponent, setIsOpponent ] = useState<boolean>(false);
 
+    const router = useRouter();
+
     function handleBlockUser() {
         axios.post(`http://localhost:3000/friends/block/${user.id}`, {}, {
             withCredentials: true,
@@ -231,6 +234,24 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                     <IconUserX/>
                 </Button>
             )}
+
+            {(isFriend) && (
+                <Button
+                    onPress={() => router.push(`/chat/dm/${user.id}`)}
+                    size="sm"
+                    color="primary"
+                    auto>
+                    <IconMessage2/>
+                </Button>
+            )}
+
+            <Button
+                //onPress={}
+                size="sm"
+                color="success"
+                auto>
+                <IconMessages/>
+            </Button>
 
             {duelButton(user, player, isOpponent, setIsOpponent)}
         </Row>
