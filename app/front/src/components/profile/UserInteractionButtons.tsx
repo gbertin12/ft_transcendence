@@ -1,11 +1,12 @@
 import { User } from "@/interfaces/user.interface";
 import { Button, Row } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
-import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX } from '@tabler/icons-react';
+import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX, IconUser, IconUserOff } from '@tabler/icons-react';
 import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
 import { FriendRequest } from "@/interfaces/chat.interfaces";
 import { useUser } from "@/contexts/user.context";
+import { PlayerInterface } from "@/interfaces/pong.interface";
 
 function handleAddFriend(to: number) {
     axios.post('http://localhost:3000/friends/add', { to }, {
@@ -83,7 +84,7 @@ function friendInteractionButton(
                     auto
                     onPress={() => handleAcceptFriendRequest(user.id)}
                     color="success">
-                    <IconUserCheck />
+                    <IconUserCheck/>
                 </Button>
 
                 <Button
@@ -91,7 +92,7 @@ function friendInteractionButton(
                     auto
                     onPress={() => handleDeclineFriendRequest(user.id)}
                     color="error">
-                    <IconUserX />
+                    <IconUserOff/>
                 </Button>
             </Row>
         );
@@ -111,27 +112,88 @@ function friendInteractionButton(
 }
 
 export default function UserInteractionButtons({ user }: { user: User }) {
-    const { friends, receivedRequests, sentRequests } = useChat();
+    const { friends, receivedRequests, sentRequests, blockedUsers } = useChat();
+    const [ isBlocked, setIsBlocked ] = useState<boolean>(false);
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
     const { socket } = useUser();
+    const [ player, setPlayer ] = useState<PlayerInterface>({} as PlayerInterface);
+
+    function handleBlockUser() {
+        axios.post(`http://localhost:3000/friends/block/${user.id}`, {}, {
+            withCredentials: true,
+            validateStatus: () => true,
+        });
+    }
+
+    function handleUnblockUser() {
+        axios.post(`http://localhost:3000/friends/unblock/${user.id}`, {}, {
+            withCredentials: true,
+            validateStatus: () => true,
+        });
+    }
 
     useEffect(() => {
-        if (friends.some((friend) => friend.userId === user.id)) {
-            setIsFriend(true);
-        } else {
-            setIsFriend(false);
-        }
+        axios.get(`http://localhost:3000/user/player/${user.id}`)
+            .then((res) => {
+                setPlayer(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    useEffect(() => {
+        setIsBlocked(blockedUsers.has(user.id));
+    }, [blockedUsers]);
+
+    useEffect(() => {
+        setIsFriend(
+            friends.some((friend) => friend.userId === user.id)
+        );
     }, [friends]);
 
     async function handleDuelRequest() {
-        console.log("in handleDuelRequest");
         socket.emit('duelRequest', user.id);
     }
 
     return (
-            <Row justify="space-evenly">
-                {friendInteractionButton(user, sentRequests, receivedRequests, isFriend)}
-                <Button onPress={handleDuelRequest} size="sm" color="error" auto><IconSwords/></Button>
-            </Row>
+        <Row justify="space-evenly">
+            {friendInteractionButton(user, sentRequests, receivedRequests, isFriend)}
+
+            {(isBlocked) ? (
+                <Button
+                    onPress={handleUnblockUser}
+                    size="sm"
+                    color="success"
+                    auto>
+                    <IconUser/>
+                </Button>
+                ) : (
+                <Button
+                    onPress={handleBlockUser}
+                    size="sm"
+                    color="error"
+                    auto>
+                    <IconUserX/>
+                </Button>
+            )}
+
+            {(player.state !== 0) ? (
+                <Button
+                    disabled
+                    size="sm"
+                    color="primary"
+                    auto>
+                    <IconSwords/>
+                </Button>) : (
+                <Button
+                    onPress={handleDuelRequest}
+                    size="sm"
+                    color="primary"
+                    auto>
+                    <IconSwords/>
+                </Button>
+            )}
+        </Row>
     );
 }
