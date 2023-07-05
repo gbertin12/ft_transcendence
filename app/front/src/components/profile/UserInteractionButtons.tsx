@@ -7,6 +7,7 @@ import { useChat } from "@/contexts/chat.context";
 import { FriendRequest } from "@/interfaces/chat.interfaces";
 import { useUser } from "@/contexts/user.context";
 import { PlayerInterface } from "@/interfaces/pong.interface";
+import { useNotif } from "@/contexts/notif.context";
 
 function handleAddFriend(to: number) {
     axios.post('http://localhost:3000/friends/add', { to }, {
@@ -116,6 +117,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
     const [ isBlocked, setIsBlocked ] = useState<boolean>(false);
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
     const { socket } = useUser();
+    const { canRequest, setCanRequest } = useNotif();
     const [ player, setPlayer ] = useState<PlayerInterface>({} as PlayerInterface);
 
     function handleBlockUser() {
@@ -154,6 +156,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
 
     async function handleDuelRequest() {
         socket.emit('duelRequest', user.id);
+        setCanRequest(false);
     }
 
     return (
@@ -178,7 +181,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 </Button>
             )}
 
-            {(player.state !== 0) ? (
+            {(!canRequest || player.state !== 0) ? (
                 <Button
                     disabled
                     size="sm"

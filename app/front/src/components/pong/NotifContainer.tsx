@@ -3,16 +3,18 @@ import { useUser } from '@/contexts/user.context';
 import { Button, Card, Text } from '@nextui-org/react';
 
 export default function NotifContainer({ decline }: { decline: boolean }) {
-    const { opponent, setShowNotif } = useNotif();
+    const { opponent, setShowNotif, setCanRequest } = useNotif();
     const { socket } = useUser();
 
     async function handleAccept() {
         socket.emit('acceptDuel', opponent);
+        setCanRequest(true);
     }
 
     async function handleDecline() {
         socket.emit('declineDuel', opponent);
         setShowNotif(false);
+        setCanRequest(true);
     }
 
     return (
