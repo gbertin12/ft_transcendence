@@ -26,14 +26,14 @@ export default function Game() {
 
     useEffect(() => {
         if (router.isReady) {
-            if (!user.id) {
-                router.push(`/?next=${router.asPath}`);
+            if (user && !user.id) {
+                router.push('/');
             }
             if (router.query && router.query.roomName && router.query.who) {
                 handleStartGame(router.query.roomName, router.query.who);
             }
         }
-    }, [router]);
+    }, [router, user]);
 
     useEffect(() => {
         socket.on('searchGame', handleStartGame)
