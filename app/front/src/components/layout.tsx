@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 
 export default function Layout({ children }: any) {
     const [ decline, setDecline ] = useState<boolean>(false);
+    const [ cancel, setCancel ] = useState<boolean>(false);
 
     const { socket } = useUser();
     const { setOpponent, showNotif, setShowNotif } = useNotif();
@@ -19,6 +20,7 @@ export default function Layout({ children }: any) {
             setDecline(false);
             setOpponent(opponent);
             setShowNotif(true);
+            setCancel(false);
         });
 
         socket.on('searchGameDuel', ({ roomname, who }: { roomname: string, who: number }) => {
@@ -30,13 +32,20 @@ export default function Layout({ children }: any) {
             setDecline(true);
             setOpponent(opponent);
             setShowNotif(true);
+            setCancel(false);
+        });
+
+        socket.on('cancelDuelRequest', (opponent: PlayerInterface) => {
+            setOpponent(opponent);
+            setShowNotif(true);
+            setCancel(true);
         });
     }, [socket]);
 
     return (
         <>
             <Navbar/>
-            {(showNotif) && (<NotifContainer decline={decline}/>)}
+            {(showNotif) && (<NotifContainer decline={decline} cancel={cancel}/>)}
             <main>{children}</main>
         </>
     );

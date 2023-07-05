@@ -123,8 +123,19 @@ export class UserController {
         return await this.userService.getPlayerEloByDate(usernameDto.username, dateDto.date);
     }
 
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Get('player/opponent')
+    getOpponent(@Req() req: Request) {
+        const current_player = this.pongGateway.players.find((p) => p.userId === req.user["id"]);
+        const opponentId = this.pongGateway.duelRequests[current_player.id];
+        if (!opponentId) {
+            return null;
+        }
+        return opponentId;
+    }
+
     @Get('player/:id')
-    async getPlayerById(@Param() dto: UserIdDto) {
+    getPlayerById(@Param() dto: UserIdDto) {
         const player = this.pongGateway.players.find((p) => p.userId === dto.id);
         return player;
     }

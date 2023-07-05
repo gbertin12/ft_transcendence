@@ -1,7 +1,7 @@
 import { User } from "@/interfaces/user.interface";
 import { Button, Row } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
-import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX, IconUser, IconUserOff } from '@tabler/icons-react';
+import { IconUserMinus, IconUserPlus, IconSwords, IconUserCancel, IconUserCheck, IconUserX, IconUser, IconUserOff, IconCircleX } from '@tabler/icons-react';
 import axios from 'axios';
 import { useChat } from "@/contexts/chat.context";
 import { FriendRequest } from "@/interfaces/chat.interfaces";
@@ -112,13 +112,58 @@ function friendInteractionButton(
     }
 }
 
+function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, setIsOpponent: any): JSX.Element {
+    const { socket } = useUser();
+
+    function handleDuelRequest() {
+        socket.emit('duelRequest', user.id);
+        setIsOpponent(true);
+    }
+
+    function handelCancelDuel() {
+        socket.emit('cancelDuel', player);
+        setIsOpponent(false);
+    }
+
+    if (isOpponent) {
+        return (
+            <Button
+                onPress={handelCancelDuel}
+                size="sm"
+                color="warning"
+                auto>
+                <IconCircleX/>
+            </Button>
+        );
+    }
+
+    return (<>
+        {(player.state !== 0) ? (
+            <Button
+                disabled
+                size="sm"
+                color="primary"
+                auto>
+                <IconSwords/>
+            </Button>) : (
+                <Button
+                    onPress={handleDuelRequest}
+                    size="sm"
+                    color="primary"
+                    auto>
+                    <IconSwords/>
+                </Button>
+            )}
+        </>
+    );
+}
+
 export default function UserInteractionButtons({ user }: { user: User }) {
     const { friends, receivedRequests, sentRequests, blockedUsers } = useChat();
     const [ isBlocked, setIsBlocked ] = useState<boolean>(false);
     const [ isFriend, setIsFriend ] = useState<boolean>(false);
-    const { socket } = useUser();
-    const { canRequest, setCanRequest } = useNotif();
     const [ player, setPlayer ] = useState<PlayerInterface>({} as PlayerInterface);
+    const [ isOpponent, setIsOpponent ] = useState<boolean>(false);
 
     function handleBlockUser() {
         axios.post(`http://localhost:3000/friends/block/${user.id}`, {}, {
@@ -142,6 +187,17 @@ export default function UserInteractionButtons({ user }: { user: User }) {
             .catch((err) => {
                 console.log(err);
             });
+
+        axios.get('http://localhost:3000/user/player/opponent', {
+            withCredentials: true,
+            validateStatus: () => true,
+        }).then((res) => {
+                if (res.data === user.id) {
+                    setIsOpponent(true);
+                } else {
+                    setIsOpponent(false);
+                }
+            });
     }, []);
 
     useEffect(() => {
@@ -153,11 +209,6 @@ export default function UserInteractionButtons({ user }: { user: User }) {
             friends.some((friend) => friend.userId === user.id)
         );
     }, [friends]);
-
-    async function handleDuelRequest() {
-        socket.emit('duelRequest', user.id);
-        setCanRequest(false);
-    }
 
     return (
         <Row justify="space-evenly">
@@ -181,22 +232,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 </Button>
             )}
 
-            {(!canRequest || player.state !== 0) ? (
-                <Button
-                    disabled
-                    size="sm"
-                    color="primary"
-                    auto>
-                    <IconSwords/>
-                </Button>) : (
-                <Button
-                    onPress={handleDuelRequest}
-                    size="sm"
-                    color="primary"
-                    auto>
-                    <IconSwords/>
-                </Button>
-            )}
+            {duelButton(user, player, isOpponent, setIsOpponent)}
         </Row>
     );
 }

@@ -10,7 +10,6 @@ import { Socket, Server } from 'socket.io';
 import {
     roomInterface,
     PlayerInterface,
-    PlayerEndGame,
 } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
@@ -159,6 +158,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         console.log("DUEL REQUEST from", client.id, "to:", opponent.id);
 
+        initiator.state = 1;
+        opponent.state = 1;
         this.duelRequests[client.id] = opponentId;
         this.server.to(opponent.id).emit('duelRequest', initiator);
     }
@@ -166,13 +167,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('acceptDuel')
     acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
         if (!this.duelRequests[opponent.id]) {
+            // send something:?
             return ;
         }
 
         const player = this.players.find((p) => client.id === p.id);
         if (player.userId === opponent.userId ||
-            player.state !== 0 ||
-            opponent.state !== 0
+            player.state !== 1 ||
+            opponent.state !== 1
         ) {
             // send something?
             return ;
@@ -212,7 +214,24 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         delete this.duelRequests[opponent.id];
         const player = this.players.find((p) => client.id === p.id);
+        player.state = 0;
+        const adversary = this.players.find((p) => opponent.id === p.id);
+        adversary.state = 0;
         this.server.to(opponent.id).emit('declineDuelRequest', player);
+    }
+
+    @SubscribeMessage('cancelDuel')
+    cancelDuelRequest(client: Socket, opponent: PlayerInterface) {
+        if (!this.duelRequests[client.id]) {
+            return ;
+        }
+
+        delete this.duelRequests[opponent.id];
+        const player = this.players.find((p) => client.id === p.id);
+        const adversary = this.players.find((p) => opponent.id === p.id);
+        player.state = 0;
+        adversary.state = 0;
+        this.server.to(opponent.id).emit('cancelDuelRequest', player);
     }
 
     @SubscribeMessage('playerMove')
