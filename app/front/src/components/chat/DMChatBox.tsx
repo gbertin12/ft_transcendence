@@ -120,7 +120,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         });
         // reset unread messages
         setFriends((friends) => {
-            const index = friends.findIndex((friend) => friend.id === interlocutor.id);
+            const index = friends.findIndex((friend) => friend.user.id === interlocutor.id);
             if (index !== -1) {
                 friends[index].unreadMessages = 0;
             }

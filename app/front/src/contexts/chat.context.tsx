@@ -92,12 +92,9 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     if (Array.isArray(relationships.friends)) {
                         const friends: Friend[] = relationships.friends.map((friend) => {
                             // if user id is self, use user2 instead
-                            if (friend.friend_id === user.id) {
+                            if (friend.user.id === user.id) {
                                 return {
-                                    id: friend.user2.id,
-                                    name: friend.user2.name,
-                                    avatar: friend.user2.avatar,
-                                    userId: friend.user2.id,
+                                    user: friend.user2,
                                     isOnline: false,
                                     isTyping: false,
                                     isPlaying: false,
@@ -105,10 +102,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                                 };
                             } else {
                                 return {
-                                    id: friend.user.id,
-                                    name: friend.user.name,
-                                    avatar: friend.user.avatar,
-                                    userId: friend.user.id,
+                                    user: friend.user,
                                     isOnline: false,
                                     isTyping: false,
                                     isPlaying: false,
@@ -124,7 +118,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                         }
                         setBlockedUsers(blockedUsers);
                         setFriends(friends);
-                        socket.emit("updateStatus", { "status": "online" });
+                        axios.patch(`http://localhost:3000/friends/status/online`, {}, { withCredentials: true, validateStatus: () => true });
                     }
                 }).catch((err) => {
                     return;
@@ -220,14 +214,11 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
             });
             socket.on('deleteFriend', (user_id: number) => {
-                setFriends((friends) => friends.filter((f) => f.id !== user_id));
+                setFriends((friends) => friends.filter((f) => f.user.id !== user_id));
             });
             socket.on("friendRequestAccepted", (payload: any) => {
                 let newFriend: Friend = {
-                    id: payload.user.id,
-                    name: payload.user.name,
-                    avatar: payload.user.avatar,
-                    userId: payload.user.id,
+                    user: payload.user,
                     isOnline: false,
                     isTyping: false,
                     isPlaying: false,
@@ -242,19 +233,16 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setFriendRequests((requests) => [...requests, request]);
             });
             socket.on("online", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isPlaying: false } : f));
+                setFriends((friends) => friends.map((f) => f.user.id === friend_id ? { ...f, isOnline: true, isPlaying: false } : f));
             });
             socket.on("typing", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isTyping: true } : f));
+                setFriends((friends) => friends.map((f) => f.user.id === friend_id ? { ...f, isTyping: true } : f));
             });
             socket.on("playing", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isPlaying: true, isTyping: false, isOnline: true } : f));
-            });
-            socket.on("onlineAnswer", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isTyping: false, isPlaying: false } : f));
+                setFriends((friends) => friends.map((f) => f.user.id === friend_id ? { ...f, isPlaying: true, isTyping: false, isOnline: true } : f));
             });
             socket.on("offline", (friend_id: number) => {
-                setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: false, isTyping: false, isPlaying: false } : f));
+                setFriends((friends) => friends.map((f) => f.user.id === friend_id ? { ...f, isOnline: false, isTyping: false, isPlaying: false } : f));
             });
             socket.on("punishment_revoked", (channel_id: number) => {
                 setBannedChannels((bannedChannels) => {
@@ -286,7 +274,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 // If the href is not in the good dm, increment the unread messages
                 if (!window.location.href.includes(`/dm/${payload.sender_id}`) && !window.location.href.includes(`/dm/${payload.receiver_id}`)) {
                     setFriends(
-                        (friends) => friends.map((f) => f.id === payload.sender_id ? { ...f, unreadMessages: f.unreadMessages + 1 } : f)
+                        (friends) => friends.map((f) => f.user.id === payload.sender_id ? { ...f, unreadMessages: f.unreadMessages + 1 } : f)
                     );
                 }
             });
@@ -361,7 +349,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("online");
                 socket.off("typing");
                 socket.off("playing");
-                socket.off("onlineAnswer");
                 socket.off("offline");
                 socket.off("unbanned");
                 socket.off("unmuted");
