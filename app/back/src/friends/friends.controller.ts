@@ -68,13 +68,8 @@ export class FriendsController {
         let friendRequest: any = await this.friendsService.addFriend(sender, receiver_id);
         friendRequest.sender = sender;
         // Send friendRequestAdded to receiver
-        if (this.chatGateway.usersClients[receiver_id]) {
-            this.chatGateway.usersClients[receiver_id].emit("friendRequestAdded", friendRequest);
-        }
-        if (this.chatGateway.usersClients[sender.id]) {
-            // patch the friendRequest to add the sender
-            this.chatGateway.usersClients[sender.id].emit("friendRequestAdded", friendRequest);
-        }
+        this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestAdded", friendRequest);
+        this.chatGateway.server.to(`user-${sender.id}`).emit("friendRequestAdded", friendRequest);
         return friendRequest;
     }
 
@@ -93,19 +88,13 @@ export class FriendsController {
         const newFriend: Friend = await this.friendsService.acceptFriendRequest(receiver_id, params.id);
 
         // Sender has to receive the new user, not the new friend (because the new friend is the sender)
-        if (this.chatGateway.usersClients[params.id]) {
-            let receiver = await this.userService.getUserById(receiver_id);
-            this.chatGateway.usersClients[params.id].emit("friendRequestAccepted", {
-                user: receiver
-            });
-            this.chatGateway.usersClients[params.id].emit("friendRequestDeleted", request);
-        }
-
-        // Send message to receiver
-        if (this.chatGateway.usersClients[receiver_id]) {
-            this.chatGateway.usersClients[receiver_id].emit("friendRequestDeleted", request);
-            this.chatGateway.usersClients[receiver_id].emit("friendRequestAccepted", newFriend);
-        }
+        let receiver = await this.userService.getUserById(receiver_id);
+        this.chatGateway.server.to(`user-${params.id}`).emit("friendRequestAccepted", {
+            user: receiver
+        });
+        this.chatGateway.server.to(`user-${params.id}`).emit("friendRequestDeleted", request);
+        this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestDeleted", request);
+        this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestAccepted", newFriend);
         return newFriend;
     }
 
@@ -115,12 +104,8 @@ export class FriendsController {
         let receiver_id: number = req.user['id'];
         const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(receiver_id, params.id);
         // send friendRequestDeleted to receiver and sender
-        if (this.chatGateway.usersClients[receiver_id]) {
-            this.chatGateway.usersClients[receiver_id].emit("friendRequestDeleted", deletedRequest);
-        }
-        if (this.chatGateway.usersClients[deletedRequest.sender_id]) {
-            this.chatGateway.usersClients[deletedRequest.sender_id].emit("friendRequestDeleted", deletedRequest);
-        }
+        this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestDeleted", deletedRequest);
+        this.chatGateway.server.to(`user-${deletedRequest.sender_id}`).emit("friendRequestDeleted", deletedRequest);
         return deletedRequest;
     }
 
@@ -129,12 +114,8 @@ export class FriendsController {
     async cancelFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
         let sender_id: number = req.user['id'];
         const deletedRequest: FriendRequest = await this.friendsService.deleteFriendRequest(params.id, sender_id);
-        if (this.chatGateway.usersClients[deletedRequest.receiver_id]) {
-            this.chatGateway.usersClients[deletedRequest.receiver_id].emit("friendRequestDeleted", deletedRequest);
-        }
-        if (this.chatGateway.usersClients[sender_id]) {
-            this.chatGateway.usersClients[sender_id].emit("friendRequestDeleted", deletedRequest);
-        }
+        this.chatGateway.server.to(`user-${deletedRequest.receiver_id}`).emit("friendRequestDeleted", deletedRequest);
+        this.chatGateway.server.to(`user-${sender_id}`).emit("friendRequestDeleted", deletedRequest);
         return deletedRequest;
     }
 
@@ -144,12 +125,8 @@ export class FriendsController {
         if (!await this.friendsService.deleteFriend(req.user['id'], params.id)) {
             throw new ForbiddenException("You can't delete a friend that doesn't exist");
         }
-        if (this.chatGateway.usersClients[req.user['id']]) {
-            this.chatGateway.usersClients[req.user['id']].emit("deleteFriend", params.id);
-        }
-        if (this.chatGateway.usersClients[params.id]) {
-            this.chatGateway.usersClients[params.id].emit("deleteFriend", req.user['id']);
-        }
+        this.chatGateway.server.to(`user-${req.user['id']}`).emit("deleteFriend", params.id);
+        this.chatGateway.server.to(`user-${params.id}`).emit("deleteFriend", req.user['id']);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
