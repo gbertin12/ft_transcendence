@@ -153,18 +153,20 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		p5.ellipse(ballX, ballY, ballSize, ballSize);
 		
 		p5.textSize(titleSize);
+		let margeUsername1 = p5.width / 3;
+		let margeUsername2 = p5.width / 4;
 		p5.fill("#17C964")
 		if (who == 0)
 		{
 			p5.text(score1, p5.width / 2 - 50, 50);
 			p5.textSize(textSize);
-			p5.text(user.name, p5.width / 2 - 180, 50);
+			p5.text(user.name, p5.width / 2 - margeUsername1, 50);
 			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
 		} else {
 			p5.fill("#F31260");
 			p5.text(score1, p5.width / 2 - 50, 50);
 			p5.textSize(textSize);
-			p5.text(nameOpponent, p5.width / 2 - 180, 50);
+			p5.text(nameOpponent, p5.width / 2 - margeUsername1, 50);
 			p5.rect(0, paddlePlayer1Y, paddleWidth, paddleHeight);
 		}
 		p5.textSize(titleSize);
@@ -173,13 +175,13 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		{
 			p5.text(score2, p5.width / 2 + 50, 50);
 			p5.textSize(textSize);
-			p5.text(user.name, p5.width / 2 + 120, 50);
+			p5.text(user.name, p5.width / 2 + margeUsername2, 50);
 			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
 		} else {
 			p5.fill("#F31260");
 			p5.text(score2, p5.width / 2 + 50, 50);
 			p5.textSize(textSize);
-			p5.text(nameOpponent, p5.width / 2 + 120, 50);
+			p5.text(nameOpponent, p5.width / 2 + margeUsername2, 50);
 			p5.rect(p5.width - paddleWidth, paddlePlayer2Y, paddleWidth, paddleHeight);
 		}
 	}

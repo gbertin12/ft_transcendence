@@ -109,7 +109,7 @@ const resetBallPosition = (
     server: Server) => {
     // set players && ball on server side 
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
-    const randY: number = 100 * Math.random();
+    const randY: number = 20 + (60 * Math.random());
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
     room.pongState.ball.speedX = 0.8;
     room.pongState.ball.speedY = 0.8;
