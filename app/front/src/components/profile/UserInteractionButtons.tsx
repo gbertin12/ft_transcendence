@@ -210,7 +210,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
 
     useEffect(() => {
         setIsFriend(
-            friends.some((friend) => friend.userId === user.id)
+            friends.some((friend) => friend.user.id === user.id)
         );
     }, [friends]);
 

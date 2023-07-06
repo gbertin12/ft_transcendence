@@ -45,10 +45,7 @@ export interface FriendRequest {
 }
 
 export interface Friend {
-    id: number;
-    name: string;
-    avatar: string;
-    userId: number;
+    user: User;
     isOnline: boolean;
     isTyping: boolean;
     isPlaying: boolean;
@@ -91,6 +88,6 @@ export interface PunishmentData {
 }
 
 export interface Relationships {
-    friends: User[];
-    blocked: User[];
+    friends: any[];
+    blocked: any[];
 }

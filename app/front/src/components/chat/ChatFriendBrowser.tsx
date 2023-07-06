@@ -14,12 +14,12 @@ const ChatFriendBrowser: React.FC = () => {
         <ul>
             {friends.map((friend) => (
                 <ChatEntry
-                    user={friend}
+                    user={friend.user}
                     isOnline={friend.isOnline}
                     isTyping={friend.isTyping}
                     isPlaying={friend.isPlaying}
                     unreadMessages={friend.unreadMessages}
-                    key={friend.userId}
+                    key={friend.user.id}
                 >
                     {(friend.isPlaying ? (
                         <Grid xs={1} css={{ my: "auto" }}>
@@ -37,7 +37,7 @@ const ChatFriendBrowser: React.FC = () => {
                             color="error"
                             css={{ display: (friend.unreadMessages === 0) ? "none" : "" }}
                         >
-                            <Link href={`/chat/dm/${friend.userId}`}>
+                            <Link href={`/chat/dm/${friend.user.id}`}>
                                 <IconMessageCircle />
                             </Link>
                         </Badge>
