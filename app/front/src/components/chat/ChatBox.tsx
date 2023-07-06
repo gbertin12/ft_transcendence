@@ -172,6 +172,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                 }
                 return [...channels];
             });
+            socket.emit('leave', channelId);
         });
         fetchMessages(channel).then((messages) => {
             setMessages(messages);
