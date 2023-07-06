@@ -21,19 +21,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@nes
 import { DmsService } from '../dms/dms.service';
 
 export let systemMessageStack: number = -1; // Decremented each time a system message is sent to avoid message id conflicts
-
-function powerLevel(channel: ChannelStaff, user_id: number, messageData?: MessageData): number {
-    if (channel.owner_id === user_id) {
-        return 3;
-    }
-    if (channel.administrators.includes(user_id)) {
-        return 2;
-    }
-    if (messageData && messageData.sender.id === user_id) {
-        return 1;
-    }
-    return 0;
-}
+export let userStatuses: Map<number, string> = new Map(); // Stores user statuses
 
 @WebSocketGateway(8001, {
     cors: {
@@ -162,32 +150,35 @@ export class ChatGateway
         this.server.to(`user-${payload.interlocutor}`).emit('messageDeleted', payload.message_id);
     }
 
-    @SubscribeMessage('updateStatus')
-    async handleUpdateStatus(client: Socket, payload: any) {
+    async publishStatus(user_id: number, status: string) {
+        userStatuses[user_id] = status;
         // loop through all user's friends and send the message to the right user
-        let friends = await this.friendService.getFriends(client['user'].id);
-        if (payload.status === "online") {
+        let friends = await this.friendService.getFriends(user_id);
+        if (status === "online") {
             friends.forEach((friend) => {
-                const id = friend.friend_id === client['user'].id ? friend.user_id : friend.friend_id;
-                if (this.server.sockets.adapter.rooms.has(`user-${id}`)) {
-                    client.emit('online', id);
+                const id = friend.friend_id === user_id ? friend.user_id : friend.friend_id;
+                if (userStatuses.hasOwnProperty(id)) {
+                    this.server.to(`user-${user_id}`).emit(userStatuses[id], id);
                 }
             });
         }
+        if (userStatuses.hasOwnProperty(user_id)) {
+            delete userStatuses[user_id];
+        }
         friends.forEach((friend) => {
-            const id = friend.friend_id === client['user'].id ? friend.user_id : friend.friend_id;
-            switch (payload.status) { // do not allow arbitrary status values
+            const id = friend.friend_id === user_id ? friend.user_id : friend.friend_id;
+            switch (status) { // do not allow arbitrary status values
                 case 'online':
-                    this.server.to(`user-${id}`).emit('online', client['user'].id);
+                    this.server.to(`user-${id}`).emit('online', user_id);
                     break;
                 case 'typing':
-                    this.server.to(`user-${id}`).emit('typing', client['user'].id);
+                    this.server.to(`user-${id}`).emit('typing', user_id);
                     break;
                 case 'playing':
-                    this.server.to(`user-${id}`).emit('playing', client['user'].id);
+                    this.server.to(`user-${id}`).emit('playing', user_id);
                     break;
                 case 'offline':
-                    this.server.to(`user-${id}`).emit('offline', client['user'].id);
+                    this.server.to(`user-${id}`).emit('offline', user_id);
                     break;
                 default:
                     break; // do nothing
