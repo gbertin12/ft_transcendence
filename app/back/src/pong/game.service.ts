@@ -262,7 +262,6 @@ export class GameService {
         room.pongState.player2.score = 0;
         room.pongState.player1.state = 0;
         room.pongState.player2.state = 0;
-        console.log("IN HANDLE END GAME: forfeit = ", forfeit);
     }
 
     calcElo(winner: PlayerInterface, looser: PlayerInterface): number[] {

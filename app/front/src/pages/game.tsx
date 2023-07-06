@@ -115,7 +115,7 @@ export default function Game() {
                     </Container>
                     <Spacer y={2} />
                     <Row justify='center' >
-                        <ButtonModes modes={modes} handleSetModes={handleSetModes} />
+                        <ButtonModes modes={modes} handleSetModes={handleSetModes} searchGame={searchGame} />
                         <ButtonStart searchGame={searchGame} modes={modes} handleSetSearchGame={handleSetSearchGame} />
                         <ButtonHintGame />
                     </Row>
