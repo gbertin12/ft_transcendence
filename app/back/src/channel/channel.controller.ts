@@ -378,17 +378,14 @@ export class ChannelController {
             receiverId,
             dto.channel_id,
         )
-        let users: number[] = [senderId, receiverId]
-        users.forEach((userId) => {
-            if (this.chatGateway.usersClients[userId]) {
-                this.chatGateway.usersClients[userId].emit('invite', {
-                    channel: channel,
-                    channel_id: dto.channel_id,
-                    channel_name: channel.name,
-                    sender: req.user,
-                });
-            }
-        })
+        const payload = {
+            channel: channel,
+            channel_id: dto.channel_id,
+            channel_name: channel.name,
+            sender: req.user,
+        };
+        this.chatGateway.server.to(`user-${receiverId}`).emit('invite', payload);
+        this.chatGateway.server.to(`user-${senderId}`).emit('invite', payload);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -399,16 +396,13 @@ export class ChannelController {
             body.id,
             dto.channel_id,
         )
-        let users: number[] = [req.user['id'], body.id]
-        users.forEach((userId) => {
-            if (this.chatGateway.usersClients[userId]) {
-                this.chatGateway.usersClients[userId].emit('cancelInvite', {
-                    channel_id: dto.channel_id,
-                    receiver_id: body.id,
-                    sender_id: req.user['id'],
-                });
-            }
-        });
+        const payload = {
+            channel_id: dto.channel_id,
+            receiver_id: body.id,
+            sender_id: req.user['id'],
+        };
+        this.chatGateway.server.to(`user-${body.id}`).emit('cancelInvite', payload);
+        this.chatGateway.server.to(`user-${req.user['id']}`).emit('cancelInvite', payload);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -419,16 +413,13 @@ export class ChannelController {
             body.id,
             dto.channel_id,
         )
-        let users: number[] = [req.user['id'], body.id]
-        users.forEach((userId) => {
-            if (this.chatGateway.usersClients[userId]) {
-                this.chatGateway.usersClients[userId].emit('acceptInvite', {
-                    channel_id: dto.channel_id,
-                    receiver_id: body.id,
-                    sender_id: req.user['id'],
-                });
-            }
-        });
+        const payload = {
+            channel_id: dto.channel_id,
+            receiver_id: body.id,
+            sender_id: req.user['id'],
+        };
+        this.chatGateway.server.to(`user-${body.id}`).emit('acceptInvite', payload);
+        this.chatGateway.server.to(`user-${req.user['id']}`).emit('acceptInvite', payload);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
