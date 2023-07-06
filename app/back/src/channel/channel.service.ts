@@ -327,7 +327,7 @@ export class ChannelService {
     }
 
     async inviteToChannel(sender_id: number, receiver_id: number, channel_id: number) {
-        return this.db.channelInvites.upsert({
+        return this.db.channelInvite.upsert({
             where: {
                 sender_id_receiver_id_channel_id: {
                     sender_id: sender_id,
@@ -349,7 +349,7 @@ export class ChannelService {
     }
 
     async revokeInvite(sender_id: number, receiver_id: number, channel_id: number) {
-        return this.db.channelInvites.delete({
+        return this.db.channelInvite.delete({
             where: {
                 sender_id_receiver_id_channel_id: {
                     sender_id: sender_id,
@@ -367,7 +367,7 @@ export class ChannelService {
                 channel_id: channel_id
             }
         })
-        return this.db.channelInvites.delete({
+        return this.db.channelInvite.delete({
             where: {
                 sender_id_receiver_id_channel_id: {
                     sender_id: sender_id,
