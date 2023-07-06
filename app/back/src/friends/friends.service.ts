@@ -400,4 +400,12 @@ export class FriendsService {
             },
         });
     }
+
+    async publishStatus(user_id: number, status: 'online' | 'offline' | 'typing' | 'playing') {
+        const friends = await this.getFriends(user_id);
+        friends.forEach((friend) => {
+            const friend_id = friend.user_id === user_id ? friend.friend_id : friend.user_id;
+            // TODO: Publish status to friend, and cache it to maps to send it to friends that come online
+        });
+    }
 }
