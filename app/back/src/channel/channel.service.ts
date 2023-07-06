@@ -603,7 +603,6 @@ export class ChannelService {
                 owner: owner.owner,
                 admins: admins.admins.map((admin) => admin.user),
                 users: users.map((user) => user.user).filter((user) => {
-                    console.log(user);
                     return !admins.admins.some((admin) => admin.user.id == user.id) && owner.owner.id != user.id;
                 })
             }
@@ -613,7 +612,6 @@ export class ChannelService {
                 admins: admins.admins.map((admin) => admin.user),
                 // remove users that are admins or owner
                 users: users.map((user) => user.sender).filter((user) => {
-                    console.log(user);
                     return !admins.admins.some((admin) => admin.user.id == user.id) && owner.owner.id != user.id;
                 })
             }
