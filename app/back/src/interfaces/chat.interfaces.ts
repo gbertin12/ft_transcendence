@@ -91,6 +91,6 @@ export interface PunishmentData {
 }
 
 export interface Relationships {
-    friends: any[];
-    blocked: any[];
+    friends: User[];
+    blocked: User[];
 }
