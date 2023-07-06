@@ -30,14 +30,14 @@ export default function Game() {
 
     useEffect(() => {
         if (router.isReady) {
-            if (!user.id) {
-                router.push(`/?next=${router.asPath}`);
+            if (user && !user.id) {
+                router.push('/');
             }
             if (router.query && router.query.roomName && router.query.who, router.query.nameOpponent) {
                 handleStartGame(router.query.roomName, parseInt(router.query.who), router.query.nameOpponent);
             }
         }
-    }, [router]); 
+    }, [router, user]); 
 
     const handleStartGame = (roomName: string, playerNumber: number, nameOpponent: string) => {
         setRoomName(roomName);
@@ -55,7 +55,7 @@ export default function Game() {
         return () => {
             socket.off('searchGame', handleStartGame);
         }
-    }, [socket, roomName]);
+    }, [socket]);
 
     useEffect(() => {
         const exitingFunction = () => {

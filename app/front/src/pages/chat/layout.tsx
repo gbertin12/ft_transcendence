@@ -1,7 +1,7 @@
 import ChanneldGrid from "@/components/chat/grids/ChannelsGrid";
 import FriendGrid from "@/components/chat/grids/FriendGrid";
 import { useUser } from "@/contexts/user.context";
-import { Grid, Loading } from "@nextui-org/react";
+import { Grid } from "@nextui-org/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -11,13 +11,11 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
     useEffect(() => {
         if (router.isReady) {
-            if (!user.id) {
-                router.push(`/?next=${router.asPath}`);
+            if (user && !user.id) {
+                router.push('/');
             }
         }
-    }, [router]);
-
-    if (!user.id) return (<Loading/>);
+    }, [router, user]);
 
     return (
         <Grid.Container css={{ "mx": "$4" }}>

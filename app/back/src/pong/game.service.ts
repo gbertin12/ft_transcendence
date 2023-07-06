@@ -142,7 +142,7 @@ export class GameService {
     constructor(
         private userService: UserService,
     ) { }
-    async handleGame(room: roomInterface, server: Server) {
+    async handleGame(room: roomInterface, server: Server, duelRequests: any) {
         // set ball position
         room.pongState.ball.x = convertToPixel(50, canvasWidth);
         room.pongState.ball.y = convertToPixel(50, canvasHeight);
@@ -165,7 +165,7 @@ export class GameService {
         while (room.state != 2) {
             // check if game is finished
             if (room.pongState.player1.score == 5 || room.pongState.player2.score == 5) {
-                this.handleEndGame(room, server, false);
+                this.handleEndGame(room, server, false, duelRequests);
                 return;
             }
             // check if modes is active
@@ -198,7 +198,7 @@ export class GameService {
         }
     }
 
-    async handleEndGame(room: roomInterface, server: Server, forfeit: boolean) {
+    async handleEndGame(room: roomInterface, server: Server, forfeit: boolean, duelRequests: any) {
         let eloDiff = 0;
         if (room.pongState.player1.score > room.pongState.player2.score) {
             // increment Wins / Looses in DB
@@ -246,6 +246,10 @@ export class GameService {
             );
         }
 
+        // remove players from duelRequests (if they exist)
+        delete duelRequests[room.pongState.player1.id];
+        delete duelRequests[room.pongState.player2.id];
+
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);
         const user2 = await this.userService.getUserByName(room.pongState.player2.name);
         server.to(room.pongState.player1.id).emit('updateUser', user1);
@@ -256,11 +260,12 @@ export class GameService {
         server.to(room.pongState.player2.id).emit('endGame', endGame);
         room.pongState.player1.score = 0;
         room.pongState.player2.score = 0;
+        room.pongState.player1.state = 0;
+        room.pongState.player2.state = 0;
         console.log("IN HANDLE END GAME: forfeit = ", forfeit);
     }
 
     calcElo(winner: PlayerInterface, looser: PlayerInterface): number[] {
-
         let eloWinner = winner.userInfos.elo;
         let eloLooser = looser.userInfos.elo;
         const p1 = eloWinner / (eloWinner + eloLooser);

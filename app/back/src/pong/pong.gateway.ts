@@ -11,7 +11,6 @@ import { Socket, Server } from 'socket.io';
 import {
     roomInterface,
     PlayerInterface,
-    PlayerEndGame,
 } from '../../src/interfaces/pong.interface';
 import { GameService } from './game.service';
 import { JwtService } from '@nestjs/jwt';
@@ -34,6 +33,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     players: PlayerInterface[] = [];
     rooms: roomInterface[] = [];
+    duelRequests = {};
 
     @WebSocketServer()
     server: Server;
@@ -127,28 +127,64 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.rooms.push(newRoom);
             this.server.to(playerId).emit('searchGame', newRoom.name, 1, waitingPlayer.name);
             this.server.to(waitingPlayer.id).emit('searchGame', newRoom.name, 0, player.name);
-            this.gameService.handleGame(newRoom, this.server);
+            this.gameService.handleGame(newRoom, this.server, this.duelRequests);
         }
     }
 
     @SubscribeMessage('duelRequest')
     handleDuelRequest(client: Socket, opponentId: number) {
+        if (this.duelRequests[client.id]) {
+            // send something ?
+            return ;
+        }
+
         const initiator = this.players.find((player) => player.id === client.id);
         const opponent = this.players.find((player) => player.userId === opponentId);
+        if (initiator.userId === opponent.userId ||  // can't play against yourself
+            initiator.state !== 0 ||                 // check if initiator is in queue or game
+            opponent.state !== 0                     // check if opponent is in queue or game
+        ) {
+            // send something?
+            return ;
+        }
+
+        // check if player has already been requested in duel
+        for (let key in this.duelRequests) {
+            if (this.duelRequests[key] === initiator.id) {
+                // send something?
+                return ;
+            }
+        }
+
         console.log("DUEL REQUEST from", client.id, "to:", opponent.id);
 
+        initiator.state = 1;
+        opponent.state = 1;
+        this.duelRequests[client.id] = opponentId;
         this.server.to(opponent.id).emit('duelRequest', initiator);
     }
 
     @SubscribeMessage('acceptDuel')
     acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
+        if (!this.duelRequests[opponent.id]) {
+            // send something:?
+            return ;
+        }
+
         const player = this.players.find((p) => client.id === p.id);
+        if (player.userId === opponent.userId ||
+            player.state !== 1 ||
+            opponent.state !== 1
+        ) {
+            // send something?
+            return ;
+        }
         const roomName: string = uuidv4();
         player.state = 2;
         opponent.state = 2;
         const newRoom: roomInterface = {
             name: roomName,
-            state: 0,
+            state: 1,
             pongState: {
                 ball: {
                     x: 50,
@@ -162,14 +198,43 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             },
         };
 
-       
         const duelData = { roomname: roomName, who: 0, nameOpponent: opponent.name};
+        player.state = 2;
+        opponent.state = 2;
         this.rooms.push(newRoom);
         this.server.to(player.id).emit('searchGameDuel', duelData);
         duelData.who = 1;
         duelData.nameOpponent = player.name;
         this.server.to(opponent.id).emit('searchGameDuel', duelData);
-        this.gameService.handleGame(newRoom, this.server);
+        this.gameService.handleGame(newRoom, this.server, this.duelRequests);
+    }
+
+    @SubscribeMessage('declineDuel')
+    declineDuelRequest(client: Socket, opponent: PlayerInterface) {
+        if (!this.duelRequests[opponent.id]) {
+            return ;
+        }
+
+        delete this.duelRequests[opponent.id];
+        const player = this.players.find((p) => client.id === p.id);
+        player.state = 0;
+        const adversary = this.players.find((p) => opponent.id === p.id);
+        adversary.state = 0;
+        this.server.to(opponent.id).emit('declineDuelRequest', player);
+    }
+
+    @SubscribeMessage('cancelDuel')
+    cancelDuelRequest(client: Socket, opponent: PlayerInterface) {
+        if (!this.duelRequests[client.id]) {
+            return ;
+        }
+
+        delete this.duelRequests[opponent.id];
+        const player = this.players.find((p) => client.id === p.id);
+        const adversary = this.players.find((p) => opponent.id === p.id);
+        player.state = 0;
+        adversary.state = 0;
+        this.server.to(opponent.id).emit('cancelDuelRequest', player);
     }
 
     @SubscribeMessage('playerMove')
@@ -230,7 +295,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
 
             room.state = 2;
-            this.gameService.handleEndGame(room, this.server, true);
+            this.gameService.handleEndGame(room, this.server, true, this.duelRequests);
         }
     }
 

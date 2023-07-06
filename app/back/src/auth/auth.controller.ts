@@ -14,26 +14,34 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import * as OTPAuth from 'otpauth';
 
 class LocalAuthDto {
+    @IsString()
     @IsNotEmpty()
     username: string;
 
+    @IsString()
     @IsNotEmpty()
     password: string;
 }
 
 class FtCallbackDto {
+    @IsString()
     @IsNotEmpty()
     code: string;
 
+    @IsString()
     @IsNotEmpty()
     state: string;
 }
 
 class VerifyOtpDto {
+    @IsString()
     @IsNotEmpty()
+    @MinLength(6)
+    @MaxLength(6)
     otp: string;
 }
 
@@ -43,6 +51,8 @@ export class AuthController {
         private authService: AuthService,
         private userService: UserService,
     ) { }
+
+    pendingTOTPs = {};
 
     @Get('42/callback')
     async ftCallback(
@@ -57,7 +67,6 @@ export class AuthController {
         res.redirect(302, `${process.env.FRONT_URL}/profile`);
     }
 
-    // TODO: CHANGE DISCORD STUFF
     @Get('discord/callback')
     @UseGuards(AuthGuard('discord'))
     async discordCallback(
@@ -118,24 +127,14 @@ export class AuthController {
     @Get('2fa/enable')
     async setOTP(
         @Req() req: Request,
-        @Res() res: Response
+        @Res() res: Response,
     ) {
-        const uri = await this.authService.setOTP(req.user['id']);
-        //const token = await this.authService.generateJWT(req.user['id'], true);
-        //res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.send(uri);
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Get('2fa/disable')
-    async unsetOTP(
-        @Req() req: Request,
-        @Res() res: Response
-    ) {
-        await this.authService.unsetOTP(req.user['id']);
-        const token = await this.authService.generateJWT(req.user['id']);
-        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.end();
+        if (await this.userService.hasOTP(req.user['id'])) {
+            throw new HttpException('TOTP already set', HttpStatus.FORBIDDEN);
+        }
+        const totp = await this.authService.generateTOTP();
+        this.pendingTOTPs[req.user['id']] = totp;
+        res.send(totp.toString());
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -145,13 +144,38 @@ export class AuthController {
         @Res() res: Response,
         @Body() dto: VerifyOtpDto,
     ) {
-        if (!await this.authService.verifyOTP(req.user['id'], dto.otp)) {
+        if (req.user['id'] in this.pendingTOTPs) {
+            const totp = this.pendingTOTPs[req.user['id']];
+            const result = totp.validate({ token: dto.otp, window: 1 });
+            if (result === null) {
+                throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
+            }
+            this.userService.updateOTPSecret(req.user['id'], totp.secret.base32);
+            delete this.pendingTOTPs[req.user['id']];
+        } else if (!await this.authService.verifyOTP(req.user['id'], dto.otp)) {
             throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
         }
         const token = await this.authService.generateJWT(req.user['id'], true);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.end();
     }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Post('2fa/disable')
+    async unsetOTP(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Body() dto: VerifyOtpDto,
+    ) {
+        if (!await this.authService.verifyOTP(req.user['id'], dto.otp)) {
+            throw new HttpException('TOTP validation failed', HttpStatus.UNAUTHORIZED);
+        }
+        await this.authService.unsetOTP(req.user['id']);
+        const token = await this.authService.generateJWT(req.user['id']);
+        res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
+        res.end();
+    }
+
     @Get('dummy')
     async dummy(
         @Res() res: Response,

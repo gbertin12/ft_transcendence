@@ -1,8 +1,7 @@
 import { useUser } from "@/contexts/user.context";
 import { Input, Spacer, Button, Grid, Text, Row, FormElement } from "@nextui-org/react";
 import axios from 'axios';
-import { useRouter } from "next/router";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function SignUp() {
     const [ username, setUsername ] = useState<string>("");
@@ -10,17 +9,7 @@ export default function SignUp() {
     const [ msg, setMsg ] = useState<string>("");
     const [ color, setColor ] = useState<string>("");
 
-    const [ nextPage, setNextPage ] = useState<string>("/profile");
-    const router = useRouter();
     const { setUser } = useUser();
-
-    useEffect(() => {
-        if (router.isReady) {
-            if (router.query && router.query.next) {
-                setNextPage(router.query.next);
-            }
-        }
-    }, [router]);
 
     async function refreshUser() {
         const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
@@ -34,7 +23,7 @@ export default function SignUp() {
         await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
         //await refreshUser();
         //router.push(nextPage);
-        window.location.href = nextPage;
+        window.location.href = "/profile";
     }
 
     function register() {

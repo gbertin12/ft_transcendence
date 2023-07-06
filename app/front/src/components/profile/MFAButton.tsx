@@ -27,7 +27,7 @@ export default function MFAButton() {
 
     async function enable2FA() {
         const res = await fetch("http://localhost:3000/auth/2fa/enable", {
-            credentials: "include"
+            credentials: "include",
         });
         if (res?.ok) {
             const otpauth_uri = await res.text();
@@ -38,19 +38,27 @@ export default function MFAButton() {
     }
 
     async function disable2FA() {
-        await fetch("http://localhost:3000/auth/2fa/disable", {
-            credentials: "include"
+        const res = await fetch("http://localhost:3000/auth/2fa/disable", {
+            credentials: "include",
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ otp: code }),
         });
-        setUser({ ...user, otp: false });
-        setOtp(false);
+
+        return res;
     }
 
     async function handleDisable2FA() {
-        const res = await verify2FA();
+        const res = await disable2FA();
         if (res?.ok) {
-            disable2FA();
+            setUser({ ...user, otp: false });
+            setOtp(false);
             setValidated(true);
             setShowInput(false);
+            setCode("");
+            setError("");
+        } else {
+            setError("Invalid OTP");
             setCode("");
         }
     }
@@ -63,17 +71,17 @@ export default function MFAButton() {
             setUser({ ...user, otp: true });
             setOtp(true);
             setCode("");
+            setError("");
         } else {
-            const err = await res.json();
-            setError(err.message);
+            setError("Invalid OTP");
+            setCode("");
         }
     }
 
     async function handleCloseQrcode() {
-        if (!validated) {
-            disable2FA();
-            setShowQrcode(false);
-        }
+        setShowQrcode(false);
+        setOtp(false);
+        setCode("");
     }
 
     async function handleCloseInput() {
@@ -117,7 +125,7 @@ export default function MFAButton() {
                 blur
                 closeButton
                 preventClose
-                width="25%"
+                width="33%"
                 aria-labelledby="2FA Input"
                 open={showInput}
                 onClose={handleCloseInput}>
@@ -126,6 +134,7 @@ export default function MFAButton() {
                 </Modal.Header>
 
                 <Modal.Body>
+                    <Text color="error">{error}</Text>
                     <MFAInput code={code} setCode={setCode} btnCallback={handleDisable2FA}/>
                 </Modal.Body>
             </Modal>

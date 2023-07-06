@@ -21,7 +21,8 @@ import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import { Type } from 'class-transformer';
-import { IsISO8601, IsNotEmpty } from 'class-validator';
+import { IsISO8601, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { PongGateway } from '../pong/pong.gateway';
 
 class DateDto {
     @Type(() => () => new Date())
@@ -38,9 +39,19 @@ class UsernameParamDto {
     username: string
 }
 
+class UserIdDto {
+    @Type(() => Number)
+    @IsNumber()
+    @IsPositive()
+    id: number
+}
+
 @Controller('user')
 export class UserController {
-    constructor(private userService: UserService) {}
+    constructor(
+        private userService: UserService,
+        private pongGateway: PongGateway,
+    ) {}
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get('me')
@@ -113,5 +124,22 @@ async update(
         @Query() dateDto: DateDto,
     ) {
         return await this.userService.getPlayerEloByDate(usernameDto.username, dateDto.date);
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Get('player/opponent')
+    getOpponent(@Req() req: Request) {
+        const current_player = this.pongGateway.players.find((p) => p.userId === req.user["id"]);
+        const opponentId = this.pongGateway.duelRequests[current_player.id];
+        if (!opponentId) {
+            return null;
+        }
+        return opponentId;
+    }
+
+    @Get('player/:id')
+    getPlayerById(@Param() dto: UserIdDto) {
+        const player = this.pongGateway.players.find((p) => p.userId === dto.id);
+        return player;
     }
 }

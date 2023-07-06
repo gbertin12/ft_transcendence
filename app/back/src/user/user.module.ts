@@ -1,10 +1,11 @@
-import { HttpException, HttpStatus, Module } from '@nestjs/common';
+import { HttpException, HttpStatus, Module, forwardRef } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { DbModule } from '../db/db.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { randomUUID } from 'crypto';
 import { diskStorage } from 'multer';
+import { PongModule } from '../pong/pong.module';
 
 const storage = diskStorage({
     destination: process.env.AVATAR_DIR,
@@ -33,6 +34,7 @@ const fileFilter = (
     providers: [UserService],
     imports: [
         DbModule,
+        forwardRef(() => PongModule),
         MulterModule.register({
             storage,
             fileFilter,

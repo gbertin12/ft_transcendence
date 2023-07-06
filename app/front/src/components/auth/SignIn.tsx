@@ -1,11 +1,10 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
 import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import MFAInput from './MFAInput';
 import { useUser } from '@/contexts/user.context';
+import { useRouter } from 'next/router';
 
 export default function SignIn({ closeModal }: { closeModal: () => void }) {
     const [ username, setUsername ] = useState<string>("");
@@ -16,17 +15,8 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     const [ otp, setOtp ] = useState<string>("");
     const [ mfaError, setMfaError ] = useState<string>("");
 
-    const [ nextPage, setNextPage ] = useState<string>("/profile");
-    const router = useRouter();
     const { setUser } = useUser();
-
-    useEffect(() => {
-        if (router.isReady) {
-            if (router.query && router.query.next) {
-                setNextPage(router.query.next);
-            }
-        }
-    }, [router]);
+    const router = useRouter();
 
     async function verify2FA() {
         const res = await fetch("http://localhost:3000/auth/2fa/verify", {
@@ -40,7 +30,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             closeModal();
             //await refreshUser();
             //router.push(nextPage);
-            window.location.href = nextPage;
+            window.location.href = "/profile";
         } else {
             const err = await res.json();
             setMfaError(err.message);
@@ -71,7 +61,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
                 } else {
                     //await refreshUser();
                     //router.push(nextPage);
-                    window.location.href = nextPage;
+                    window.location.href = "/profile";
                 }
             } else {
                 setError("Login failed");
