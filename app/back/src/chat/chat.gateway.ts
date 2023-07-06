@@ -99,10 +99,13 @@ export class ChatGateway
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
             const user = await this.userService.getUserById(payload.id);
-            client['friends'].forEach((id: number) => {
-                this.server.to(`user-${id}`).emit('offline', user.id);
-            });
-            client.leave(`user-${user.id}`);
+            // Check if there are no other connections from this user
+            if (!this.server.sockets.adapter.rooms.has(`user-${user.id}`)) {
+                client['friends'].forEach((id: number) => {
+                    this.server.to(`user-${id}`).emit('offline', user.id);
+                });
+                client.leave(`user-${user.id}`);
+            }
         } catch {
             client.disconnect();
             return "UnauthorizedException";
@@ -162,30 +165,34 @@ export class ChatGateway
     @SubscribeMessage('updateStatus')
     async handleUpdateStatus(client: Socket, payload: any) {
         // loop through all user's friends and send the message to the right user
-        const friends = client['friends'];
-        friends.forEach((id: number) => {
+        let friends = await this.friendService.getFriends(client['user'].id);
+        if (payload.status === "online") {
+            friends.forEach((friend) => {
+                const id = friend.friend_id === client['user'].id ? friend.user_id : friend.friend_id;
+                if (this.server.sockets.adapter.rooms.has(`user-${id}`)) {
+                    client.emit('online', id);
+                }
+            });
+        }
+        friends.forEach((friend) => {
+            const id = friend.friend_id === client['user'].id ? friend.user_id : friend.friend_id;
             switch (payload.status) { // do not allow arbitrary status values
                 case 'online':
-                    this.server.to(`user-{id}`).emit('online', client['user'].id);
+                    this.server.to(`user-${id}`).emit('online', client['user'].id);
                     break;
                 case 'typing':
-                    this.server.to(`user-{id}`).emit('typing', client['user'].id);
+                    this.server.to(`user-${id}`).emit('typing', client['user'].id);
                     break;
                 case 'playing':
-                    this.server.to(`user-{id}`).emit('playing', client['user'].id);
+                    this.server.to(`user-${id}`).emit('playing', client['user'].id);
                     break;
                 case 'offline':
-                    this.server.to(`user-{id}`).emit('offline', client['user'].id);
+                    this.server.to(`user-${id}`).emit('offline', client['user'].id);
                     break;
                 default:
                     break; // do nothing
             }
         });
-    }
-
-    @SubscribeMessage('onlineAnswer') // Pretty much a ping-pong, send a `online` message to the user with the id `payload.id` (doesn't work)
-    async handleOnlineAnswer(client: Socket, pong_id: number) {
-        this.server.to(`user-${pong_id}`).emit('online', client['user'].id);
     }
 }
 

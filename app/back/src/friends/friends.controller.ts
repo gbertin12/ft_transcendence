@@ -77,8 +77,7 @@ export class FriendsController {
     @Post('/requests/:id/accept')
     async acceptFriendRequest(@Req() req, @Param() params: FriendReqIdDto) {
         let receiver_id: number = req.user['id'];
-        console.log("receiver_id", receiver_id)
-        
+
         let request = await this.friendsService.getFriendRequest(params.id, receiver_id);
 
         if (!request) {
@@ -95,6 +94,13 @@ export class FriendsController {
         this.chatGateway.server.to(`user-${params.id}`).emit("friendRequestDeleted", request);
         this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestDeleted", request);
         this.chatGateway.server.to(`user-${receiver_id}`).emit("friendRequestAccepted", newFriend);
+        // Check if the sender is online
+        if (this.chatGateway.server.sockets.adapter.rooms.has(`user-${params.id}`)) {
+            // Send online status to sender
+            this.chatGateway.server.to(`user-${params.id}`).emit("online", receiver_id);
+            // Send online status to receiver
+            this.chatGateway.server.to(`user-${receiver_id}`).emit("online", params.id);
+        }
         return newFriend;
     }
 
