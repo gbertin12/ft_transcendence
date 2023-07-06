@@ -150,7 +150,7 @@ export class FriendsController {
         }
         try {
             await this.friendsService.blockUser(req.user['id'], params.id);
-            this.chatGateway.server.to(`user-${req.user['id']}`).emit("deleteFriend", req.user['id']);
+            this.chatGateway.server.to(`user-${req.user['id']}`).emit("blocked", params.id);
         } catch (e) {
             // TODO: throw an error maybe ?
         }
