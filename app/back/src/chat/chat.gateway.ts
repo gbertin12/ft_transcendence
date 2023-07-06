@@ -87,13 +87,8 @@ export class ChatGateway
         try {
             const payload = await this.jwtService.verifyAsync(cookies.session);
             const user = await this.userService.getUserById(payload.id);
-            // Check if there are no other connections from this user
-            if (!this.server.sockets.adapter.rooms.has(`user-${user.id}`)) {
-                client['friends'].forEach((id: number) => {
-                    this.server.to(`user-${id}`).emit('offline', user.id);
-                });
-                client.leave(`user-${user.id}`);
-            }
+            client.leave(`user-${user.id}`);
+            this.publishStatus(user.id, "offline");
         } catch {
             client.disconnect();
             return "UnauthorizedException";
@@ -162,8 +157,11 @@ export class ChatGateway
                 }
             });
         }
-        if (userStatuses.hasOwnProperty(user_id)) {
-            delete userStatuses[user_id];
+        if (userStatuses.hasOwnProperty(user_id) && status === "offline") {
+            // Look if there are more than 1 connection in room `user-${user_id}`
+            if (this.server.sockets.adapter.rooms.has(`user-${user_id}`)) {
+                return ;
+            }
         }
         friends.forEach((friend) => {
             const id = friend.friend_id === user_id ? friend.user_id : friend.friend_id;
