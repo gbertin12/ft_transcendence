@@ -250,7 +250,7 @@ export class ChannelController {
         let channel: Channel = await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
         if (body.private) {
             // Emit only creation to the owner
-            this.chatGateway.usersClients[ownerId].emit('newChannel', channel);
+            this.chatGateway.server.to(`user-${ownerId}`).emit('newChannel', channel);
         } else {
             this.chatGateway.server.emit('newChannel', channel);
         }
@@ -449,9 +449,7 @@ export class ChannelController {
         await this.channelService.leaveChannel(userId, dto.channel_id);
         this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} left the channel`);
         // Send a socket message to the user to leave the channel
-        if (this.chatGateway.usersClients[userId]) {
-            this.chatGateway.usersClients[userId].emit('leaveChannel', dto.channel_id);
-        }
+        this.chatGateway.server.to(`user-${userId}`).emit('leaveChannel', dto.channel_id);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
