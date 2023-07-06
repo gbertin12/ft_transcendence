@@ -1,9 +1,9 @@
-import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param, ForbiddenException, Query, BadRequestException, Patch } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../user/user.service';
 import { Friend, FriendRequest, User } from '@prisma/client';
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsNumber, IsPositive, IsString, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChatGateway } from '../chat/chat.gateway';
 
@@ -19,6 +19,13 @@ class FriendReqIdDto {
     @IsNumber()
     @IsPositive()
     id: number;
+}
+
+class FriendStatusDto {
+    @Type(() => String)
+    @IsString()
+    @Matches(/^(online|offline|playing|typing)$/)
+    status: string;
 }
 
 @Controller('friends')
@@ -162,5 +169,10 @@ export class FriendsController {
             // TODO: throw an error maybe ?
         }
     }
-    
+
+    @UseGuards(AuthGuard('jwt-2fa'))
+    @Patch("/status/:status")
+    async publishStatus(@Req() req, @Param() params: FriendStatusDto) {
+        this.chatGateway.publishStatus(req.user['id'], params.status);
+    }
 }
