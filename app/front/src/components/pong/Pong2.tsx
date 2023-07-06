@@ -7,6 +7,7 @@ import Sketch from "react-p5";
 import p5Types from "p5";
 import dynamic from 'next/dynamic'
 import { PlayerEndGame } from '@/interfaces/pong.interface';
+import axios from 'axios';
 
 interface Power {
 	isActive: boolean;
@@ -244,6 +245,7 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 
 	useEffect(() => {
 		window.addEventListener('resize', handleWindowResize);
+		axios.patch(`http://localhost:3000/friends/status/playing`, {}, { withCredentials: true, validateStatus: () => true });
 		return () => {
 			window.removeEventListener('resize', handleWindowResize);
 		}
