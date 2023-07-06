@@ -14,9 +14,7 @@ const ChatFriendBrowser: React.FC = () => {
         <ul>
             {friends.map((friend) => (
                 <ChatEntry
-                    name={friend.name}
-                    avatar={friend.avatar}
-                    userId={friend.userId}
+                    user={friend}
                     isOnline={friend.isOnline}
                     isTyping={friend.isTyping}
                     isPlaying={friend.isPlaying}
