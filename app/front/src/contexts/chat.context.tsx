@@ -243,7 +243,6 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             });
             socket.on("online", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isOnline: true, isPlaying: false } : f));
-                socket.emit("onlineAnswer", friend_id);
             });
             socket.on("typing", (friend_id: number) => {
                 setFriends((friends) => friends.map((f) => f.id === friend_id ? { ...f, isTyping: true } : f));
