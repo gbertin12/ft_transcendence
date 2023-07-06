@@ -87,6 +87,7 @@ export class ChatGateway
             this.friendService.getFriends(user.id).then((friends) => {
                 client['friends'] = friends.map((friend) => (friend.user_id === user.id ? friend.friend_id : friend.user_id));
             });
+            client.join(`user-${user.id}`);
         } catch {
             client.disconnect();
             return "UnauthorizedException";
@@ -108,6 +109,7 @@ export class ChatGateway
                     this.usersClients[id].emit('offline', user.id);
                 }
             });
+            client.leave(`user-${user.id}`);
         } catch {
             client.disconnect();
             return "UnauthorizedException";
@@ -116,10 +118,9 @@ export class ChatGateway
 
     @SubscribeMessage('join')
     async handleJoin(client: Socket, channelId: number) {
-        // leave all channels except first one
-        Object.keys(client.rooms).forEach((room) => {
-            if (room !== client.id) {
-                //console.log("leaving room:", room)
+        // leave all channels that contains 'channel-'
+        client.rooms.forEach((room) => {
+            if (room.startsWith("channel-")) {
                 client.leave(room);
             }
         });
@@ -148,13 +149,7 @@ export class ChatGateway
 
     @SubscribeMessage('leave')
     async handleLeave(client: Socket, channelId: number) {
-        // leave all channels except first one
-        Object.keys(client.rooms).forEach((room) => {
-            if (room !== client.id && room.startsWith("channel-")) {
-                console.log("leaving room:", room)
-                client.leave(room);
-            }
-        });
+        client.leave(`channel-${channelId}`);
     }
 
     @SubscribeMessage('dmDelete')
@@ -167,10 +162,8 @@ export class ChatGateway
             throw new ForbiddenException('You are not allowed to delete this message');
         }
         await this.dmsService.deleteMessage(payload.message_id);
-        if (this.usersClients[payload.interlocutor]) {
-            this.usersClients[payload.interlocutor].emit('messageDeleted', payload.message_id);
-        }
-        client.emit('messageDeleted', payload.message_id);
+        this.server.to(`user-${client['user'].id}`).emit('messageDeleted', payload.message_id);
+        this.server.to(`user-${payload.interlocutor}`).emit('messageDeleted', payload.message_id);
     }
 
     @SubscribeMessage('updateStatus')
