@@ -27,14 +27,13 @@ model User {
     BlockedUser       BlockedUser[]
     friend            Friend[]         @relation("friend")
     friend2           Friend[]         @relation("friend2")
-    ChannelInvites    ChannelInvites[]
     PrivateMessage    PrivateMessage[]
     punished          Punishment[]     @relation("punished")
     punisher          Punishment[]     @relation("punisher")
     ChannelAdmin      ChannelAdmin[]
     ChannelAccess     ChannelAccess[]
-    ChannelInvite     ChannelInvite[]
-    ChannelInvite     ChannelInvite[]
+    sent_invites      ChannelInvite[]  @relation("sender")
+    received_invites  ChannelInvite[]  @relation("receiver")
 }
 
 model MatchHistory {
@@ -90,23 +89,24 @@ model ChannelInvite {
     receiver_id Int
     channel_id  Int
     sent_at     DateTime @default(now()) @db.Timestamp(6)
-    sender      User     @relation(fields: [sender_id], references: [id])
-    receiver    User     @relation(fields: [receiver_id], references: [id])
+    sender      User     @relation("sender", fields: [sender_id], references: [id])
+    receiver    User     @relation("receiver", fields: [receiver_id], references: [id])
     channel     Channel  @relation(fields: [channel_id], references: [id])
+
+    @@id([sender_id, receiver_id, channel_id])
 }
 
 model Channel {
-    id             Int              @id @default(autoincrement())
-    name           String           @db.VarChar(64)
-    topic          String           @db.VarChar(128)
-    private        Boolean          @default(false) @db.Boolean
-    creation_date  DateTime         @default(now()) @db.Timestamp(6)
+    id             Int             @id @default(autoincrement())
+    name           String          @db.VarChar(64)
+    topic          String          @db.VarChar(128)
+    private        Boolean         @default(false) @db.Boolean
+    creation_date  DateTime        @default(now()) @db.Timestamp(6)
     owner_id       Int
-    password       String?          @db.VarChar(128)
-    owner          User             @relation(fields: [owner_id], references: [id])
+    password       String?         @db.VarChar(128)
+    owner          User            @relation(fields: [owner_id], references: [id])
     channel_access ChannelAccess[]
     admins         ChannelAdmin[]
-    ChannelInvites ChannelInvites[]
     ChannelInvite  ChannelInvite[]
 }
 
@@ -117,17 +117,6 @@ model ChannelAccess {
     user       User    @relation(fields: [user_id], references: [id])
 
     @@id([channel_id, user_id])
-}
-
-model ChannelInvites {
-    sender_id   Int
-    receiver_id Int
-    channel_id  Int
-    invited_at  DateTime @default(now()) @db.Timestamp(6)
-    sender      User     @relation(fields: [sender_id], references: [id])
-    channel     Channel  @relation(fields: [channel_id], references: [id])
-
-    @@id([sender_id, receiver_id, channel_id])
 }
 
 model ChannelAdmin {
