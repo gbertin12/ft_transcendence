@@ -137,9 +137,7 @@ export class FriendsController {
         }
         try {
             await this.friendsService.blockUser(req.user['id'], params.id);
-            if (this.chatGateway.usersClients[req.user['id']]) {
-                this.chatGateway.usersClients[req.user['id']].emit("blocked", params.id);
-            }
+            this.chatGateway.server.to(`user-${req.user['id']}`).emit("deleteFriend", req.user['id']);
         } catch (e) {
             // TODO: throw an error maybe ?
         }
@@ -153,9 +151,7 @@ export class FriendsController {
         }
         try {
             await this.friendsService.unblockUser(req.user['id'], params.id);
-            if (this.chatGateway.usersClients[req.user['id']]) {
-                this.chatGateway.usersClients[req.user['id']].emit("unblocked", params.id);
-            }
+            this.chatGateway.server.to(`user-${req.user['id']}`).emit("unblocked", params.id);
         } catch (e) {
             // TODO: throw an error maybe ?
         }
