@@ -1,10 +1,10 @@
 import { Avatar, Badge, Grid, Text } from '@nextui-org/react';
 import React from 'react';
+import AvatarTooltip from '../profile/AvatarTooltip';
+import { User } from '@/interfaces/chat.interfaces';
 
 interface ChatEntryProps {
-    name: string;
-    avatar: string;
-    userId: number;
+    user: User;
     isOnline: boolean;
     isTyping: boolean;
     isPlaying: boolean;
@@ -32,7 +32,7 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, isTyping, isPlaying, unreadMessages, children }) => {
+const ChatEntry: React.FC<ChatEntryProps> = ({ user, isOnline, isTyping, isPlaying, unreadMessages, children }) => {
     const [isHovered, setIsHovered] = React.useState(false);
 
     return (
@@ -55,14 +55,14 @@ const ChatEntry: React.FC<ChatEntryProps> = ({ name, avatar, userId, isOnline, i
                     color={getStatusColor(isOnline, isPlaying)}
                     variant={isTyping ? "points" : "dot"}
                 >
-                    <Avatar
-                        size="lg"
-                        src={`http://localhost:3000/static/avatars/${avatar}`}
+                    <AvatarTooltip
+                        placement='left'
+                        user={user}
                     />
                 </Badge>
             </Grid>
             <Grid xs={8} css={{my: "auto"}}>
-                <Text span>{name}</Text>
+                <Text span>{user.name}</Text>
             </Grid>
             {children}
         </Grid.Container >
