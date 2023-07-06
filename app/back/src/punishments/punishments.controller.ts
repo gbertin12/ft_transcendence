@@ -56,8 +56,6 @@ export class PunishmentsController {
 		}
 		await this.punishmentsService.revoke(dto.issuer_id, dto.punished_id, dto.channel_id);
 		// Send revoke to punished user
-		if (this.chatGateway.usersClients[dto.punished_id]) {
-			this.chatGateway.usersClients[dto.punished_id].emit('punishment_revoked', dto.channel_id);
-		}
+		this.chatGateway.server.to(`user-${dto.punished_id}`).emit('punishment_revoked', dto.channel_id);
 	}
 }
