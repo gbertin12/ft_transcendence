@@ -568,14 +568,12 @@ export class ChannelController {
             "banned"
         );
         this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} banned ${user.name} from the channel ${formatPunishmentDuration(body.duration)}`);
-        // send socket to punished
-        if (this.chatGateway.usersClients[dto.user_id]) {
-            this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                type: 'banned',
-                channel_id: dto.channel_id,
-                duration: body.duration || null,
-            });
-        };
+        // send socket to punished user
+        this.chatGateway.server.to(`user-${dto.user_id}`).emit('punishment', {
+            type: 'banned',
+            channel_id: dto.channel_id,
+            duration: body.duration || null,
+        });
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -600,13 +598,11 @@ export class ChannelController {
         );
         this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} muted ${user.name} in the channel ${formatPunishmentDuration(body.duration)}`);
         // send socket to punished
-        if (this.chatGateway.usersClients[dto.user_id]) {
-            this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                type: 'muted',
-                channel_id: dto.channel_id,
-                duration: body.duration || null,
-            });
-        };
+        this.chatGateway.server.to(`user-${dto.user_id}`).emit('punishment', {
+            type: 'muted',
+            channel_id: dto.channel_id,
+            duration: body.duration || null,
+        });
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
@@ -628,11 +624,9 @@ export class ChannelController {
         await this.channelService.leaveChannel(dto.user_id, dto.channel_id);
         this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} kicked ${user.name} from the channel`);
         // send socket to punished
-        if (this.chatGateway.usersClients[dto.user_id]) {
-            this.chatGateway.usersClients[dto.user_id].emit('punishment', {
-                type: 'kicked',
-                channel_id: dto.channel_id,
-            });
-        };
+        this.chatGateway.server.to(`user-${dto.user_id}`).emit('punishment', {
+            type: 'kicked',
+            channel_id: dto.channel_id,
+        });
     }
 }
