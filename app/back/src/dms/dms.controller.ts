@@ -93,7 +93,7 @@ export class DmsController {
 			throw new ForbiddenException("You blocked this user");
 		}
 		let message = await this.dmsService.createMessage(requester_id, interlocutor_id, req.body.content);
-		this.chatGateway.usersClients[requester_id].emit('dmMessage', message);
-		this.chatGateway.usersClients[interlocutor_id].emit('dmMessage', message);
+		this.chatGateway.server.to(`user-${interlocutor_id}`).emit('dmMessage', message);
+		this.chatGateway.server.to(`user-${requester_id}`).emit('dmMessage', message);
 	};
 }
