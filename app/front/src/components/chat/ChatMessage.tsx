@@ -76,8 +76,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, i
                                 placement="top"
                             />
                         </div>
-                        <Text className="overflow-hidden block relative">
-                            <Text span color="primary" className="mr-1 text-lg font-medium">
+                        <div className="overflow-hidden block relative">
+                            <div color="primary" className="mr-1 text-lg font-medium">
                                 {data.sender.name + (blocked ? " (blocked)" : "")}
                                 {senderOwner && (
                                     <Text color="$error" css={{ display: "inline-flex" }}>
@@ -118,9 +118,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ data, concatenate, channel, i
                                         </Tooltip>
                                     </Text>
                                 )}
-                            </Text>
+                            </div>
                             <Text span color="$neutral" className="text-sm">{formatDate(data.timestamp)}</Text>
-                        </Text>
+                        </div>
                     </>
                 )}
                 <div className='absolute right-4 top-0'>
