@@ -166,7 +166,9 @@ export default function UserInteractionButtons({ user }: { user: User }) {
     const [ player, setPlayer ] = useState<PlayerInterface>({} as PlayerInterface);
     const [ isOpponent, setIsOpponent ] = useState<boolean>(false);
 
+
     const router = useRouter();
+    const { selectedChannel } = useChat();
 
     function handleBlockUser() {
         axios.post(`http://localhost:3000/friends/block/${user.id}`, {}, {
@@ -246,13 +248,15 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 </Button>
             )}
 
-            <Button
-                //onPress={}
-                size="sm"
-                color="success"
-                auto>
-                <IconMessages/>
-            </Button>
+            {(selectedChannel && selectedChannel.private) && (
+                <Button
+                    //onPress={}
+                    size="sm"
+                    color="success"
+                    auto>
+                    <IconMessages/>
+                </Button>
+            )}
 
             {DuelButton(user, player, isOpponent, setIsOpponent)}
         </Row>
