@@ -1,7 +1,7 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
 import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import MFAInput from './MFAInput';
 import { useUser } from '@/contexts/user.context';
 import { useRouter } from 'next/router';
@@ -17,6 +17,19 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
 
     const { setUser } = useUser();
     const router = useRouter();
+
+    useEffect(() => {
+        if (router.isReady) {
+            if (router.query.otp) {
+                const otp = (router.query.otp == "true");
+                if (otp) {
+                    setShowInput(true);
+                } else {
+                    window.location.href = "/profile";
+                }
+            }
+        }
+    }, [router]);
 
     async function verify2FA() {
         const res = await fetch("http://localhost:3000/auth/2fa/verify", {

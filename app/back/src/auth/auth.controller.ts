@@ -64,7 +64,7 @@ export class AuthController {
         const user = await this.authService.ftCallback(dto.code, dto.state, state_cookie);
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+        res.redirect(302, `${process.env.FRONT_URL}/?otp=${user.otp}`);
     }
 
     @Get('discord/callback')
@@ -76,7 +76,7 @@ export class AuthController {
         const user = await this.userService.createUser(req.user.toString());
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+        res.redirect(302, `${process.env.FRONT_URL}/?otp=${user.otp}`);
     }
 
     @Get('github/callback')
@@ -88,7 +88,7 @@ export class AuthController {
         const user = await this.userService.createUser(req.user.toString());
         const token = await this.authService.generateJWT(user.id);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
-        res.redirect(302, `${process.env.FRONT_URL}/profile`);
+        res.redirect(302, `${process.env.FRONT_URL}/?otp=${user.otp}`);
     }
 
     @Post('register')
