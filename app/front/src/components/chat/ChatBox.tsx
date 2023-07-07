@@ -43,8 +43,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         bannedChannels,
         mutedChannels,
         blockedUsers,
+        setSelectedChannel,
         setChannels,
     } = useChat();
+
+    useEffect(() => {
+        setSelectedChannel(channel);
+        return () => {
+            setSelectedChannel(null);
+        }
+    }, [channel]);
 
     const messagesRef = useRef<HTMLUListElement>(null);
 

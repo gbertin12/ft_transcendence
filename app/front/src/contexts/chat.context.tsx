@@ -6,6 +6,10 @@ import axios from 'axios';
 interface ChatContextType {
     channels: Channel[];
     setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
+    selectedChannel: Channel | null;
+    setSelectedChannel: React.Dispatch<React.SetStateAction<Channel | null>>;
+    channelInvites: ChannelInvite[];
+    setChannelInvites: React.Dispatch<React.SetStateAction<ChannelInvite[]>>;
     privateChannels: Channel[];
     setPrivateChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
     publicChannels: Channel[];
@@ -34,6 +38,10 @@ interface OwnerUpdate {
 const ChatContext = createContext<ChatContextType>({
     channels: [],
     setChannels: () => { },
+    selectedChannel: null,
+    setSelectedChannel: () => { },
+    channelInvites: [],
+    setChannelInvites: () => { },
     privateChannels: [],
     setPrivateChannels: () => { },
     publicChannels: [],
@@ -58,6 +66,7 @@ export const useChat = () => useContext(ChatContext);
 
 export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
+    const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [privateChannels, setPrivateChannels] = useState<Channel[]>([]);
     const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
     const [channelInvites, setChannelInvites] = useState<ChannelInvite[]>([]);
@@ -373,6 +382,10 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         <ChatContext.Provider value={{
             channels,
             setChannels,
+            selectedChannel,
+            setSelectedChannel,
+            channelInvites,
+            setChannelInvites,
             publicChannels,
             setPublicChannels,
             privateChannels,
