@@ -137,7 +137,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // send something ?
             return ;
         }
-
         const initiator = this.players.find((player) => player.id === client.id);
         const opponent = this.players.find((player) => player.userId === opponentId);
         if (initiator.userId === opponent.userId ||  // can't play against yourself
@@ -147,7 +146,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // send something?
             return ;
         }
-
         // check if player has already been requested in duel
         for (let key in this.duelRequests) {
             if (this.duelRequests[key] === initiator.id) {
@@ -223,10 +221,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('cancelDuel')
     cancelDuelRequest(client: Socket, opponent: PlayerInterface) {
         if (!this.duelRequests[client.id]) {
+            console.log("don't found duel request")
             return ;
         }
-
-        delete this.duelRequests[opponent.id];
+        delete this.duelRequests[client.id];
         const player = this.players.find((p) => client.id === p.id);
         const adversary = this.players.find((p) => opponent.id === p.id);
         player.state = 0;
