@@ -113,7 +113,7 @@ function friendInteractionButton(
     }
 }
 
-function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, setIsOpponent: any): JSX.Element {
+function DuelButton(user: User, player: PlayerInterface, isOpponent: boolean, setIsOpponent: any): JSX.Element {
     const { socket } = useUser();
 
     function handleDuelRequest() {
@@ -121,7 +121,7 @@ function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, se
         setIsOpponent(true);
     }
 
-    function handelCancelDuel() {
+    function handleCancelDuel() {
         socket.emit('cancelDuel', player);
         setIsOpponent(false);
     }
@@ -129,7 +129,7 @@ function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, se
     if (isOpponent) {
         return (
             <Button
-                onPress={handelCancelDuel}
+                onPress={handleCancelDuel}
                 size="sm"
                 color="warning"
                 auto>
@@ -195,6 +195,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
             withCredentials: true,
             validateStatus: () => true,
         }).then((res) => {
+                console.log(res);
                 if (res.data === user.id) {
                     setIsOpponent(true);
                 } else {
@@ -253,7 +254,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 <IconMessages/>
             </Button>
 
-            {duelButton(user, player, isOpponent, setIsOpponent)}
+            {DuelButton(user, player, isOpponent, setIsOpponent)}
         </Row>
     );
 }
