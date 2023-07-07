@@ -113,7 +113,7 @@ function friendInteractionButton(
     }
 }
 
-function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, setIsOpponent: any): JSX.Element {
+function DuelButton(user: User, player: PlayerInterface, isOpponent: boolean, setIsOpponent: any): JSX.Element {
     const { socket } = useUser();
 
     function handleDuelRequest() {
@@ -254,7 +254,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 <IconMessages/>
             </Button>
 
-            {duelButton(user, player, isOpponent, setIsOpponent)}
+            {DuelButton(user, player, isOpponent, setIsOpponent)}
         </Row>
     );
 }
