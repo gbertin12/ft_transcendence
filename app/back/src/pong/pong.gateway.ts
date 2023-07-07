@@ -133,35 +133,44 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('duelRequest')
     handleDuelRequest(client: Socket, opponentId: number) {
-        if (this.duelRequests[client.id]) {
+        console.log("in DUEL REQUEST: ", this.duelRequests);
+        const initiator = this.players.find((player) => player.id === client.id);
+        const opponent = this.players.find((player) => player.userId === opponentId);
+        console.log("duel request from: ", initiator.userId, "to: ", opponentId);
+
+        if (this.duelRequests[initiator.userId]) {
+            console.log("DUEL REQUEST: wrong userId");
             // send something ?
             return ;
         }
-        const initiator = this.players.find((player) => player.id === client.id);
-        const opponent = this.players.find((player) => player.userId === opponentId);
         if (initiator.userId === opponent.userId ||  // can't play against yourself
             initiator.state !== 0 ||                 // check if initiator is in queue or game
             opponent.state !== 0                     // check if opponent is in queue or game
         ) {
             // send something?
+            console.log("DUEL REQUEST: wrong state");
             return ;
         }
         // check if player has already been requested in duel
         for (let key in this.duelRequests) {
-            if (this.duelRequests[key] === initiator.id) {
+            if (this.duelRequests[key] === initiator.userId) {
+                console.log("DUEL REQUEST: initiator id");
                 // send something?
                 return ;
             }
         }
         initiator.state = 1;
         opponent.state = 1;
-        this.duelRequests[client.id] = opponentId;
+        this.duelRequests[initiator.userId] = opponentId;
         this.server.to(opponent.id).emit('duelRequest', initiator);
+        console.log("after DUEL REQUEST: ", this.duelRequests);
     }
 
     @SubscribeMessage('acceptDuel')
     acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
-        if (!this.duelRequests[opponent.id]) {
+        console.log("in ACCEPT DUEL: ", this.duelRequests);
+
+        if (!this.duelRequests[opponent.userId]) {
             // send something:?
             return ;
         }
@@ -206,30 +215,34 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('declineDuel')
     declineDuelRequest(client: Socket, opponent: PlayerInterface) {
-        if (!this.duelRequests[opponent.id]) {
+        if (!this.duelRequests[opponent.userId]) {
             return ;
         }
 
-        delete this.duelRequests[opponent.id];
+        delete this.duelRequests[opponent.userId];
         const player = this.players.find((p) => client.id === p.id);
         player.state = 0;
         const adversary = this.players.find((p) => opponent.id === p.id);
         adversary.state = 0;
         this.server.to(opponent.id).emit('declineDuelRequest', player);
+        console.log("after DECLINE DUEL: ", this.duelRequests);
     }
 
     @SubscribeMessage('cancelDuel')
     cancelDuelRequest(client: Socket, opponent: PlayerInterface) {
-        if (!this.duelRequests[client.id]) {
+        console.log("in CANCEL DUEL: ", this.duelRequests);
+        const player = this.players.find((p) => client.id === p.id);
+        const adversary = this.players.find((p) => opponent.id === p.id);
+
+        if (!this.duelRequests[player.userId]) {
             console.log("don't found duel request")
             return ;
         }
-        delete this.duelRequests[client.id];
-        const player = this.players.find((p) => client.id === p.id);
-        const adversary = this.players.find((p) => opponent.id === p.id);
+        delete this.duelRequests[player.userId];
         player.state = 0;
         adversary.state = 0;
         this.server.to(opponent.id).emit('cancelDuelRequest', player);
+        console.log("after CANCEL DUEL: ", this.duelRequests);
     }
 
     @SubscribeMessage('playerMove')

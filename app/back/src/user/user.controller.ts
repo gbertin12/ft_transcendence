@@ -60,7 +60,7 @@ export class UserController {
         user['password'] = (user['password'] !== null ? '' : null);
         return user;
     }
-    
+
     @UseGuards(AuthGuard('jwt-2fa'))
     @Post('me')
     @UseInterceptors(FileInterceptor('avatar'))
@@ -129,8 +129,7 @@ export class UserController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Get('player/opponent')
     getOpponent(@Req() req: Request) {
-        const current_player = this.pongGateway.players.find((p) => p.userId === req.user["id"]);
-        const opponentId = this.pongGateway.duelRequests[current_player.id];
+        const opponentId = this.pongGateway.duelRequests[req.user["id"]];
         if (!opponentId) {
             return null;
         }

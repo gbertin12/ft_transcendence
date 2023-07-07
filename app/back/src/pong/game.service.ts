@@ -245,8 +245,8 @@ export class GameService {
         }
 
         // remove players from duelRequests (if they exist)
-        delete duelRequests[room.pongState.player1.id];
-        delete duelRequests[room.pongState.player2.id];
+        delete duelRequests[room.pongState.player1.userId];
+        delete duelRequests[room.pongState.player2.userId];
 
         const user1 = await this.userService.getUserByName(room.pongState.player1.name);
         const user2 = await this.userService.getUserByName(room.pongState.player2.name);
