@@ -249,7 +249,15 @@ export default function UserInteractionButtons({ user }: { user: User }) {
 
             {(selectedChannel && selectedChannel.private) && (
                 <Button
-                    //onPress={}
+                    onPress={() => {
+                        // Invite user to the channel
+                        axios.post(`http://localhost:3000/channel/${selectedChannel.id}/invite`, {
+                            id: user.id,
+                        }, {
+                            withCredentials: true,
+                            validateStatus: () => true,
+                        });
+                    }}
                     size="sm"
                     color="success"
                     auto>

@@ -358,6 +358,13 @@ export class ChannelController {
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
+    @Get('/invites')
+    async getInvites(@Req() req) {
+        let userId = req.user['id'];
+        return await this.channelService.getInvites(userId);
+    }
+
+    @UseGuards(AuthGuard('jwt-2fa'))
     @Post(':channel_id/invite')
     async inviteUser(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
         const senderId = req.user['id'];
@@ -392,8 +399,8 @@ export class ChannelController {
     @Delete(':channel_id/invite')
     async cancelInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
         this.channelService.revokeInvite(
-            req.user['id'],
             body.id,
+            req.user['id'],
             dto.channel_id,
         )
         const payload = {
@@ -409,8 +416,8 @@ export class ChannelController {
     @Put(':channel_id/invite')
     async acceptInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
         this.channelService.acceptInvite(
-            req.user['id'],
             body.id,
+            req.user['id'],
             dto.channel_id,
         )
         const payload = {

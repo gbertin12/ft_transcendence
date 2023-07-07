@@ -19,7 +19,17 @@ const ChannelList: React.FC<any> = () => {
     }, []);
 
     return (
-        <>
+        <Container
+            css={{
+                listStyle: "none",
+                padding: 0,
+                height: "85vh",
+                overflowY: "auto",
+                overflowX: "hidden",
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
             <hr />
             <Grid.Container>
                 <Grid xs={10}>
@@ -28,17 +38,6 @@ const ChannelList: React.FC<any> = () => {
                 <ChannelCreateIcon />
             </Grid.Container>
             <hr />
-            <Container
-                css={{
-                    listStyle: "none",
-                    padding: 0,
-                    height: "85vh",
-                    overflowY: "auto",
-                    overflowX: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                }}
-            >
                 {privateChannels.length >= 1 && (
                     <>
                         <Text h3>Private Channels</Text>
@@ -57,9 +56,8 @@ const ChannelList: React.FC<any> = () => {
                         />
                     </>
                 )}
-            </Container>
             <ChannelInvites />
-        </>
+        </Container>
     )
 }
 
