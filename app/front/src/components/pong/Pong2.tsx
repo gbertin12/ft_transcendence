@@ -269,7 +269,6 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 		socket.on('updateBallPosition', ({ x, y }: { x: number, y: number }) => {
 			if (p5lib)
 			{
-				console.log("updateBallPOsution")
 				ballX = convertToPixel(x, p5lib.width);
 				ballY = convertToPixel(y, p5lib.height);
 			}

@@ -101,10 +101,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const waitingPlayer = this.players.find(
             (player) =>
                 player.state === 1 &&
-                    player.id !== playerId &&
-                    player.modes === data.modes,
+                player.id !== playerId &&
+                player.modes === data.modes,
         );
-        if (waitingPlayer && player && waitingPlayer.id != player.id) {
+        if (waitingPlayer && player && waitingPlayer.userInfos.name != player.userInfos.name) {
             player.state = 2;
             waitingPlayer.state = 2;
             const roomName: string = uuidv4();
@@ -155,9 +155,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 return ;
             }
         }
-
-        console.log("DUEL REQUEST from", client.id, "to:", opponent.id);
-
         initiator.state = 1;
         opponent.state = 1;
         this.duelRequests[client.id] = opponentId;
@@ -243,7 +240,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {
         const room = this.rooms.find((room) => room.name === data.room);
         if (room) {
-            //console.log(room)
             if (room.pongState.player1.id === data.clientId) {
                 const percent = data.percent;
                 room.pongState.player1.y = percent;
