@@ -46,7 +46,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             window.location.href = "/profile";
         } else {
             const err = await res.json();
-            setMfaError(err.message);
+            setMfaError("Invalid code");
             setOtp("");
         }
     }
