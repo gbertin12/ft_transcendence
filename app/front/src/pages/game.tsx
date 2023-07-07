@@ -79,6 +79,9 @@ export default function Game() {
         //handleSetRoomName('');
         setPlayGame(false);
         setEndGame(true);
+        setTimeout(() => {
+            router.push('/game');
+        }, 1000);
     }
 
     const handleSetModes = (value: boolean) => {

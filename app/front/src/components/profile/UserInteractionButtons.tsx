@@ -121,7 +121,7 @@ function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, se
         setIsOpponent(true);
     }
 
-    function handelCancelDuel() {
+    function handleCancelDuel() {
         socket.emit('cancelDuel', player);
         setIsOpponent(false);
     }
@@ -129,7 +129,7 @@ function duelButton(user: User, player: PlayerInterface, isOpponent: boolean, se
     if (isOpponent) {
         return (
             <Button
-                onPress={handelCancelDuel}
+                onPress={handleCancelDuel}
                 size="sm"
                 color="warning"
                 auto>
@@ -195,6 +195,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
             withCredentials: true,
             validateStatus: () => true,
         }).then((res) => {
+                console.log(res);
                 if (res.data === user.id) {
                     setIsOpponent(true);
                 } else {
