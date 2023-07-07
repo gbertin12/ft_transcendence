@@ -111,8 +111,6 @@ const resetBallPosition = (
     room.pongState.ball.x = convertToPixel(50, canvasWidth);
     const randY: number = 20 + (60 * Math.random());
     room.pongState.ball.y = convertToPixel(randY, canvasHeight);
-    room.pongState.ball.speedX = 0.8;
-    room.pongState.ball.speedY = 0.8;
     sendBallPosition(room, server);
 }
 
@@ -192,7 +190,7 @@ export class GameService {
                     y: 150,
                 });
                 await sleep(1000);
-                handleResetPlayerPosition(room, server);
+                    handleResetPlayerPosition(room, server);
             }
             await sleep(20);
         }

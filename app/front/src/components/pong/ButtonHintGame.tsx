@@ -73,7 +73,7 @@ export default function ButtonHintGame() {
 					style={{
 						transform: "translateY(20%)",
 					}}
-					color='yellow'
+					color='black'
 					/>
         	  	</Popover.Trigger>
         	  	<Popover.Content>

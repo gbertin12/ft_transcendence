@@ -88,17 +88,17 @@ export const handleColisionWithPower = (room: roomInterface, server: Server, obs
 				if (room.pongState.ball.speedY < 0)
 					room.pongState.ball.speedY -= 0.4;
 				else
-					room.pongState.ball.speedY += .3;0
+					room.pongState.ball.speedY += 0.3;
 				// check speed X
-				if (room.pongState.ball.speedX > 2)
-					room.pongState.ball.speedX = 2;
-				else if (room.pongState.ball.speedX < -2)
-					room.pongState.ball.speedX = -2;
+				if (room.pongState.ball.speedX > 1.5)
+					room.pongState.ball.speedX = 1.5;
+				else if (room.pongState.ball.speedX < -1.5)
+					room.pongState.ball.speedX = -1.5;
 				// check speed Y
-				if (room.pongState.ball.speedY > 2)
-					room.pongState.ball.speedY = 2;
-				else if (room.pongState.ball.speedY < -2)
-					room.pongState.ball.speedY = -2;
+				if (room.pongState.ball.speedY > 1.5)
+					room.pongState.ball.speedY = 1.5;
+				else if (room.pongState.ball.speedY < -1.5)
+					room.pongState.ball.speedY = -1.5;
 			}
 			else if (power.type === 1) {
 				// bounce bonus
