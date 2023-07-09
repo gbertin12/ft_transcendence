@@ -17,11 +17,7 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
     const [receivedRequests, setReceivedRequests] = React.useState<ChannelInvite[]>([]);
 
     useEffect(() => {
-        // Filter out requests that have been sent
-        const filteredRequests = channelInvites.filter((invite) => {
-            return invite.sender.id !== user.id;
-        });
-        setReceivedRequests(filteredRequests);
+        setReceivedRequests(channelInvites.filter((invite) => invite.user_id !== user?.id));
     }, [channelInvites]);
 
     if (receivedRequests.length === 0) {
@@ -34,27 +30,27 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
             <hr />
             <ul>
                 {receivedRequests.map((invite) => (
-                    <li className="list-none" key={invite.channel.id}>
+                    <li className="list-none" key={invite.id}>
                         <Grid.Container>
                             <Grid xs={10}>
                                 <ChannelEntry
-                                    channel={invite.channel}
+                                    channel={invite}
                                     banned={false}
                                     muted={false}
                                     isSelected={false}
                                     unreadMessages={0}
-                                    key={invite.channel.id}
+                                    key={invite.id}
                                     onClick={() => { }}
                                 />
                             </Grid>
                             <Grid xs={1}>
                                 <IconCheck className="my-auto" onClick={() => {
-                                    axios.put(`http://localhost:3000/friends/${invite.channel.id}/invite`, { id: invite.user_id }, { withCredentials: true })
+                                    axios.put(`http://localhost:3000/channel/${invite.id}/invite`, { id: invite.user_id }, { withCredentials: true })
                                 }} />
                             </Grid>
                             <Grid className="my-auto" xs={1}>
                                 <IconX onClick={() => {
-                                    axios.delete(`http://localhost:3000/friends/${invite.channel.id}/invite`, { withCredentials: true })
+                                    axios.delete(`http://localhost:3000/channel/${invite.id}/invite`, { withCredentials: true })
                                 }} />
                             </Grid>
                         </Grid.Container>

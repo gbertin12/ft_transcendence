@@ -385,48 +385,28 @@ export class ChannelController {
             receiverId,
             dto.channel_id,
         )
-        const payload = {
-            channel: channel,
-            channel_id: dto.channel_id,
-            channel_name: channel.name,
-            sender: req.user,
-        };
-        this.chatGateway.server.to(`user-${receiverId}`).emit('invite', payload);
-        this.chatGateway.server.to(`user-${senderId}`).emit('invite', payload);
+        this.chatGateway.server.to(`user-${receiverId}`).emit('invite', channel);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Delete(':channel_id/invite')
-    async cancelInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
+    async cancelInvite(@Param() dto: ChannelDto, @Req() req) {
         this.channelService.revokeInvite(
-            body.id,
             req.user['id'],
             dto.channel_id,
         )
-        const payload = {
-            channel_id: dto.channel_id,
-            receiver_id: body.id,
-            sender_id: req.user['id'],
-        };
-        this.chatGateway.server.to(`user-${body.id}`).emit('cancelInvite', payload);
-        this.chatGateway.server.to(`user-${req.user['id']}`).emit('cancelInvite', payload);
+        this.chatGateway.server.to(`user-${req.user.id}`).emit('cancelInvite', dto.channel_id);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))
     @Put(':channel_id/invite')
-    async acceptInvite(@Param() dto: ChannelDto, @Body() body: GenericIdDto, @Req() req) {
-        this.channelService.acceptInvite(
-            body.id,
+    async acceptInvite(@Param() dto: ChannelDto, @Req() req) {
+        let inviter_name = await this.channelService.acceptInvite(
             req.user['id'],
             dto.channel_id,
         )
-        const payload = {
-            channel_id: dto.channel_id,
-            receiver_id: body.id,
-            sender_id: req.user['id'],
-        };
-        this.chatGateway.server.to(`user-${body.id}`).emit('acceptInvite', payload);
-        this.chatGateway.server.to(`user-${req.user['id']}`).emit('acceptInvite', payload);
+        this.chatGateway.server.to(`user-${req.user['id']}`).emit('acceptInvite', dto.channel_id);
+        this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} joined the channel, invited by ${inviter_name}`);
     }
 
     @UseGuards(AuthGuard('jwt-2fa'))

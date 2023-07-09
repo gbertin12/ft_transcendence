@@ -15,12 +15,12 @@ interface ChannelEntryProps {
 }
 
 function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
-    if (isSelected) {
-        return "$accents1";
-    }
-    if (isHovered) {
-        return "$accents2";
-    }
+    // if (isSelected) {
+    //     return "$accents1";
+    // }
+    // if (isHovered) {
+    //     return "$accents2";
+    // }
     return "transparent";
 }
 
