@@ -61,7 +61,7 @@ class OwnershipTransferDto {
     @Type(() => String)
     @Matches(/^[0-9]{6}$/) // Only 6 digits
     @IsOptional() // The user might not always have 2FA enabled
-    code: string;
+    otp: string;
 
     // Optionnal password (if the user has 2FA setup, we're using the 2FA instead)
     @Type(() => String)
@@ -319,6 +319,11 @@ export class ChannelController {
                     channel_id: dto.channel_id,
                 }
             });
+            await this.dbService.channelInvite.deleteMany({
+                where: {
+                    channel_id: dto.channel_id,
+                }
+            });
         }
 
         channel.private = body.private;
@@ -433,7 +438,7 @@ export class ChannelController {
     @UseGuards(AuthGuard('jwt-2fa'))
     @Patch(':channel_id/transfer')
     async transferOwnership(@Param() dto: ChannelDto, @Body() body: OwnershipTransferDto, @Req() req) {
-        if (req.user.otp && !body.code) { // User has 2fa but didn't provide a code
+        if (req.user.otp && !body.otp) { // User has 2fa but didn't provide a code
             throw new BadRequestException("Missing authentication fields");
         }
         if (req.user.password && !req.user.otp && !body.password) { // User has no 2fa but has a password and didn't provide it
@@ -456,7 +461,7 @@ export class ChannelController {
         }
 
         // Check authentication fields
-        if (req.user.otp && body.code && !await this.authService.verifyOTP(req.user['id'], body.code)) {
+        if (req.user.otp && body.otp && !await this.authService.verifyOTP(req.user['id'], body.otp)) {
             throw new HttpException('Invalid code', 401);
         }
         if (!req.user.otp && req.user.password && body.password && !await this.authService.verifyPassword(req.user, body.password)) {
