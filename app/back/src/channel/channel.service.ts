@@ -326,6 +326,49 @@ export class ChannelService {
         });
     }
 
+    async getInvites(user_id: number) {
+        return await this.db.channelInvite.findMany({
+            where: {
+                receiver_id: user_id
+            },
+            include: {
+                channel: {
+                    select: {
+                        id: true,
+                        name: true,
+                        owner_id: true,
+                        private: true,
+                        password: true,
+                        topic: true
+                    },
+                },
+                sender: {
+                    select: {
+                        avatar: true,
+                        elo: true,
+                        id: true,
+                        losses: true,
+                        name: true,
+                        wins: true,
+                        otp: false,
+                        password: false,
+                        otpSecret: false,
+                    },
+                },
+            },
+        }).then((invites) => {
+            return invites.map((invite) => {
+                const channel = invite.channel;
+                channel.password = (channel.password !== null ? '' : null);
+                return {
+                    channel: channel,
+                    sender: invite.sender,
+                    user_id: invite.receiver_id
+                }
+            });
+        });
+    }
+
     async inviteToChannel(sender_id: number, receiver_id: number, channel_id: number) {
         return this.db.channelInvite.upsert({
             where: {

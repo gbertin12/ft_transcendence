@@ -50,7 +50,6 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                                     channelChanged(channel);
                                 }}
                                 isSelected={selectedIndex === index}
-                                user={user}
                             />
                         </li>
                     ))}
@@ -84,7 +83,6 @@ const ChatChannelBrowser: React.FC<ChatChannelBrowserProps> = ({ channelChanged,
                                     channelChanged(channel);
                                 }}
                                 isSelected={selectedIndex === index}
-                                user={user}
                             />
                         </li>
                     ))}

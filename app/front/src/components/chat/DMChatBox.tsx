@@ -130,7 +130,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             socket.off('dmMessage', handleNewMessage);
             socket.off('messageDeleted');
         }
-    }, [socket, user]);
+    }, [socket, user, fetchMessages, interlocutor, setFriends, handleNewMessage]);
 
     const handlePostMessage = useCallback((message: string) => {
         try {
@@ -138,7 +138,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         } catch (err) {
             throw Error("UNEXPECTED ERROR: " + err);
         }
-    }, [user]);
+    }, [user, interlocutor.id]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
 

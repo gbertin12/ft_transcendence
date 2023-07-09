@@ -41,7 +41,7 @@ export const UserContextProvider: React.FC<any> = ({ children }) => {
         socket.on('updateUser', (user: User) => {
             setUser(user);
         });
-    }, [socket]);
+    }, []);
 
     return (
         <UserContext.Provider value={{ user, setUser, socket }}>

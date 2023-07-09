@@ -194,11 +194,22 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 }
             });
         };
-
+        const fetchChannelInvites = async () => {
+            if (user.id === undefined) return;
+            axios.get("http://localhost:3000/channel/invites", {
+                withCredentials: true,
+                validateStatus: () => true,
+            }).then((response) => {
+                if (response.status === 200) {
+                    setChannelInvites(response.data);
+                }
+            });
+        };
         fetchChannels();
         fetchFriends();
         fetchBans();
         fetchFriendRequests();
+        fetchChannelInvites();
     }, [user]);
 
     useEffect(() => {
@@ -371,7 +382,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("acceptInvite");
             }
         }
-    }, [socket]);
+    }, [socket, user.id]);
 
     React.useEffect(() => {
         setSentRequests(friendRequests.filter((request) => request.sender_id === user.id));

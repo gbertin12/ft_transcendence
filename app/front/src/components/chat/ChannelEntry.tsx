@@ -3,13 +3,13 @@ import React from 'react';
 import { Channel, User } from '@/interfaces/chat.interfaces';
 import { ChannelEditIcon } from './icons/ChannelEditIcon';
 import { IconLock } from '@tabler/icons-react';
+import { useUser } from '@/contexts/user.context';
 
 interface ChannelEntryProps {
     isSelected: boolean;
     channel: Channel;
     banned: boolean;
     muted: boolean;
-    user: User;
     onClick: () => void;
     unreadMessages?: number;
 }
@@ -24,10 +24,11 @@ function getBackgroundColor(isHovered: boolean, isSelected: boolean) {
     return "transparent";
 }
 
-const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, muted, user, onClick, unreadMessages }) => {
+const ChannelEntry: React.FC<ChannelEntryProps> = ({ isSelected, channel, banned, muted, onClick, unreadMessages }) => {
     if (unreadMessages === undefined) { unreadMessages = 0; } // default to 0 (ugly hack)
 
     const [isHovered, setIsHovered] = React.useState(false);
+    const { user } = useUser();
 
     return (
         <Grid.Container
