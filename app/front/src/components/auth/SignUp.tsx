@@ -1,23 +1,21 @@
-import { useUser } from "@/contexts/user.context";
-import { Input, Spacer, Button, Grid, Text, Row, FormElement } from "@nextui-org/react";
-import axios from 'axios';
-import { FormEvent, useState } from "react";
+//import { useUser } from "@/contexts/user.context";
+import { Input, Spacer, Button, Grid, Text, Row, FormElement, Tooltip } from "@nextui-org/react";
+//import axios from 'axios';
+//import { FormEvent, useState } from "react";
 
 export default function SignUp() {
-    const [ username, setUsername ] = useState<string>("");
-    const [ password, setPassword ] = useState<string>("");
-    const [ msg, setMsg ] = useState<string>("");
-    const [ color, setColor ] = useState<string>("");
+    /*const [ msg, setMsg ] = useState<string>("");
+    const [ color, setColor ] = useState<string>("");*/
 
-    const { setUser } = useUser();
+    //const { setUser } = useUser();
 
-    async function refreshUser() {
+    /*async function refreshUser() {
         const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
         if (res?.ok) {
             const userData = await res.json();
             setUser(userData);
         }
-    }
+    }&*/
 
     async function dummyLogin() {
         await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
@@ -26,7 +24,7 @@ export default function SignUp() {
         window.location.href = "/profile";
     }
 
-    function register() {
+    /*function register() {
         if (username && password) {
             axios.post("http://localhost:3000/auth/register", { username, password })
                 .then((_res) => {
@@ -52,7 +50,7 @@ export default function SignUp() {
     function handleOnInputPassword(event: FormEvent<FormElement>) {
         const target = event.target as HTMLInputElement;
         setPassword(target.value);
-    }
+    }*/
 
     return (
         <Grid>
@@ -60,35 +58,39 @@ export default function SignUp() {
             <Grid.Container direction="column">
                 <Row>
 
-                    <Input bordered onInput={handleOnInputUsername} value={username} placeholder="Username" label="Username"/>
+                    <Input bordered placeholder="Username" label="Username"/>
                 </Row>
 
                 <Spacer y={1} />
 
                 <Row>
-                    <Input.Password bordered onInput={handleOnInputPassword} value={password} placeholder="Password" label="Password"/>
+                    <Input.Password bordered placeholder="Password" label="Password"/>
                 </Row>
 
+                {/*
                 {(msg) && (<>
                     <Spacer y={1}/>
                     <Row>
                         <Text color={color}>{msg}</Text>
                     </Row>
                 </>)}
+                */}
 
                 <Spacer y={1}/>
 
                 <Grid.Container justify='flex-end'>
                     <Grid >
-                        <Button bordered color="primarySolidContrast" onPress={register} auto>
-                            <Text>Register</Text>
-                        </Button>
+                        <Tooltip content={"Coming Soon!!"} color="invert" css={{ zIndex: 1000001 }}>
+                            <Button bordered disabled auto>
+                                <Text>Register</Text>
+                            </Button>
+                        </Tooltip>
                     </Grid>
 
                     <Spacer x={1}/>
 
                     <Grid >
-                        <Button bordered color="primarySolidContrast" onPress={dummyLogin} auto>
+                        <Button bordered onPress={dummyLogin} auto>
                             <Text >Dummy login</Text>
                         </Button>
                     </Grid>

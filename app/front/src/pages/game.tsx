@@ -95,7 +95,19 @@ export default function Game() {
 
     if (!user.id) return (<Loading/>);
 
-    if (!playGame && !endGame) {
+    if (!playGame && endGame) {
+        return <>
+            <Head>
+                <title> Game </title>
+            </Head>
+            <div className="flex flex-col items-center">
+                <Spacer y={3} />
+                <div style={{width:'80%', maxWidth:'1000px'}}>
+                    <CardEndGame endGame={dataEndGame} roomName={roomName} handleCloseCardEndGame={handleCloseCardEndGame} />
+                </div>
+            </div>
+        </>
+    } else if (!playGame && !endGame) {
         return <>
             <Head>
                 <title> Game </title>
@@ -121,18 +133,6 @@ export default function Game() {
                         <ButtonHintGame />
                     </Row>
                     <Spacer />
-                </div>
-            </div>
-        </>
-    } else if (!playGame && endGame) {
-        return <>
-            <Head>
-                <title> Game </title>
-            </Head>
-            <div className="flex flex-col items-center">
-                <Spacer y={3} />
-                <div style={{width:'80%', maxWidth:'1000px'}}>
-                    <CardEndGame endGame={dataEndGame} roomName={roomName} handleCloseCardEndGame={handleCloseCardEndGame} />
                 </div>
             </div>
         </>

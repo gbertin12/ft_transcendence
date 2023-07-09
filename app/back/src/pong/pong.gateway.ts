@@ -61,7 +61,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 modes: true,
                 userInfos: user,
             };
-            this.players.push(player);
+            // if player is already in the array, juste replace it
+            const p = this.players.find((p) => p.userId === player.userId);
+            if (p) {
+                const index = this.players.indexOf(p);
+                this.players[index] = player;
+            } else {
+                this.players.push(player);
+            }
             // send the player id to the client
             client.emit('playerId', client.id);
         } catch {
@@ -80,13 +87,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (leaver) {
             const room = this.rooms.find(
                 (room) =>
-                    leaver.id === room.pongState.player1.id ||
-                        leaver.id === room.pongState.player2.id,
+                    leaver.userId === room.pongState.player1.userId ||
+                        leaver.userId === room.pongState.player2.userId,
             );
-
-            if (room.state === 1) {
-                this.bustLeaver(client, room.name);
-            }
+            this.bustLeaver(client, room.name);
         }
     }
 
@@ -110,7 +114,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const roomName: string = uuidv4();
             const newRoom: roomInterface = {
                 name: roomName,
-                state: 0,
+                state: 1,
                 pongState: {
                     ball: {
                         x: 50,
@@ -133,13 +137,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('duelRequest')
     handleDuelRequest(client: Socket, opponentId: number) {
-        console.log("in DUEL REQUEST: ", this.duelRequests);
         const initiator = this.players.find((player) => player.id === client.id);
         const opponent = this.players.find((player) => player.userId === opponentId);
-        console.log("duel request from: ", initiator.userId, "to: ", opponentId);
 
         if (this.duelRequests[initiator.userId]) {
-            console.log("DUEL REQUEST: wrong userId");
             // send something ?
             return ;
         }
@@ -148,13 +149,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             opponent.state !== 0                     // check if opponent is in queue or game
         ) {
             // send something?
-            console.log("DUEL REQUEST: wrong state");
             return ;
         }
         // check if player has already been requested in duel
         for (let key in this.duelRequests) {
             if (this.duelRequests[key] === initiator.userId) {
-                console.log("DUEL REQUEST: initiator id");
                 // send something?
                 return ;
             }
@@ -163,13 +162,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         opponent.state = 1;
         this.duelRequests[initiator.userId] = opponentId;
         this.server.to(opponent.id).emit('duelRequest', initiator);
-        console.log("after DUEL REQUEST: ", this.duelRequests);
     }
 
     @SubscribeMessage('acceptDuel')
     acceptDuelRequest(client: Socket, opponent: PlayerInterface) {
-        console.log("in ACCEPT DUEL: ", this.duelRequests);
-
         if (!this.duelRequests[opponent.userId]) {
             // send something:?
             return ;
@@ -225,24 +221,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const adversary = this.players.find((p) => opponent.id === p.id);
         adversary.state = 0;
         this.server.to(opponent.id).emit('declineDuelRequest', player);
-        console.log("after DECLINE DUEL: ", this.duelRequests);
     }
 
     @SubscribeMessage('cancelDuel')
     cancelDuelRequest(client: Socket, opponent: PlayerInterface) {
-        console.log("in CANCEL DUEL: ", this.duelRequests);
         const player = this.players.find((p) => client.id === p.id);
         const adversary = this.players.find((p) => opponent.id === p.id);
 
         if (!this.duelRequests[player.userId]) {
-            console.log("don't found duel request")
             return ;
         }
         delete this.duelRequests[player.userId];
         player.state = 0;
         adversary.state = 0;
         this.server.to(opponent.id).emit('cancelDuelRequest', player);
-        console.log("after CANCEL DUEL: ", this.duelRequests);
     }
 
     @SubscribeMessage('playerMove')
@@ -290,7 +282,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     bustLeaver(client: Socket, roomName: string) {
-        const room = this.rooms.find((room) => room.name === roomName);
+        const room = this.rooms.find((room) => room.name === roomName && room.state === 1);
 
         if (room) {
             if (room.pongState.player1.id === client.id) {

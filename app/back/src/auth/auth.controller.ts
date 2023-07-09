@@ -15,9 +15,9 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
-import * as OTPAuth from 'otpauth';
+//import * as OTPAuth from 'otpauth';
 
-class LocalAuthDto {
+/*class LocalAuthDto {
     @IsString()
     @IsNotEmpty()
     username: string;
@@ -25,7 +25,7 @@ class LocalAuthDto {
     @IsString()
     @IsNotEmpty()
     password: string;
-}
+}*/
 
 class FtCallbackDto {
     @IsString()
@@ -67,7 +67,7 @@ export class AuthController {
         res.redirect(302, `${process.env.FRONT_URL}/?otp=${user.otp}`);
     }
 
-    @Get('discord/callback')
+    /*@Get('discord/callback')
     @UseGuards(AuthGuard('discord'))
     async discordCallback(
         @Req() req: Request,
@@ -112,7 +112,7 @@ export class AuthController {
         const token = await this.authService.generateJWT(req.user['id']);
         res.cookie('session', token, { httpOnly: false, sameSite: 'strict' });
         res.send({ otp: req.user['otp'] });
-    }
+    }*/
 
     // before starting the OAuth flow, we hit this endpoint
     // to generate a random value (UUID) to act as a CSRF token (state parameter)

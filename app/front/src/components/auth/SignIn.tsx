@@ -1,27 +1,23 @@
 import { IconBrandDiscordFilled } from '@tabler/icons-react';
 import { IconBrandGithubFilled } from '@tabler/icons-react';
-import { Input, Spacer, Button , Grid, Text, Row, FormElement, Modal } from "@nextui-org/react";
-import { FormEvent, useEffect, useState } from 'react';
+import { Input, Spacer, Button , Grid, Text, Row, Modal, Tooltip } from "@nextui-org/react";
+import { useEffect, useState } from 'react';
 import MFAInput from './MFAInput';
-import { useUser } from '@/contexts/user.context';
+//import { useUser } from '@/contexts/user.context';
 import { useRouter } from 'next/router';
 
 export default function SignIn({ closeModal }: { closeModal: () => void }) {
-    const [ username, setUsername ] = useState<string>("");
-    const [ password, setPassword] = useState<string>("");
-    const [ error, setError ] = useState<string>("");
-
     const [ showInput, setShowInput ] = useState<boolean>(false);
     const [ otp, setOtp ] = useState<string>("");
     const [ mfaError, setMfaError ] = useState<string>("");
 
-    const { setUser } = useUser();
+    //const { setUser } = useUser();
     const router = useRouter();
 
     useEffect(() => {
         if (router.isReady) {
             if (router.query.otp) {
-                const otp = (router.query.otp == "true");
+                const otp = (router.query.otp === "true");
                 if (otp) {
                     setShowInput(true);
                 } else {
@@ -45,13 +41,18 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             //router.push(nextPage);
             window.location.href = "/profile";
         } else {
-            const err = await res.json();
             setMfaError("Invalid code");
             setOtp("");
         }
     }
 
-    async function refreshUser() {
+    async function ftLogin() {
+        const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
+        const state_token = await res.text();
+        router.push(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`);
+    }
+
+    /*async function refreshUser() {
         const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
         if (res?.ok) {
             const userData = await res.json();
@@ -80,15 +81,9 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
                 setError("Login failed");
             }
         }
-    }
+    }*/
 
-    async function ftLogin() {
-        const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
-        const state_token = await res.text();
-        router.push(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`);
-    }
-
-    function discordLogin() {
+    /*function discordLogin() {
         router.push('http://localhost:3000/auth/discord/callback');
     }
 
@@ -104,14 +99,14 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     function handleOnInputPassword(event: FormEvent<FormElement>) {
         const target = event.target as HTMLInputElement;
         setPassword(target.value);
-    }
+    }*/
 
     if (showInput) {
         return (
             <Modal
                 closeButton
                 preventClose
-                width="50%"
+                width="25%"
                 aria-labelledby="2FA Input"
                 open={showInput}
                 onClose={() => setShowInput(false)}>
@@ -132,27 +127,24 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
             <Text h4>Login</Text>
             <Grid.Container direction="column" >
                 <Row>
-                    <Input bordered onInput={handleOnInputUsername} value={username} placeholder="Username" label="Username"/>
+                    <Input bordered placeholder="Username" label="Username"/>
                 </Row>
 
                 <Spacer y={1} />
 
                 <Row>
-                    <Input.Password bordered onInput={handleOnInputPassword} value={password} placeholder="Password" label="Password"/>
+                    <Input.Password bordered placeholder="Password" label="Password"/>
                 </Row>
 
                 <Spacer y={1}/>
 
-                {(error) && (<>
-                    <Spacer y={1}/>
-                    <Text color="error">{error}</Text>
-                </>)}
-
                 <Grid.Container justify='flex-end'>
                     <Grid >
-                        <Button bordered onPress={userPassLogin} auto color="primarySolidContrast">
-                            <Text>Login</Text>
-                        </Button>
+                        <Tooltip content={"Coming Soon!!"} color="invert" css={{ zIndex: 1000001 }}>
+                            <Button bordered disabled auto>
+                                <Text>Login</Text>
+                            </Button>
+                        </Tooltip>
                     </Grid>
                 </Grid.Container>
             </Grid.Container>
@@ -163,26 +155,26 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
 
             <Grid.Container justify='center' gap={1}>
                 <Grid>
-                    <Button bordered color="primarySolidContrast" onPress={ftLogin} auto icon="42">
+                    <Button bordered onPress={ftLogin} auto icon="42">
                     </Button>
                 </Grid>
 
                 <Grid>
-                    <Button
-                        auto bordered
-                        color="primarySolidContrast"
-                        onPress={discordLogin}
-                        icon={<IconBrandDiscordFilled fill="$white" />}
-                    />
+                    <Tooltip content={"Coming Soon!!"} color="invert" css={{ zIndex: 1000001 }}>
+                        <Button
+                            auto bordered disabled
+                            icon={<IconBrandDiscordFilled />}
+                        />
+                    </Tooltip>
                 </Grid>
 
                 <Grid>
-                    <Button
-                        auto bordered
-                        color="primarySolidContrast"
-                        onPress={githubLogin}
-                        icon={<IconBrandGithubFilled/>}
-                    />
+                    <Tooltip content={"Coming Soon!!"} color="invert" css={{ zIndex: 1000001 }}>
+                        <Button
+                            auto bordered disabled
+                            icon={<IconBrandGithubFilled/>}
+                        />
+                    </Tooltip>
                 </Grid>
             </Grid.Container>
         </Grid>

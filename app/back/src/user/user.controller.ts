@@ -21,7 +21,7 @@ import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import { Type } from 'class-transformer';
-import { IsISO8601, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { IsISO8601, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Matches } from 'class-validator';
 import { PongGateway } from '../pong/pong.gateway';
 
 class DateDto {
@@ -31,10 +31,15 @@ class DateDto {
 }
 
 class UpdateNameDto {
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    @Matches(/^(?=[a-zA-Z0-9._]{2,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/)
     name: string;
 }
 
 class UsernameParamDto {
+    @IsString()
     @IsNotEmpty()
     username: string
 }
@@ -69,18 +74,20 @@ export class UserController {
         @Body('') dto: UpdateNameDto,
         @UploadedFile(new ParseFilePipe({
             validators: [
-                new MaxFileSizeValidator({ maxSize: 10000 }),
+                new MaxFileSizeValidator({ maxSize: 1_000_000 }),
             ],
-        fileIsRequired: false
-    })) avatar?: Express.Multer.File,
+            fileIsRequired: false
+        })) avatar?: Express.Multer.File,
     ) {
-        try {
-            await this.userService.updateName(req.user['id'], dto.name);
-        } catch {
-            throw new HttpException(
-                `Error: Username '${dto.name}' already exists`,
-                HttpStatus.BAD_REQUEST
-            );
+        if (dto.name) {
+            try {
+                await this.userService.updateName(req.user['id'], dto.name);
+            } catch {
+                throw new HttpException(
+                    `Error: Username '${dto.name}' already exists`,
+                    HttpStatus.BAD_REQUEST
+                );
+            }
         }
 
         if (avatar) {

@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { DbService } from '../db/db.service';
 import { User } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import * as OTPAuth from 'otpauth';
@@ -25,7 +24,7 @@ async function getProfile(access_token: string): Promise<string> {
         });
         if (response?.ok) {
             const user = await response.json();
-            return user.login;
+            return `${user.login}-42`;
         }
         console.log('42 INTRA DEAD (AGAIN)??');
         return 'error';
@@ -44,10 +43,9 @@ export class AuthService {
     constructor(
         private userService: UserService,
         private jwtService: JwtService,
-        private dbService: DbService,
     ) { }
 
-    async register(username: string, password: string): Promise<boolean> {
+    /*async register(username: string, password: string): Promise<boolean> {
         try {
             await this.userService.getUserByName(username);
             return false;
@@ -56,7 +54,7 @@ export class AuthService {
             this.userService.createUser(username, hashed_pass);
             return true;
         }
-    }
+    }*/
 
     async verifyState(state_param: string, state_cookie: string): Promise<Boolean> {
         const payload = await this.jwtService.verifyAsync(state_cookie);

@@ -53,8 +53,18 @@ export default function EditPlayerInfo(
                 handleShowEdit();
             } else {
                 const err = await res.json();
-                console.log(err.message);
-                setError(err.message);
+                console.log(err);
+                if (typeof err.message === "string") {
+                    setError(err.message);
+                } else if (Array.isArray(err.message)) {
+                    if (err.message[0].constraints && err.message[0].constraints.matches) {
+                        setError("Error: Invalid username (only alphanumeric characters + '.' and '_' are allowed). Must be between 2 and 20 characters");
+                    } else {
+                        setError("Unknown error");
+                    }
+                } else {
+                    setError("Unknown error");
+                }
             }
 
             // reset input elements to default/none value

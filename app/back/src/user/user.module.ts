@@ -22,7 +22,7 @@ const fileFilter = (
 ) => {
     if (!file.originalname.match(/\.(png|jpe?g|gif|webp)$/)) {
         callback(
-            new HttpException("Error: only images are allowed (size must be under 10kB)", HttpStatus.BAD_REQUEST),
+            new HttpException("Error: only images are allowed (size must be under 1Mb)", HttpStatus.BAD_REQUEST),
             false,
         );
     }

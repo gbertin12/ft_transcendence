@@ -197,6 +197,7 @@ export class GameService {
     }
 
     async handleEndGame(room: roomInterface, server: Server, forfeit: boolean, duelRequests: any) {
+        room.state = 2;
         let eloDiff = 0;
         if (room.pongState.player1.score > room.pongState.player2.score) {
             // increment Wins / Looses in DB

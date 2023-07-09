@@ -54,18 +54,20 @@ function DisplayLeaderboard({rowsLeaderboard} : {rowsLeaderboard: RowLeaderboard
 function setDataRow(users : User[]) {
     let rowsLeaderboard : RowLeaderboard[] = [];
     let id : number = 1;
-    users.map(user => {
-        let winrate : number = Math.round(user.wins / (user.wins + user.losses) * 100);
+    if (users) {
+        users.map(user => {
+            let winrate : number = Math.round(user.wins / (user.wins + user.losses) * 100);
 
-        if (!winrate) winrate = 0;
-        let newRow : RowLeaderboard = {
-            rank : id,
-            user,
-            winrate
-        }
-        rowsLeaderboard.push(newRow);
-        id++;
-    })
+            if (!winrate) winrate = 0;
+            let newRow : RowLeaderboard = {
+                rank : id,
+                user,
+                winrate
+            }
+            rowsLeaderboard.push(newRow);
+            id++;
+        })
+    }
     return (rowsLeaderboard);
 }
 
