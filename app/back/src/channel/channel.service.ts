@@ -438,7 +438,6 @@ export class ChannelService {
     }
 
     async setRole(user_id: number, channel_id: number, power_level: number) {
-        let role = "invalid";
         switch (power_level) {
             case 0: // user, remove from administrators
                 await this.db.channelAdmin.delete({
