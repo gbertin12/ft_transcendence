@@ -193,7 +193,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             socket.off('deleteMessage');
             socket.emit('leave', channel.id);
         }
-    }, [socket, channel]);
+    }, [socket, channel, fetchMessages, setChannels]);
 
     const handleNewMessage = useCallback((message: string) => {
         try {

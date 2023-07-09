@@ -48,7 +48,7 @@ const MembersTab: React.FC<MembersTabProps> = ({ channel }) => {
                 setMembers(response.data.users);
             }
         });
-    }, []);
+    }, [channel.id]);
 
     return (
         <>

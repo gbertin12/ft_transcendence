@@ -16,7 +16,7 @@ const ChannelList: React.FC<any> = () => {
 
     const handleChannelChange = useCallback((channel: Channel) => {
         router.push(`/chat/channel/${channel.id}`, undefined, { shallow: true });
-    }, []);
+    }, [router]);
 
     return (
         <Container

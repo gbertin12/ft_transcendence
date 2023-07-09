@@ -382,7 +382,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("acceptInvite");
             }
         }
-    }, [socket]);
+    }, [socket, user.id]);
 
     React.useEffect(() => {
         setSentRequests(friendRequests.filter((request) => request.sender_id === user.id));
