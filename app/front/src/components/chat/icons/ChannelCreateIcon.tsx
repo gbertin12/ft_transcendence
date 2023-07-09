@@ -130,7 +130,6 @@ const ChannelCreateIcon: React.FC = () => {
                                 }).catch((err) => {
                                     setCreating(false);
                                     setPopIsOpen(false);
-                                    throw Error("UNEXPECTED ERROR: " + err)
                                 });
                             }}
                         >
