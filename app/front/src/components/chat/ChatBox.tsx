@@ -96,7 +96,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             }
             return res.data;
         }).catch((err) => {
-            throw Error("UNEXPECTED ERROR: " + err);
+            
         })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
@@ -123,7 +123,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
             }
             return res.data;
         }).catch((err) => {
-            throw Error("UNEXPECTED ERROR: " + err);
         })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
@@ -199,7 +198,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         try {
             axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
-            throw Error("UNEXPECTED ERROR: " + err);
         }
     }, [channel]);
 
