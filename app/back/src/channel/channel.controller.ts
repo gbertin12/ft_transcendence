@@ -476,6 +476,13 @@ export class ChannelController {
             new_owner: body.new_owner,
         });
 
+        // Remove user from administrators if he was one
+        this.channelService.setRole(body.new_owner, dto.channel_id, 0);
+        this.chatGateway.server.to(`channel-${dto.channel_id}`).emit('removeStaff', {
+            channel_id: dto.channel_id,
+            user_id: body.new_owner,
+        });
+
         // Send a system message and a socket ping to the channel to update roles / badges
         this.chatGateway.sendSystemMessage(dto.channel_id, `${req.user['name']} transferred its ownership to ${user.name}`,);
     }
