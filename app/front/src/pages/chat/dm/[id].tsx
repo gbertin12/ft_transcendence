@@ -39,7 +39,7 @@ function getErrorCode(status: number): JSX.Element {
             return (
                 <>
                     <h1 className="text-3xl font-bold">Unknown user</h1>
-                    <p className="text-xl">This user doesn't exists.</p>
+                    <p className="text-xl">This user doesn&apos;t exists.</p>
                 </>
             );
         default: // sus
