@@ -33,7 +33,7 @@ const ReceivedRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequ
                 }}
             >
                 {requests.map((request) => (
-                    <li className="list-none">
+                    <li className="list-none" key={`li-${request.sender_id}`}>
                         <ChatEntry
                             user={request.sender}
                             isOnline={false} // set these to false to obfuscate the data
@@ -88,7 +88,7 @@ const SentRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequests
                 }}
             >
                 {requests.map((request) => (
-                    <li className="list-none">
+                    <li className="list-none" key={`li-${request.receiver_id}`}>
                         <ChatEntry
                             user={request.receiver}
                             isOnline={false} // set these to false to obfuscate the data
