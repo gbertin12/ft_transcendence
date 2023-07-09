@@ -44,7 +44,7 @@ export default function Game() {
         setWho(playerNumber);
         socket.emit("joinRoom", roomName);
         setPlayGame(true);
-        setEndGame(false);
+        //setEndGame(false);
         setNameOpponent(nameOpponent);
         if (window && window.innerWidth != 0)
             setWindowWidth(window.innerWidth);
@@ -77,8 +77,9 @@ export default function Game() {
         socket.emit('leaveRoom', endGameData.room.name);
         setDataEndGame(endGameData);
         //handleSetRoomName('');
-        setPlayGame(false);
+        //setPlayGame(false);
         setEndGame(true);
+        console.log("in handleSetEndGame: ", endGameData);
         router.replace('/game');
     }
 
@@ -88,6 +89,7 @@ export default function Game() {
 
     const handleCloseCardEndGame = () => {
         setEndGame(false);
+        setPlayGame(false);
         setWho(-1);
         setRoomName("");
         setSearchGame(false);
@@ -95,7 +97,8 @@ export default function Game() {
 
     if (!user.id) return (<Loading/>);
 
-    if (!playGame && endGame) {
+    if (endGame) {
+        console.log("displaying CardEndGame...");
         return <>
             <Head>
                 <title> Game </title>
@@ -107,7 +110,19 @@ export default function Game() {
                 </div>
             </div>
         </>
-    } else if (!playGame && !endGame) {
+    } else if (playGame) {
+        return <>
+            <Head>
+                <title> Game </title>
+            </Head>
+            <div className="flex flex-col items-center">
+                <Spacer y={3} />
+                <div style={{width:'80%', maxWidth:'1000px'}}>
+                    <Pong2 nameOpponent={nameOpponent} roomName={roomName} windowWidth={windowWidth} who={who} handleSetEndGame={handleSetEndGame} />
+                </div>
+            </div>
+        </>
+    } else {
         return <>
             <Head>
                 <title> Game </title>
@@ -136,19 +151,5 @@ export default function Game() {
                 </div>
             </div>
         </>
-    } else if (playGame) {
-        return <>
-            <Head>
-                <title> Game </title>
-            </Head>
-            <div className="flex flex-col items-center">
-                <Spacer y={3} />
-                <div style={{width:'80%', maxWidth:'1000px'}}>
-                    <Pong2 nameOpponent={nameOpponent} roomName={roomName} windowWidth={windowWidth} who={who} handleSetEndGame={handleSetEndGame} />
-                </div>
-            </div>
-        </>
-    } else {
-        return <></>
     }
 }
