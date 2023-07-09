@@ -242,6 +242,11 @@ export class ChannelService {
                 channel_id: channelId
             }
         });
+        await this.db.channelInvite.deleteMany({
+            where: {
+                channel_id: channelId
+            }
+        });
     }
 
     async getChannel(channelId: number) {
@@ -648,5 +653,16 @@ export class ChannelService {
                 })
             }
         }
+    }
+
+    async getInvitations(channel_id: number) {
+        return await this.db.channelInvite.findMany({
+            where: {
+                channel_id: channel_id
+            },
+            select: {
+                receiver_id: true,
+            }
+        });
     }
 }
