@@ -34,7 +34,7 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
             <hr />
             <ul>
                 {receivedRequests.map((invite) => (
-                    <li className="list-none">
+                    <li className="list-none" key={invite.channel.id}>
                         <Grid.Container>
                             <Grid xs={10}>
                                 <ChannelEntry
