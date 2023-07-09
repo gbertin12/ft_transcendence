@@ -93,7 +93,7 @@ model ChannelInvite {
     receiver    User     @relation("receiver", fields: [receiver_id], references: [id])
     channel     Channel  @relation(fields: [channel_id], references: [id])
 
-    @@id([sender_id, receiver_id, channel_id])
+    @@id([receiver_id, channel_id])
 }
 
 model Channel {
