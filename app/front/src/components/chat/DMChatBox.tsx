@@ -61,7 +61,6 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             }
             return res.data;
         }).catch((err) => {
-            throw Error("UNEXPECTED ERROR: " + err);
         })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
@@ -88,7 +87,6 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             }
             return res.data;
         }).catch((err) => {
-            throw Error("UNEXPECTED ERROR: " + err);
         })
         data.forEach((message: Message) => {
             message.timestamp = new Date(message.timestamp);
@@ -136,7 +134,6 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         try {
             axios.post(`http://localhost:3000/dms/${interlocutor.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
-            throw Error("UNEXPECTED ERROR: " + err);
         }
     }, [user, interlocutor.id]);
 

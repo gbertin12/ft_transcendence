@@ -41,7 +41,6 @@ export const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onCli
                 }).then((response) => {
                     onClick();
                 }).catch((error) => {
-                    throw Error("UNEXPECTED ERROR: " + error);
                 });
             }}
         >
@@ -169,7 +168,6 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                 }).then((response) => {
                                     setIsOpen(false);
                                 }).catch((error) => {
-                                    throw Error("UNEXPECTED ERROR: " + error);
                                 });
                             }}
                             />
@@ -188,7 +186,6 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                         }).then((response) => {
                                             setIsOpen(false);
                                         }).catch((error) => {
-                                            throw Error("UNEXPECTED ERROR: " + error);
                                         });
                                     }}
                                 >
