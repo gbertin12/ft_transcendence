@@ -21,15 +21,6 @@ const ChatFriendBrowser: React.FC = () => {
                     unreadMessages={friend.unreadMessages}
                     key={friend.user.id}
                 >
-                    {(friend.isPlaying ? (
-                        <Grid xs={1} css={{ my: "auto" }}>
-                            <IconEye />
-                        </Grid>
-                    ) : (
-                        <Grid xs={1} css={{ my: "auto" }}>
-                            <IconDeviceGamepad />
-                        </Grid>
-                    ))}
                     <Grid xs={1} css={{ my: "auto" }}>
                         <Badge
                             content={friend.unreadMessages > 9 ? "9+" : friend.unreadMessages.toString()}

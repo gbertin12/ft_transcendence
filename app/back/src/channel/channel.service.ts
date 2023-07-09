@@ -342,29 +342,12 @@ export class ChannelService {
                         topic: true
                     },
                 },
-                sender: {
-                    select: {
-                        avatar: true,
-                        elo: true,
-                        id: true,
-                        losses: true,
-                        name: true,
-                        wins: true,
-                        otp: false,
-                        password: false,
-                        otpSecret: false,
-                    },
-                },
             },
         }).then((invites) => {
             return invites.map((invite) => {
                 const channel = invite.channel;
                 channel.password = (channel.password !== null ? '' : null);
-                return {
-                    channel: channel,
-                    sender: invite.sender,
-                    user_id: invite.receiver_id
-                }
+                return channel;
             });
         });
     }
@@ -372,8 +355,7 @@ export class ChannelService {
     async inviteToChannel(sender_id: number, receiver_id: number, channel_id: number) {
         return this.db.channelInvite.upsert({
             where: {
-                sender_id_receiver_id_channel_id: {
-                    sender_id: sender_id,
+                receiver_id_channel_id: {
                     receiver_id: receiver_id,
                     channel_id: channel_id,
                 }
@@ -391,11 +373,10 @@ export class ChannelService {
         });
     }
 
-    async revokeInvite(sender_id: number, receiver_id: number, channel_id: number) {
+    async revokeInvite(receiver_id: number, channel_id: number) {
         return this.db.channelInvite.delete({
             where: {
-                sender_id_receiver_id_channel_id: {
-                    sender_id: sender_id,
+                receiver_id_channel_id: {
                     receiver_id: receiver_id,
                     channel_id: channel_id,
                 }
@@ -403,8 +384,8 @@ export class ChannelService {
         });
     }
 
-    async acceptInvite(sender_id: number, receiver_id: number, channel_id: number) {
-        this.db.channelAccess.create({
+    async acceptInvite(receiver_id: number, channel_id: number): Promise<string> {
+        await this.db.channelAccess.create({
             data: {
                 user_id: receiver_id,
                 channel_id: channel_id
@@ -412,12 +393,20 @@ export class ChannelService {
         })
         return this.db.channelInvite.delete({
             where: {
-                sender_id_receiver_id_channel_id: {
-                    sender_id: sender_id,
+                receiver_id_channel_id: {
                     receiver_id: receiver_id,
                     channel_id: channel_id,
                 }
+            },
+            select: {
+                sender: {
+                    select: {
+                        name: true
+                    }
+                }
             }
+        }).then((invite) => {
+            return invite.sender.name;
         });
     }
 

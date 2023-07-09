@@ -346,17 +346,21 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                         break;
                 }
             });
-            socket.on("invite", (invite: ChannelInvite) => {
-                setChannelInvites((invites) => [...invites, invite]);
+            socket.on("invite", (channel: Channel) => {
+                if (channelInvites.find((c: Channel) => c.id === channel.id)) {
+                    return;
+                }
+                setChannelInvites((invites) => [...invites, channel]);
             });
-            socket.on("cancelInvite", (invite: ChannelInvite) => {
-                setChannelInvites((invites) => invites.filter((i: ChannelInvite) => i.channel.id !== invite.channel.id));
+            socket.on("cancelInvite", (channel_id: number) => {
+                setChannelInvites((invites) => invites.filter((i: Channel) => i.id !== channel_id));
             });
-            socket.on("acceptInvite", (invite: ChannelInvite) => {
+            socket.on("acceptInvite", (channel_id: number) => {
                 // Remove the invite from the list of invites
-                setChannelInvites((invites) => invites.filter((i: ChannelInvite) => i.channel.id !== invite.channel.id));
+                setChannelInvites((invites) => invites.filter((i: Channel) => i.id !== channel_id));
                 // Add the channel to the list of channels
-                setChannels((channels) => [...channels, invite.channel]);
+                let invite = channelInvites.find((i: Channel) => i.id === channel_id);
+                setChannels((channels) => [...channels, invite]);
             });
             return () => {
                 socket.off("newChannel");
@@ -382,7 +386,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("acceptInvite");
             }
         }
-    }, [socket, user.id]);
+    }, [socket, user.id, channels, channelInvites, friends, bannedChannels, mutedChannels, blockedUsers, friendRequests]);
 
     React.useEffect(() => {
         setSentRequests(friendRequests.filter((request) => request.sender_id === user.id));

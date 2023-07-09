@@ -10,12 +10,6 @@ export interface Channel {
     allowed: boolean; // true when channel is password protected and user has access, false otherwise
 }
 
-export interface ChannelInvite {
-    channel: Channel;
-    sender: User;
-    user_id: number;
-}
-
 export interface Message {
     channel_id: number;
     sender_id: number;
