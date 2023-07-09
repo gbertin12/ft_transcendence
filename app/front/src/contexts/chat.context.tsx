@@ -229,6 +229,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
             });
             socket.on('deleteChannel', (payload: number) => {
                 setChannels((channels) => channels.filter((c) => c.id !== payload));
+                setChannelInvites((invites) => invites.filter((invite: Channel) => invite.id !== payload));
             });
             socket.on('editChannel', (payload: Channel) => {
                 setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));

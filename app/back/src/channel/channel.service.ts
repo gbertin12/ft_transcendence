@@ -232,11 +232,6 @@ export class ChannelService {
                 channel_id: channelId
             }
         });
-        await this.db.channel.delete({
-            where: {
-                id: channelId
-            }
-        });
         await this.db.message.deleteMany({
             where: {
                 channel_id: channelId
@@ -245,6 +240,11 @@ export class ChannelService {
         await this.db.channelInvite.deleteMany({
             where: {
                 channel_id: channelId
+            }
+        });
+        await this.db.channel.delete({
+            where: {
+                id: channelId
             }
         });
     }
