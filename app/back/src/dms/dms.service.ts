@@ -40,7 +40,7 @@ export class DmsService {
                 content: true,
                 timestamp: true
             },
-            take: 50 // limit to 50 messages
+            take: 300 // limit to 50 messages
         })
     }
 
@@ -137,7 +137,7 @@ export class DmsService {
                 content: true,
                 timestamp: true
             },
-            take: 50 // limit to 50 messages
+            take: 300 // limit to 50 messages
         })
     }
 }
