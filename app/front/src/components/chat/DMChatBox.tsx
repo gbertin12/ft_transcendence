@@ -95,12 +95,20 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         return data.reverse();
     }, []);
 
+    // function newMessage(message: MessageData) {
+    //     message.timestamp = new Date(message.timestamp);
+    //     setMessages((messages) => [message, ...messages]);
+    // }
+
+    // react callback
+    const handleNewMessage = useCallback(async (message: MessageData): Promise<void> => {
+        // parse the timestamp
+        message.timestamp = new Date(message.timestamp);
+        setMessages((messages) => [message, ...messages]);
+    }, []);
+
     useEffect(() => {
-        socket.on('dmMessage', (message: MessageData) => {
-            alert("message received")
-            message.timestamp = new Date(message.timestamp);
-            setMessages((messages) => [message, ...messages]);
-        });
+        socket.on('dmMessage', handleNewMessage);
         socket.on('messageDeleted', (message_id: number) => {
             // find the message in the list and remove it
             setMessages((messages) => {

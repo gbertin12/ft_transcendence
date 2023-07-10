@@ -1,5 +1,5 @@
-import { Channel, ChannelInvite, Friend, FriendRequest, Message, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Channel, ChannelInvite, Friend, FriendRequest, Message, MessageData, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
 
@@ -294,13 +294,9 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                     return newBlockedUsers;
                 });
             });
-            socket.on("dmMessage", (payload: any) => {
-                // If the href is not in the good dm, increment the unread messages
-                if (!window.location.href.includes(`/dm/${payload.sender_id}`) && !window.location.href.includes(`/dm/${payload.receiver_id}`)) {
-                    setFriends(
-                        (friends) => friends.map((f) => f.user.id === payload.sender_id ? { ...f, unreadMessages: f.unreadMessages + 1 } : f)
-                    );
-                }
+            socket.on('dmPing', (sender_id: number) => {
+                if (window.location.href.includes(`/dm/${sender_id}`)) return;
+                setFriends((friends) => friends.map((f) => f.user.id === sender_id ? { ...f, unreadMessages: f.unreadMessages + 1 } : f));
             });
             socket.on("updateOwner", (data: OwnerUpdate) => {
                 setChannels((channels) => channels.map((c) => c.id === data.channel_id ? { ...c, owner_id: data.new_owner } : c));
@@ -382,7 +378,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 socket.off("unmuted");
                 socket.off("blocked");
                 socket.off("unblocked");
-                socket.off("dmMessage");
+                socket.off("dmPing");
                 socket.off("updateOwner");
                 socket.off("punishment");
                 socket.off("invite");

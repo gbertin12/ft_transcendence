@@ -248,7 +248,7 @@ export class ChannelController {
     async createChannel(@Body() body: any, @Req() req) {
         let ownerId = req.user['id'];
         let channel: Channel = await this.channelService.createChannel(body.name, ownerId, body.private, body.password);
-        if (body.private) {
+        if (body.private && !body.password) {
             // Emit only creation to the owner
             this.chatGateway.server.to(`user-${ownerId}`).emit('newChannel', channel);
         } else {
