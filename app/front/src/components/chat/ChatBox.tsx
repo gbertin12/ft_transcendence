@@ -55,7 +55,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         return () => {
             setSelectedChannel(null);
         }
-    }, [channel]);
+    }, [channel, missingPermissions]);
+
+    useEffect(() => {
+        if (!missingPermissions) {
+            fetchMessages(channel).then((messages) => {
+                setMessages(messages);
+            });
+        }
+    }, [missingPermissions])
 
     const messagesRef = useRef<HTMLUListElement>(null);
 
