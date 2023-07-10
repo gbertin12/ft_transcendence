@@ -3,9 +3,9 @@ import { Grid, Text } from '@nextui-org/react';
 import React, { useEffect } from 'react';
 import ChannelEntry from './ChannelEntry';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { ChannelInvite } from '@/interfaces/chat.interfaces';
 import { useUser } from '@/contexts/user.context';
 import axios from 'axios';
+import { Channel } from '@/interfaces/chat.interfaces';
 
 interface ChannelInvitesProps {
 
@@ -14,7 +14,7 @@ interface ChannelInvitesProps {
 const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
     const { channelInvites } = useChat();
     const { user } = useUser();
-    const [receivedRequests, setReceivedRequests] = React.useState<ChannelInvite[]>([]);
+    const [receivedRequests, setReceivedRequests] = React.useState<Channel[]>([]);
 
     useEffect(() => {
         setReceivedRequests(channelInvites.filter((invite) => invite.user_id !== user?.id));

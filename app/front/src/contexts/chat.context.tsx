@@ -1,4 +1,4 @@
-import { Channel, ChannelInvite, Friend, FriendRequest, Message, MessageData, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
+import { Channel, Friend, FriendRequest, Message, MessageData, PunishmentData, Relationships } from '@/interfaces/chat.interfaces';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useUser } from './user.context';
 import axios from 'axios';
@@ -8,8 +8,8 @@ interface ChatContextType {
     setChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
     selectedChannel: Channel | null;
     setSelectedChannel: React.Dispatch<React.SetStateAction<Channel | null>>;
-    channelInvites: ChannelInvite[];
-    setChannelInvites: React.Dispatch<React.SetStateAction<ChannelInvite[]>>;
+    channelInvites: Channel[];
+    setChannelInvites: React.Dispatch<React.SetStateAction<Channel[]>>;
     privateChannels: Channel[];
     setPrivateChannels: React.Dispatch<React.SetStateAction<Channel[]>>;
     publicChannels: Channel[];
@@ -69,7 +69,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [privateChannels, setPrivateChannels] = useState<Channel[]>([]);
     const [publicChannels, setPublicChannels] = useState<Channel[]>([]);
-    const [channelInvites, setChannelInvites] = useState<ChannelInvite[]>([]);
+    const [channelInvites, setChannelInvites] = useState<Channel[]>([]);
     const [friends, setFriends] = useState<Friend[]>([]);
     const [bannedChannels, setBannedChannels] = useState<Set<number>>(new Set<number>());
     const [mutedChannels, setMutedChannels] = useState<Set<number>>(new Set<number>());
@@ -360,7 +360,8 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setChannelInvites((invites) => invites.filter((i: Channel) => i.id !== channel_id));
                 // Add the channel to the list of channels
                 let invite = channelInvites.find((i: Channel) => i.id === channel_id);
-                setChannels((channels) => [...channels, invite]);
+                if (!invite) return;
+                setChannels((channels) => [...channels, invite!!]);
             });
             return () => {
                 socket.off("newChannel");
