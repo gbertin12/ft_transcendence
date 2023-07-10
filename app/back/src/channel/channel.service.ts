@@ -35,7 +35,13 @@ export class ChannelService {
                                     user_id: user.id
                                 }
                             }
-                        }
+                        }, // Channel private but with password
+                        {
+                            private: true,
+                            password: {
+                                not: null
+                            },
+                        },
                     ]
                 },
                 orderBy: {
