@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { handleColisionWithObstacle, } from './obstacles';

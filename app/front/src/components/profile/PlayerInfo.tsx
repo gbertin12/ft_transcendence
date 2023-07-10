@@ -28,7 +28,7 @@ export default function PlayerInfo(
             <Card.Divider/>
 
             <Card.Body>
-                <Col align="center">
+                <Col css={{ display: "flex", flexDirection: "column", placeItems: "center" }}>
                     <Avatar
                         src={`http://localhost:3000/static/avatars/${user.avatar}`}
                         css={{ size: "$40" }}

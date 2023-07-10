@@ -4,24 +4,21 @@ import { useUser } from '@/contexts/user.context';
 import { PlayerEndGame, PlayerInterface } from '@/interfaces/pong.interface';
 
 function PlayerInfos ({win, score, username, avatar, badgeContent, newElo} : {win: boolean, score: number, username: string, avatar: string, badgeContent: string, newElo : number}) {
-    let color: string = "success";
     const pathAvatar : string = "http://localhost:3000/static/avatars/" + avatar;
-    if (!win)
-    color = "error"
     return (
         <Grid justify='center' alignItems='center'>
             <Container fluid css={{ ta:'center' }}>
-                <Badge disableOutline content={badgeContent} color={color} size={"sm"}>
+                <Badge disableOutline content={badgeContent} color={(win) ? "success" : "error"}> 
                     <Avatar 
                         bordered 
                         size='xl'
                         src={pathAvatar}
-                        color={color}
+                        color={(win) ? "success" : "error"}
                     />
                 </Badge>
             </Container>
             <Text css={{mt:"5px", ta:'center', mb:"0px", minWidth: "150px" }} h4>{username}</Text>
-            <Text css={{ ta:'center' }} color={color}>{newElo}</Text>
+            <Text css={{ ta:'center' }} color={(win) ? "success" : "error"}>{newElo}</Text>
             <Text css={{mt:"5px", ta:'center'}} h3 >{score} pts</Text>
         </Grid>
     )

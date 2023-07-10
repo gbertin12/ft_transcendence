@@ -325,6 +325,7 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 	return (
 		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
 			<div style={{ textAlign: 'center' }}>
+				{/* @ts-ignore */}
 				<Sketch preload={preload} setup={setup} draw={draw} />
 			</div>
 		</div>

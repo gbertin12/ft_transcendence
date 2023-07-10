@@ -41,11 +41,21 @@ export default function EditPlayerInfo(
             if (res?.ok) {
                 const avatar = await res.text();
                 if (name && avatar) {
-                    setUser({  ...user, avatar, name });
+                    setUser((prevuser) => {
+                        prevuser.name = name;
+                        prevuser.avatar = avatar;
+                        return prevuser;
+                    });
                 } else if (name) {
-                    setUser({  ...user, name });
+                    setUser((prevuser) => {
+                        prevuser.name = name;
+                        return prevuser;
+                    });
                 } else {
-                    setUser({  ...user, avatar });
+                    setUser((prevuser) => {
+                        prevuser.avatar = avatar;
+                        return prevuser;
+                    });
                 }
                 setError("");
 

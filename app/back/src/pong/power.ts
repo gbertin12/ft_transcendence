@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { Server } from 'socket.io';
 import { roomInterface, PowerInterface, obstaclesInterface, powerAvailables } from '../../src/interfaces/pong.interface';
 import { convertToPixel } from './game.service';

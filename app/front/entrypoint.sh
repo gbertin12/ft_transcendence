@@ -7,6 +7,6 @@ if [ ! -f "$FLAG_FILE" ]; then
 fi
 
 # prod
-#npm run build && npm run start
+npm run build && npm run start
 
-exec npm run dev
+#exec npm run dev

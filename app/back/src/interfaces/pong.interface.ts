@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { User } from "../interfaces/user.interface"
 // interface de la ball
 

@@ -34,7 +34,7 @@ export default function Game() {
                 router.push('/');
             }
             if (router.query && router.query.roomName && router.query.who, router.query.nameOpponent) {
-                handleStartGame(router.query.roomName, parseInt(router.query.who), router.query.nameOpponent);
+                handleStartGame(router.query.roomName as string, parseInt(router.query.who as string), router.query.nameOpponent as string);
             }
         }
     }, [router, user]); 
