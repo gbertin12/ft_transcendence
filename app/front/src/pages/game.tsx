@@ -79,7 +79,6 @@ export default function Game() {
         //handleSetRoomName('');
         //setPlayGame(false);
         setEndGame(true);
-        console.log("in handleSetEndGame: ", endGameData);
         router.replace('/game');
     }
 
@@ -98,7 +97,6 @@ export default function Game() {
     if (!user.id) return (<Loading/>);
 
     if (endGame) {
-        console.log("displaying CardEndGame...");
         return <>
             <Head>
                 <title> Game </title>

@@ -357,9 +357,7 @@ export class ChannelController {
         if (result) {
             this.chatGateway.server.emit('joinChannel', { channel_id: dto.channel_id, user_id: userId });
             // get all clients in room `user-${userId}` and make them join `channel-${dto.channel_id}`
-            console.log('joining channel')
             this.chatGateway.server.sockets.adapter.rooms.get(`user-${userId}`).forEach(socketId => {
-                console.log(socketId);
                 this.chatGateway.server.sockets.sockets.get(socketId).join(`channel-${dto.channel_id}`);
             });
             return { status: 201 };

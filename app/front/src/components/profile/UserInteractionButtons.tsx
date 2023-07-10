@@ -190,7 +190,6 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 setPlayer(res.data);
             })
             .catch((err) => {
-                console.log(err);
             });
 
         axios.get('http://paul-f4br5s1:3000/user/player/opponent', {

@@ -63,7 +63,6 @@ export default function EditPlayerInfo(
                 handleShowEdit();
             } else {
                 const err = await res.json();
-                console.log(err);
                 if (typeof err.message === "string") {
                     setError(err.message);
                 } else if (Array.isArray(err.message)) {

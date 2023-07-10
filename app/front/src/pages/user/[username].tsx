@@ -22,7 +22,6 @@ export default function Profile() {
                     const data = await res.json();
                     setUser(data);
                 } else {
-                    console.log("404 error");
                     router.push('/');
                 }
             })();
