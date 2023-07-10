@@ -1,10 +1,11 @@
 import { Channel } from '@/interfaces/chat.interfaces';
 import { Button, Input, Loading, Text } from '@nextui-org/react';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import axios from 'axios';
 
 interface ChannelPasswordPromptProps {
     channel: Channel;
+    validCallback: Dispatch<SetStateAction<boolean>>;
 }
 
 async function joinChannel(channel: Channel, password: string): Promise<number> {
@@ -21,7 +22,7 @@ async function joinChannel(channel: Channel, password: string): Promise<number> 
     });
 }
 
-const ChannelPasswordPrompt: React.FC<ChannelPasswordPromptProps> = ({ channel }) => {
+const ChannelPasswordPrompt: React.FC<ChannelPasswordPromptProps> = ({ channel, validCallback }) => {
     const [working, setWorking] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
@@ -51,16 +52,19 @@ const ChannelPasswordPrompt: React.FC<ChannelPasswordPromptProps> = ({ channel }
                         joinChannel(channel, password).then((response: number) => {
                             switch (response) {
                                 case 401:
-                                    setError("Mot de passe incorrect");
+                                    setError("Invalid password");
                                     setTimeout(() => {
                                         setWorking(false);
                                     }, 1000);
                                     break;
                                 case 403:
-                                    setError("Vous êtes banni de ce salon");
+                                    setError("You are banned from this channel");
                                     setTimeout(() => {
                                         setWorking(false);
                                     }, 1000);
+                                    break;
+                                case 201:
+                                    validCallback(false);
                                     break;
                                 default:
                                     setError("");

@@ -227,7 +227,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     // The user doesn't have access to this password protected channel, we need to ask for a password
     if (missingPermissions && channel.password === "") {
         return (
-            <ChannelPasswordPrompt channel={channel} />
+            <ChannelPasswordPrompt channel={channel} validCallback={setMissingPermissions} />
         );
     } else if (missingPermissions && !channel.password) { // The user doesn't have access to this channel and it's not password protected
         return ( // Throw a fake 404 message because it is a hidden channel
