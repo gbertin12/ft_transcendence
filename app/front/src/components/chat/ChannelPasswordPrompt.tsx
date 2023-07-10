@@ -28,7 +28,7 @@ const ChannelPasswordPrompt: React.FC<ChannelPasswordPromptProps> = ({ channel }
 
     return (
         <div className="flex flex-col items-center justify-center h-full">
-            <Text h1 className="text-3xl font-bold">Ce salon est protégé par un mot de passe</Text>
+            <Text h1 className="text-3xl font-bold">This channel is password protected</Text>
             {error.length > 0 && (
                 <Text h3 color="error">
                     {error}
@@ -38,8 +38,8 @@ const ChannelPasswordPrompt: React.FC<ChannelPasswordPromptProps> = ({ channel }
                 <Input
                     clearable
                     type="password"
-                    placeholder="Mot de passe"
-                    aria-label="Mot de passe du salon"
+                    placeholder="Password"
+                    aria-label="Channel password"
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 <Button
