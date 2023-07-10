@@ -8,6 +8,7 @@ import axios from "axios";
 import { useChat } from "@/contexts/chat.context";
 import { IconDoorExit, IconShieldCog } from "@tabler/icons-react";
 import ChannelSettings from "./settings/ChannelSettingsModal";
+import { useRouter } from "next/router";
 
 interface ChatBoxProps {
     channel: Channel;
@@ -39,7 +40,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     const [channelSettingsOpen, setChannelSettingsOpen] = useState<boolean>(false);
 
     const { socket, user } = useUser();
+    const router = useRouter();
     const {
+        channels,
         bannedChannels,
         mutedChannels,
         blockedUsers,
@@ -172,8 +175,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
         });
         socket.on('leaveChannel', (channelId: number) => {
             // remove the channel from the list of channels
+            const channel = channels.find((channel) => channel.id === channelId);
+            if (!channel) {
+                return ;
+            }
+            if (channel.password !== null) {
+                router.push('/chat', undefined, { shallow: true });
+                return ; // don't remove password protected channels
+            }
             setChannels((channels) => {
                 const index = channels.findIndex((channel) => channel.id === channelId);
+                // if channel has a password, we don't want to remove it from the lists
                 if (index !== -1) {
                     channels.splice(index, 1);
                 }
