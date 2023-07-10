@@ -1,6 +1,6 @@
 import { Badge, Grid, Text } from '@nextui-org/react';
 import React from 'react';
-import { Channel, User } from '@/interfaces/chat.interfaces';
+import { Channel } from '@/interfaces/chat.interfaces';
 import { ChannelEditIcon } from './icons/ChannelEditIcon';
 import { IconLock } from '@tabler/icons-react';
 import { useUser } from '@/contexts/user.context';
