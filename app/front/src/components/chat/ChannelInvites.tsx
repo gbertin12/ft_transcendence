@@ -14,13 +14,8 @@ interface ChannelInvitesProps {
 const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
     const { channelInvites } = useChat();
     const { user } = useUser();
-    const [receivedRequests, setReceivedRequests] = React.useState<Channel[]>([]);
 
-    useEffect(() => {
-        setReceivedRequests(channelInvites.filter((invite) => invite.user_id !== user?.id));
-    }, [channelInvites]);
-
-    if (receivedRequests.length === 0) {
+    if (channelInvites.length === 0) {
         return <></>;
     }
 
@@ -29,7 +24,7 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
             <Text h4>Channel invites</Text>
             <hr />
             <ul>
-                {receivedRequests.map((invite) => (
+                {channelInvites.map((invite) => (
                     <li className="list-none" key={invite.id}>
                         <Grid.Container>
                             <Grid xs={10}>
@@ -45,7 +40,7 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
                             </Grid>
                             <Grid xs={1}>
                                 <IconCheck className="my-auto" onClick={() => {
-                                    axios.put(`http://localhost:3000/channel/${invite.id}/invite`, { id: invite.user_id }, { withCredentials: true })
+                                    axios.put(`http://localhost:3000/channel/${invite.id}/invite`, { id: invite.id }, { withCredentials: true })
                                 }} />
                             </Grid>
                             <Grid className="my-auto" xs={1}>
