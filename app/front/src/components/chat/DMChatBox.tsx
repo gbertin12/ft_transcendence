@@ -95,14 +95,12 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
         return data.reverse();
     }, []);
 
-    const handleNewMessage = useCallback(async (message: MessageData): Promise<void> => {
-        // parse the timestamp
-        message.timestamp = new Date(message.timestamp);
-        setMessages((messages) => [message, ...messages]);
-    }, []);
-
     useEffect(() => {
-        socket.on('dmMessage', handleNewMessage);
+        socket.on('dmMessage', (message: MessageData) => {
+            alert("message received")
+            message.timestamp = new Date(message.timestamp);
+            setMessages((messages) => [message, ...messages]);
+        });
         socket.on('messageDeleted', (message_id: number) => {
             // find the message in the list and remove it
             setMessages((messages) => {
@@ -125,10 +123,10 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
             return [...friends];
         });
         return () => {
-            socket.off('dmMessage', handleNewMessage);
+            socket.off('dmMessage');
             socket.off('messageDeleted');
         }
-    }, [socket, user, fetchMessages, interlocutor, setFriends, handleNewMessage]);
+    }, [socket]);
 
     const handlePostMessage = useCallback((message: string) => {
         try {
