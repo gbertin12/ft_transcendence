@@ -235,6 +235,9 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                 setChannels((channels) => channels.map((c) => c.id === payload.id ? payload : c));
                 if (!payload.private) {
                     setChannelInvites((invites) => invites.filter((invite: Channel) => invite.id !== payload.id));
+                    // Check if the channel is already in the list of channels
+                    if (channels.find((c) => c.id === payload.id)) return;
+                    setChannels((channels) => [...channels, payload]);
                 }
             });
             socket.on('deleteFriend', (user_id: number) => {
