@@ -245,7 +245,7 @@ const Pong2 = ({nameOpponent, windowWidth, roomName, who, handleSetEndGame}
 
 	useEffect(() => {
 		window.addEventListener('resize', handleWindowResize);
-		axios.patch(`http://localhost:3000/friends/status/playing`, {}, { withCredentials: true, validateStatus: () => true });
+		axios.patch(`http://paul-f4br5s1:3000/friends/status/playing`, {}, { withCredentials: true, validateStatus: () => true });
 		return () => {
 			window.removeEventListener('resize', handleWindowResize);
 		}

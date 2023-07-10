@@ -40,12 +40,12 @@ const ChannelInvites: React.FC<ChannelInvitesProps> = ({ }) => {
                             </Grid>
                             <Grid xs={1}>
                                 <IconCheck className="my-auto" onClick={() => {
-                                    axios.put(`http://localhost:3000/channel/${invite.id}/invite`, { id: invite.id }, { withCredentials: true })
+                                    axios.put(`http://paul-f4br5s1:3000/channel/${invite.id}/invite`, { id: invite.id }, { withCredentials: true })
                                 }} />
                             </Grid>
                             <Grid className="my-auto" xs={1}>
                                 <IconX onClick={() => {
-                                    axios.delete(`http://localhost:3000/channel/${invite.id}/invite`, { withCredentials: true })
+                                    axios.delete(`http://paul-f4br5s1:3000/channel/${invite.id}/invite`, { withCredentials: true })
                                 }} />
                             </Grid>
                         </Grid.Container>

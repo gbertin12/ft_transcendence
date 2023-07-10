@@ -10,7 +10,7 @@ export default function SignUp() {
     //const { setUser } = useUser();
 
     /*async function refreshUser() {
-        const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
+        const res = await fetch("http://paul-f4br5s1:3000/user/me", { credentials: "include" });
         if (res?.ok) {
             const userData = await res.json();
             setUser(userData);
@@ -18,7 +18,7 @@ export default function SignUp() {
     }&*/
 
     async function dummyLogin() {
-        await fetch("http://localhost:3000/auth/dummy", { credentials: "include" });
+        await fetch("http://paul-f4br5s1:3000/auth/dummy", { credentials: "include" });
         //await refreshUser();
         //router.push(nextPage);
         window.location.href = "/profile";
@@ -26,7 +26,7 @@ export default function SignUp() {
 
     /*function register() {
         if (username && password) {
-            axios.post("http://localhost:3000/auth/register", { username, password })
+            axios.post("http://paul-f4br5s1:3000/auth/register", { username, password })
                 .then((_res) => {
                     setColor("success");
                     setMsg("Registered successfully");

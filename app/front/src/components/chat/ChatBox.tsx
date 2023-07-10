@@ -83,7 +83,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }
 
     const fetchMessages = useCallback(async (channel: Channel): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/messages`,
+        let data = await axios.get(`http://paul-f4br5s1:3000/channel/${channel.id}/messages`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -108,7 +108,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
     }, []);
 
     const fetchHistory = useCallback(async (channel: Channel, lastMessageId: number): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/channel/${channel.id}/history/${lastMessageId}`,
+        let data = await axios.get(`http://paul-f4br5s1:3000/channel/${channel.id}/history/${lastMessageId}`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -208,10 +208,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
 
     const handleNewMessage = useCallback((message: string) => {
         try {
-            axios.post(`http://localhost:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
+            axios.post(`http://paul-f4br5s1:3000/channel/${channel.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
         }
-    }, [channel]);
+    }, [channel, missingPermissions]);
 
     const memoizedMessages = useMemo(() => messages, [messages]);
 
@@ -253,7 +253,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ channel }) => {
                                                 light
                                                 disabled={channel.owner_id === user.id}
                                                 onPress={() => {
-                                                    axios.put(`http://localhost:3000/channel/${channel.id}/leave`, {},
+                                                    axios.put(`http://paul-f4br5s1:3000/channel/${channel.id}/leave`, {},
                                                         {
                                                             withCredentials: true,
                                                             validateStatus: () => true,

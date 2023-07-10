@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/user.context';
 import { PlayerEndGame, PlayerInterface } from '@/interfaces/pong.interface';
 
 function PlayerInfos ({win, score, username, avatar, badgeContent, newElo} : {win: boolean, score: number, username: string, avatar: string, badgeContent: string, newElo : number}) {
-    const pathAvatar : string = "http://localhost:3000/static/avatars/" + avatar;
+    const pathAvatar : string = "http://paul-f4br5s1:3000/static/avatars/" + avatar;
     return (
         <Grid justify='center' alignItems='center'>
             <Container fluid css={{ ta:'center' }}>

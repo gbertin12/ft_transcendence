@@ -66,7 +66,7 @@ const applyPunishment = async (punished: SenderData, channel: Channel, type: Pow
     let duration = permanent ? permDuration : Math.abs((unbanDateUTC - new Date().getTime()) / 1000);
     switch (type) {
         case 'banned':
-            await axios.put(`http://localhost:3000/channel/${channel.id}/ban/${punished.id}`,
+            await axios.put(`http://paul-f4br5s1:3000/channel/${channel.id}/ban/${punished.id}`,
                 {
                     duration: duration
                 }, {
@@ -75,7 +75,7 @@ const applyPunishment = async (punished: SenderData, channel: Channel, type: Pow
             })
             break;
         case 'kicked':
-            await axios.put(`http://localhost:3000/channel/${channel.id}/kick/${punished.id}`,
+            await axios.put(`http://paul-f4br5s1:3000/channel/${channel.id}/kick/${punished.id}`,
                 null,
                 {
                     withCredentials: true,
@@ -83,7 +83,7 @@ const applyPunishment = async (punished: SenderData, channel: Channel, type: Pow
                 })                             // is not allowed to use them anyway
             break;
         case 'muted':
-            axios.put(`http://localhost:3000/channel/${channel.id}/mute/${punished.id}`,
+            axios.put(`http://paul-f4br5s1:3000/channel/${channel.id}/mute/${punished.id}`,
                 {
                     duration: duration,
                 }, {
@@ -126,7 +126,7 @@ const PowerModal: React.FC<PowerModalProps> = ({ open, onClose, punished, channe
                     <Grid>
                         <Container direction='column' justify='center' alignItems='center'>
                             <Avatar
-                                src={`http://localhost:3000/static/avatars/${user.avatar}`}
+                                src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`}
                                 size="xl"
                                 alt={user.name}
                             />
@@ -143,7 +143,7 @@ const PowerModal: React.FC<PowerModalProps> = ({ open, onClose, punished, channe
                     <Grid>
                         <Container direction='column' justify='center' alignItems='center'>
                             <Avatar
-                                src={`http://localhost:3000/static/avatars/${punished.avatar}`}
+                                src={`http://paul-f4br5s1:3000/static/avatars/${punished.avatar}`}
                                 size="xl"
                                 alt={punished.name}
                                 css={{ filter: "grayscale(80%)" }}

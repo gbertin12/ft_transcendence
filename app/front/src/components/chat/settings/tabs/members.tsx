@@ -13,7 +13,7 @@ interface MembersTabProps {
 
 function updateRole(user_id: number, role: string, channel_id: number): Promise<boolean> {
     // Returns true if the role was updated successfully
-    return axios.patch(`http://localhost:3000/channel/${channel_id}/update_role`, {
+    return axios.patch(`http://paul-f4br5s1:3000/channel/${channel_id}/update_role`, {
         user_id: user_id,
         role: role
     }, {
@@ -36,7 +36,7 @@ const MembersTab: React.FC<MembersTabProps> = ({ channel }) => {
     // TODO: Fetch owner, administrators and members on mount
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/channel/${channel.id}/members`,
+        axios.get(`http://paul-f4br5s1:3000/channel/${channel.id}/members`,
             {
                 withCredentials: true,
                 validateStatus: () => true

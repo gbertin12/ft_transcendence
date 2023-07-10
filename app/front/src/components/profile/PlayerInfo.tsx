@@ -30,7 +30,7 @@ export default function PlayerInfo(
             <Card.Body>
                 <Col css={{ display: "flex", flexDirection: "column", placeItems: "center" }}>
                     <Avatar
-                        src={`http://localhost:3000/static/avatars/${user.avatar}`}
+                        src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`}
                         css={{ size: "$40" }}
                         alt="user picture"
                         bordered>

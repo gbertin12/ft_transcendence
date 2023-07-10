@@ -75,7 +75,7 @@ export default function Leaderboard() {
     const [rowsLeaderboard, setRowsLeaderboard] = useState<RowLeaderboard[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:3000/user/leaderboard")
+        fetch("http://paul-f4br5s1:3000/user/leaderboard")
             .then((res) => res.json())
             .then((data) => {
                 setRowsLeaderboard(setDataRow(data))

@@ -26,7 +26,7 @@ export default function Game() {
     const [nameOpponent, setNameOpponent] = useState<string>("");
     const [windowWidth, setWindowWidth] = useState<number>(0);
 
-    const pathAvatar : string = "http://localhost:3000/static/avatars/" + user.avatar;
+    const pathAvatar : string = "http://paul-f4br5s1:3000/static/avatars/" + user.avatar;
 
     useEffect(() => {
         if (router.isReady) {

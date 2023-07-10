@@ -82,7 +82,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchChannels = async () => {
-            axios.get("http://localhost:3000/channel/all",
+            axios.get("http://paul-f4br5s1:3000/channel/all",
                 {
                     withCredentials: true,
                     validateStatus: () => true,
@@ -94,7 +94,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         };
         const fetchFriends = async () => {
             if (user.id === undefined) return;
-            axios.get("http://localhost:3000/friends?blocked=true", { withCredentials: true })
+            axios.get("http://paul-f4br5s1:3000/friends?blocked=true", { withCredentials: true })
                 .then((res) => {
                     if (res.status !== 200) return;
                     const relationships: Relationships = res.data;
@@ -127,7 +127,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
                         }
                         setBlockedUsers(blockedUsers);
                         setFriends(friends);
-                        axios.patch(`http://localhost:3000/friends/status/online`, {}, { withCredentials: true, validateStatus: () => true });
+                        axios.patch(`http://paul-f4br5s1:3000/friends/status/online`, {}, { withCredentials: true, validateStatus: () => true });
                     }
                 }).catch((err) => {
                     return;
@@ -136,7 +136,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         const fetchBans = async () => {
             if (user.id === undefined) return;
             try {
-                axios.get("http://localhost:3000/punishments/active",
+                axios.get("http://paul-f4br5s1:3000/punishments/active",
                     {
                         withCredentials: true,
                         validateStatus: () => true,
@@ -185,7 +185,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         }
         const fetchFriendRequests = async () => {
             if (user.id === undefined) return;
-            axios.get("http://localhost:3000/friends/requests", {
+            axios.get("http://paul-f4br5s1:3000/friends/requests", {
                 withCredentials: true,
                 validateStatus: () => true,
             }).then((response) => {
@@ -196,7 +196,7 @@ export const ChatContextProvider: React.FC<any> = ({ children }) => {
         };
         const fetchChannelInvites = async () => {
             if (user.id === undefined) return;
-            axios.get("http://localhost:3000/channel/invites", {
+            axios.get("http://paul-f4br5s1:3000/channel/invites", {
                 withCredentials: true,
                 validateStatus: () => true,
             }).then((response) => {

@@ -28,7 +28,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     }, [router]);
 
     async function verify2FA() {
-        const res = await fetch("http://localhost:3000/auth/2fa/verify", {
+        const res = await fetch("http://paul-f4br5s1:3000/auth/2fa/verify", {
             credentials: "include",
             method: "POST",
             body: JSON.stringify({ otp }),
@@ -47,13 +47,13 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     }
 
     async function ftLogin() {
-        const res = await fetch('http://localhost:3000/auth/42/state', { credentials: 'include' });
+        const res = await fetch('http://paul-f4br5s1:3000/auth/42/state', { credentials: 'include' });
         const state_token = await res.text();
-        router.push(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`);
+        router.push(`https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-392e919c5957cd22c186e082804f1b9378ca5c2d56984a0c763c7104f165aa0a&redirect_uri=http%3A%2F%2Fpaul-f4br5s1%3A3000%2Fauth%2F42%2Fcallback&response_type=code&state=${state_token}`);
     }
 
     /*async function refreshUser() {
-        const res = await fetch("http://localhost:3000/user/me", { credentials: "include" });
+        const res = await fetch("http://paul-f4br5s1:3000/user/me", { credentials: "include" });
         if (res?.ok) {
             const userData = await res.json();
             setUser(userData);
@@ -62,7 +62,7 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
 
     async function userPassLogin() {
         if (username && password) {
-            const res = await fetch("http://localhost:3000/auth/login", {
+            const res = await fetch("http://paul-f4br5s1:3000/auth/login", {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -84,11 +84,11 @@ export default function SignIn({ closeModal }: { closeModal: () => void }) {
     }*/
 
     /*function discordLogin() {
-        router.push('http://localhost:3000/auth/discord/callback');
+        router.push('http://paul-f4br5s1:3000/auth/discord/callback');
     }
 
     function githubLogin() {
-        router.push('http://localhost:3000/auth/github/callback');
+        router.push('http://paul-f4br5s1:3000/auth/github/callback');
     }
 
     function handleOnInputUsername(event: FormEvent<FormElement>) {

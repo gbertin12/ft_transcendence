@@ -10,7 +10,7 @@ interface ChannelPasswordPromptProps {
 
 async function joinChannel(channel: Channel, password: string): Promise<number> {
     return axios.post(
-        `http://localhost:3000/channel/${channel.id}/join`,
+        `http://paul-f4br5s1:3000/channel/${channel.id}/join`,
         { password },
         {
             withCredentials: true,

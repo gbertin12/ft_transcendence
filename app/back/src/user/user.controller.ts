@@ -98,7 +98,7 @@ export class UserController {
             return avatar.filename;
         }
     }
-    // http://localhost:8000/?next=/game?roomName=aa627a88-972e-42d0-b3af-789e670b77c3&who=0&nameOpponentPnuUPdmP
+    // http://paul-f4br5s1:8000/?next=/game?roomName=aa627a88-972e-42d0-b3af-789e670b77c3&who=0&nameOpponentPnuUPdmP
 
     @Get('profile/:username')
     async getProfile(@Param() dto: UsernameParamDto) {

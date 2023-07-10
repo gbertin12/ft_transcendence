@@ -11,35 +11,35 @@ import { useNotif } from "@/contexts/notif.context";
 import { useRouter } from "next/router";
 
 function handleAddFriend(to: number) {
-    axios.post('http://localhost:3000/friends/add', { to }, {
+    axios.post('http://paul-f4br5s1:3000/friends/add', { to }, {
         withCredentials: true,
         validateStatus: () => true,
     });
 }
 
 function handleRemoveFriend(id: number) {
-    axios.delete(`http://localhost:3000/friends/${id}`, {
+    axios.delete(`http://paul-f4br5s1:3000/friends/${id}`, {
         withCredentials: true,
         validateStatus: () => true,
     });
 }
 
 function handleCancelFriendRequest(id: number) {
-    axios.delete(`http://localhost:3000/friends/requests/cancel/${id}`, {
+    axios.delete(`http://paul-f4br5s1:3000/friends/requests/cancel/${id}`, {
         withCredentials: true,
         validateStatus: () => true,
     });
 }
 
 function handleAcceptFriendRequest(id: number) {
-    axios.post(`http://localhost:3000/friends/requests/${id}/accept`, {}, {
+    axios.post(`http://paul-f4br5s1:3000/friends/requests/${id}/accept`, {}, {
         withCredentials: true,
         validateStatus: () => true,
     });
 }
 
 function handleDeclineFriendRequest(id: number) {
-    axios.delete(`http://localhost:3000/friends/requests/${id}`, {
+    axios.delete(`http://paul-f4br5s1:3000/friends/requests/${id}`, {
         withCredentials: true,
         validateStatus: () => true,
     });
@@ -171,21 +171,21 @@ export default function UserInteractionButtons({ user }: { user: User }) {
     const { selectedChannel } = useChat();
 
     function handleBlockUser() {
-        axios.post(`http://localhost:3000/friends/block/${user.id}`, {}, {
+        axios.post(`http://paul-f4br5s1:3000/friends/block/${user.id}`, {}, {
             withCredentials: true,
             validateStatus: () => true,
         });
     }
 
     function handleUnblockUser() {
-        axios.post(`http://localhost:3000/friends/unblock/${user.id}`, {}, {
+        axios.post(`http://paul-f4br5s1:3000/friends/unblock/${user.id}`, {}, {
             withCredentials: true,
             validateStatus: () => true,
         });
     }
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/user/player/${user.id}`)
+        axios.get(`http://paul-f4br5s1:3000/user/player/${user.id}`)
             .then((res) => {
                 setPlayer(res.data);
             })
@@ -193,7 +193,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 console.log(err);
             });
 
-        axios.get('http://localhost:3000/user/player/opponent', {
+        axios.get('http://paul-f4br5s1:3000/user/player/opponent', {
             withCredentials: true,
             validateStatus: () => true,
         }).then((res) => {
@@ -251,7 +251,7 @@ export default function UserInteractionButtons({ user }: { user: User }) {
                 <Button
                     onPress={() => {
                         // Invite user to the channel
-                        axios.post(`http://localhost:3000/channel/${selectedChannel.id}/invite`, {
+                        axios.post(`http://paul-f4br5s1:3000/channel/${selectedChannel.id}/invite`, {
                             id: user.id,
                         }, {
                             withCredentials: true,

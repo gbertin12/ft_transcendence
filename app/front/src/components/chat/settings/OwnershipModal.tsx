@@ -22,7 +22,7 @@ function transferOwnership(channel: Channel, futureOwner: User, password: string
     if (otp) {
         formData['otp'] = otp;
     }
-    return axios.patch(`http://localhost:3000/channel/${channel.id}/transfer`, formData, {
+    return axios.patch(`http://paul-f4br5s1:3000/channel/${channel.id}/transfer`, formData, {
         withCredentials: true,
     }).then((response) => {
         return true;
@@ -68,7 +68,7 @@ const OwnershipModal: React.FC<OwnershipModalProps> = ({ open, onClose, channel,
                     <Grid>
                         <Container direction='column' justify='center' alignItems='center'>
                             <Avatar
-                                src={`http://localhost:3000/static/avatars/${user.avatar}`}
+                                src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`}
                                 size="xl"
                                 alt={user.name}
                                 css={{ filter: "grayscale(80%)" }}
@@ -86,7 +86,7 @@ const OwnershipModal: React.FC<OwnershipModalProps> = ({ open, onClose, channel,
                     <Grid>
                         <Container direction='column' justify='center' alignItems='center'>
                             <Avatar
-                                src={`http://localhost:3000/static/avatars/${futureOwner.avatar}`}
+                                src={`http://paul-f4br5s1:3000/static/avatars/${futureOwner.avatar}`}
                                 size="xl"
                                 alt={futureOwner.name}
                             />

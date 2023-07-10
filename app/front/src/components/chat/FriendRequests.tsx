@@ -44,7 +44,7 @@ const ReceivedRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequ
                         >
                             <Grid xs={1}>
                                 <IconCheck className="my-auto" onClick={() => {
-                                    axios.post(`http://localhost:3000/friends/requests/${request.sender_id}/accept`, {}, { withCredentials: true })
+                                    axios.post(`http://paul-f4br5s1:3000/friends/requests/${request.sender_id}/accept`, {}, { withCredentials: true })
                                         .then((res) => {
                                             if (res.status !== 200) return;
                                             setFriendRequests((requests) => requests.filter((request) => request.sender_id !== request.sender_id));
@@ -53,7 +53,7 @@ const ReceivedRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequ
                             </Grid>
                             <Grid className="my-auto" xs={1}>
                                 <IconX onClick={() => {
-                                    axios.delete(`http://localhost:3000/friends/requests/${request.sender_id}`, { withCredentials: true })
+                                    axios.delete(`http://paul-f4br5s1:3000/friends/requests/${request.sender_id}`, { withCredentials: true })
                                         .then((res) => {
                                             if (res.status !== 200) return;
                                             setFriendRequests((requests) => requests.filter((request) => request.sender_id !== request.sender_id));
@@ -99,7 +99,7 @@ const SentRequests: React.FC<PolyFriendRequest> = ({ requests, setFriendRequests
                         >
                             <Grid xs={1}>
                                 <IconX onClick={() => {
-                                    axios.delete(`http://localhost:3000/friends/requests/cancel/${request.receiver_id}`, { withCredentials: true })
+                                    axios.delete(`http://paul-f4br5s1:3000/friends/requests/cancel/${request.receiver_id}`, { withCredentials: true })
                                         .then((res) => {
                                             if (res.status !== 200) return;
                                             setFriendRequests((requests) => requests.filter((request) => request.sender_id !== request.sender_id));

@@ -36,7 +36,7 @@ export const ChannelDeleteButton: React.FC<any> = ({ onClick, channel }: { onCli
             color="error"
             onClick={() => {
                 setDeleting(true);
-                axios.delete(`http://localhost:3000/channel/${channel.id}`, {
+                axios.delete(`http://paul-f4br5s1:3000/channel/${channel.id}`, {
                     withCredentials: true,
                 }).then((response) => {
                     onClick();
@@ -163,7 +163,7 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                 editedChannel.name = name;
                                 editedChannel.private = isPrivate;
                                 editedChannel.password = password;
-                                axios.patch(`http://localhost:3000/channel/${channel.id}`, editedChannel, {
+                                axios.patch(`http://paul-f4br5s1:3000/channel/${channel.id}`, editedChannel, {
                                     withCredentials: true,
                                 }).then((response) => {
                                     setIsOpen(false);
@@ -181,7 +181,7 @@ export const ChannelEditIcon: React.FC<ChannelEditIconProps> = ({ channel }) => 
                                     onClick={() => {
                                         let editedChannel = channel;
                                         editedChannel.password = null;
-                                        axios.patch(`http://localhost:3000/channel/${channel.id}`, editedChannel, {
+                                        axios.patch(`http://paul-f4br5s1:3000/channel/${channel.id}`, editedChannel, {
                                             withCredentials: true,
                                         }).then((response) => {
                                             setIsOpen(false);

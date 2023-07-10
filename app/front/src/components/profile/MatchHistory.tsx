@@ -69,7 +69,7 @@ export default function MatchHistory({ user }: { user: User }) {
 
     useEffect(() => {
         (async () => {
-            const res = await fetch(`http://localhost:3000/user/history/${user.name}`);
+            const res = await fetch(`http://paul-f4br5s1:3000/user/history/${user.name}`);
             const data = await res.json();
             setRows(setDataRows(data.gamesWon, data.gamesLost));
         })();
@@ -106,7 +106,7 @@ export default function MatchHistory({ user }: { user: User }) {
                                         <Avatar
                                             bordered
                                             color={(item.victory) ? "success" : "error"}
-                                            src={`http://localhost:3000/static/avatars/${user.avatar}`} />
+                                            src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`} />
                                     </Row>
                                 </Table.Cell>
                                 <Table.Cell>{user.name}</Table.Cell>
@@ -119,7 +119,7 @@ export default function MatchHistory({ user }: { user: User }) {
                                         <Avatar
                                             bordered
                                             color={(item.victory ? "error" : "success")}
-                                            src={`http://localhost:3000/static/avatars/${item.avatar}`} />
+                                            src={`http://paul-f4br5s1:3000/static/avatars/${item.avatar}`} />
                                     </Row>
                                 </Table.Cell>
                                 <Table.Cell>{item.date}</Table.Cell>

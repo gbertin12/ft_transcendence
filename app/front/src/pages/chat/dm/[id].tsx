@@ -66,7 +66,7 @@ const ChannelChat: React.FC = () => {
         //  - 404 -> user not found
         //  - 200 -> success (user is returned in response body)
         if (id === undefined) return;
-        axios.get(`http://localhost:3000/dms/interlocutor/${id}`, {
+        axios.get(`http://paul-f4br5s1:3000/dms/interlocutor/${id}`, {
             withCredentials: true,
         })
         .then((res) => {

@@ -46,7 +46,7 @@ export default function AvatarTooltip({ user, placement }: { user: User, placeme
             content={<ProfileTooltip user={user}/>}>
             <Avatar
                 css={{ cursor: "pointer" }}
-                src={`http://localhost:3000/static/avatars/${user.avatar}`}
+                src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`}
             />
         </Tooltip>
     );

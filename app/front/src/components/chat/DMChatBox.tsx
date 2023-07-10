@@ -45,7 +45,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     }
 
     const fetchMessages = useCallback(async (interlocutor: User): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/messages`,
+        let data = await axios.get(`http://paul-f4br5s1:3000/dms/${interlocutor.id}/messages`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -69,7 +69,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
     }, []);
 
     const fetchHistory = useCallback(async (interlocutor: User, lastMessageId: number): Promise<MessageData[]> => {
-        let data = await axios.get(`http://localhost:3000/dms/${interlocutor.id}/history/${lastMessageId}`,
+        let data = await axios.get(`http://paul-f4br5s1:3000/dms/${interlocutor.id}/history/${lastMessageId}`,
             {
                 withCredentials: true,
                 validateStatus: () => true,
@@ -138,7 +138,7 @@ const DMChatBox: React.FC<DMChatBoxProps> = ({ interlocutor }) => {
 
     const handlePostMessage = useCallback((message: string) => {
         try {
-            axios.post(`http://localhost:3000/dms/${interlocutor.id}/message`, { content: message }, { withCredentials: true })
+            axios.post(`http://paul-f4br5s1:3000/dms/${interlocutor.id}/message`, { content: message }, { withCredentials: true })
         } catch (err) {
         }
     }, [user, interlocutor.id]);

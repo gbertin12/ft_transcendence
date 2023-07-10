@@ -117,7 +117,7 @@ const ChannelCreateIcon: React.FC = () => {
                             css={{ w: "stretch", mt: "$8" }}
                             onClick={() => {
                                 setCreating(true);
-                                axios.post("http://localhost:3000/channel/create", {
+                                axios.post("http://paul-f4br5s1:3000/channel/create", {
                                     name: name,
                                     private: isPrivate,
                                     password: password,

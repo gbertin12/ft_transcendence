@@ -14,7 +14,7 @@ export default function ConnectedButton() {
               size="lg"
               color="primary"
               name={user.name}
-              src={`http://localhost:3000/static/avatars/${user.avatar}`}
+              src={`http://paul-f4br5s1:3000/static/avatars/${user.avatar}`}
             />
           </Dropdown.Trigger>
             <Dropdown.Menu aria-label="Connected Menu">
@@ -22,7 +22,7 @@ export default function ConnectedButton() {
                     <Link href='/profile' color="text">View profile</Link>
                     </Dropdown.Item>
                 <Dropdown.Item key="Logout" color="error" textValue="Logout">
-                    <Link href="http://localhost:3000/auth/logout" color="error">Logout</Link>
+                    <Link href="http://paul-f4br5s1:3000/auth/logout" color="error">Logout</Link>
                 </Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>

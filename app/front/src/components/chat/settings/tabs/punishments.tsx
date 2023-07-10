@@ -43,7 +43,7 @@ const PunishmentsTab: React.FC<PunishmentsTabProps> = ({ channel }) => {
 
     useEffect(() => {
         setLoading(true);
-        axios.get(`http://localhost:3000/channel/${channel.id}/punishments`,
+        axios.get(`http://paul-f4br5s1:3000/channel/${channel.id}/punishments`,
             { withCredentials: true }
         ).then(res => {
             setPunishments(res.data);
@@ -88,7 +88,7 @@ const PunishmentsTab: React.FC<PunishmentsTabProps> = ({ channel }) => {
                                                 disabled={working.has(index)}
                                                 onPress={() => {
                                                     setWorking(new Set(working).add(index));
-                                                    axios.delete(`http://localhost:3000/punishments/${punishment.issuer_id}/${punishment.punished_id}/${punishment.channel_id}`,
+                                                    axios.delete(`http://paul-f4br5s1:3000/punishments/${punishment.issuer_id}/${punishment.punished_id}/${punishment.channel_id}`,
                                                         {
                                                             withCredentials: true,
                                                             validateStatus: () => true

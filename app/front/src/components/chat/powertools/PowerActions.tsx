@@ -32,7 +32,7 @@ function emitPowerAction(
     if (targetMessage) {
         switch (action) {
             case 'deleted':
-                axios.delete(`http://localhost:3000/channel/${channel.id}/${targetMessage.message_id}`,
+                axios.delete(`http://paul-f4br5s1:3000/channel/${channel.id}/${targetMessage.message_id}`,
                 {
                     withCredentials: true,
                     validateStatus: () => true // The front won't display buttons if the user
@@ -69,7 +69,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                             color="default"
                             render={true}
                             onPress={() => {
-                                axios.post(`http://localhost:3000/friends/block/${sender.id}`, {}, {
+                                axios.post(`http://paul-f4br5s1:3000/friends/block/${sender.id}`, {}, {
                                     withCredentials: true,
                                     validateStatus: () => true,
                                 })
@@ -83,7 +83,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                             color="default"
                             render={true}
                             onPress={() => {
-                                axios.post(`http://localhost:3000/friends/unblock/${sender.id}`, {}, {
+                                axios.post(`http://paul-f4br5s1:3000/friends/unblock/${sender.id}`, {}, {
                                     withCredentials: true,
                                     validateStatus: () => true,
                                 })
@@ -173,7 +173,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                             color="default"
                             render={true}
                             onPress={() => {
-                                axios.post(`http://localhost:3000/friends/block/${sender.id}`, {}, {
+                                axios.post(`http://paul-f4br5s1:3000/friends/block/${sender.id}`, {}, {
                                     withCredentials: true,
                                     validateStatus: () => true,
                                 })
@@ -187,7 +187,7 @@ const PowerActions: React.FC<PowerActionsProps> = ({ channel, interlocutor, mess
                             color="default"
                             render={true}
                             onPress={() => {
-                                axios.post(`http://localhost:3000/friends/unblock/${sender.id}`, {}, {
+                                axios.post(`http://paul-f4br5s1:3000/friends/unblock/${sender.id}`, {}, {
                                     withCredentials: true,
                                     validateStatus: () => true,
                                 })
