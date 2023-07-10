@@ -23,7 +23,6 @@ const ChannelList: React.FC<any> = () => {
             css={{
                 listStyle: "none",
                 padding: 0,
-                height: "85vh",
                 overflowY: "auto",
                 overflowX: "hidden",
                 display: "flex",
